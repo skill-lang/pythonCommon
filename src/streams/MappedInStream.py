@@ -3,11 +3,11 @@ from io import FileIO
 from copy import copy
 from src import Exception
 
+
 class MappedInStream(InStream):
 
     def __init__(self, file: FileIO):
         super.__init__(file)
-
 
     def view(self, begin, end):
         return copy(self.file)
@@ -19,5 +19,5 @@ class MappedInStream(InStream):
         raise Exception.IllegalStateException("there is no reason to jump in a mapped stream")
 
     def toString(self):
-        #TODO
+        # TODO
         return "MappedInStream(0x%X -> 0x%X, next: 0x%X)"
