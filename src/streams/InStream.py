@@ -5,7 +5,6 @@ from io import FileIO
 class InStream(abc.ABC):
     """
     Implementations of this class are used to turn a byte stream into a stream of integers and floats
-    @aut
     """
 
     def __init__(self, file: FileIO):
@@ -39,14 +38,15 @@ class InStream(abc.ABC):
     def bytes(self, length):
         return bytearray.fromhex(self.file.read(length))
 
-    def has(self, n):
-        return os.fstat(self.file.fileno()).st_size <= n
+    def has(self, n=0):
+        """if n=0 then return number of bytes left in the file, else true if at least n bytes left in the file"""
+        if n > 0:
+            return os.fstat(self.file.fileno()).st_size <= n
+        else:
+            return os.fstat(self.file.fileno()).st_size
 
     def eof(self):
         return self.file.tell() == os.fstat(self.file.fileno()).st_size
-
-    @abc.abstractmethod
-    def jump(self): pass
 
     def position(self):
         return self.file.tell()
