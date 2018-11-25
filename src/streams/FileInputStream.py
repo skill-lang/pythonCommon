@@ -4,7 +4,7 @@ from src.streams import InStream, MappedInStream
 from io import FileIO
 
 
-class FileInputStream(InStream):
+class FileInputStream(InStream.InStream):
 
     def __init__(self, file: FileIO):
         super(FileInputStream, self).__init__(file)
@@ -40,5 +40,5 @@ class FileInputStream(InStream):
         with self.file.lock():
             f = deepcopy(self.file)
         f.seek(self.file.tell() + begin)
-        mis = MappedInStream(f)
+        mis = MappedInStream.MappedInStream(f)
         return mis
