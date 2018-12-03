@@ -1,12 +1,12 @@
-from src.streams import InStream
-from io import FileIO
+from src.streams.InStream import InStream
+from typing import BinaryIO
 from copy import deepcopy
 
 
 class MappedInStream(InStream):
 
-    def __init__(self, file: FileIO):
-        super.__init__(file)
+    def __init__(self, file: BinaryIO):
+        super(MappedInStream, self).__init__(file)
 
     def view(self, begin):
         f = deepcopy(self.file)

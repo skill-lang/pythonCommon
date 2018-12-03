@@ -1,45 +1,64 @@
 import abc
 import os
-from io import FileIO
+import struct
+from typing import BinaryIO
 
 
 class OutStream(abc.ABC):
 
-    def __init__(self, buffer: FileIO):
-        self.buffer = buffer
-        self.position = 0
+    def __init__(self, file: BinaryIO):
+        self.file = file
 
     def position(self):
-        if self.buffer is None:
-            return self.position
-        else:
-            return self.buffer.tell() + self.position
+        return self.file.tell()
 
     def refresh(self):
-        self.buffer.flush()
-        os.fsync()
+        if self.file is None or self.has() == 0:
+            self.file.flush()
+            os.fsync(self.file.fileno())
 
-    def bool(self, data):
-        pass
+    def bool(self, data=False):
+        self.refresh()
+
+        if data:
+            e = self.file.write(0xFF.to_bytes(1, "big"))
+        else:
+            e = self.file.write(0x00.to_bytes(1, "big"))
+
+        if e is not 1:
+            raise RuntimeError
 
     def i8(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('b', data))
 
     def i16(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('h', data))
 
     def i32(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('i', data))
 
     def i64(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('q', data))
 
-    @abc.abstractmethod
     def v64(self, data):
+        # TODO
         pass
 
     def f32(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('f', data))
 
     def f64(self, data):
-        pass
+        self.refresh()
+        self.file.write(struct.pack('d', data))
+
+    def has(self, n=0):
+        """if n=0 then return number of bytes left in the file, else true if at least n bytes left in the file"""
+        if n > 0:
+            return os.fstat(self.file.fileno()).st_size <= n
+        else:
+            return os.fstat(self.file.fileno()).st_size

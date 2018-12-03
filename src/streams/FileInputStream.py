@@ -1,12 +1,12 @@
 from copy import deepcopy
 
 from src.streams import InStream, MappedInStream
-from io import FileIO
+from typing import BinaryIO
 
 
 class FileInputStream(InStream.InStream):
 
-    def __init__(self, file: FileIO):
+    def __init__(self, file: BinaryIO):
         super(FileInputStream, self).__init__(file)
         self.storedPosition = None
         self.path = None
@@ -42,3 +42,6 @@ class FileInputStream(InStream.InStream):
         f.seek(self.file.tell() + begin)
         mis = MappedInStream.MappedInStream(f)
         return mis
+
+    def close(self):
+        self.file.close()
