@@ -1,11 +1,12 @@
 import os
 import struct
 from typing import BinaryIO
+from io import BytesIO
 
 
 class TheStream:
 
-    def __init__(self, file: BinaryIO):
+    def __init__(self, file: BytesIO):
         self.file = file
 
     def getF64(self):

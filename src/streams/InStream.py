@@ -1,14 +1,15 @@
-import abc, struct, os
-from typing import BinaryIO
-from io import FileIO
+import abc
+import os
+import struct
+from io import BufferedReader
 
 
-class InStream(abc.ABC, BinaryIO):
+class InStream(abc.ABC):
     """
     Implementations of this class are used to turn a byte stream into a stream of integers and floats
     """
 
-    def __init__(self, file: FileIO):
+    def __init__(self, file: BufferedReader):
         self.file = file
 
     def f64(self):

@@ -1,11 +1,12 @@
 from src.streams.InStream import InStream
 from typing import BinaryIO
 from copy import deepcopy
+from io import BufferedReader
 
 
 class MappedInStream(InStream):
 
-    def __init__(self, file: BinaryIO):
+    def __init__(self, file: BufferedReader):
         super(MappedInStream, self).__init__(file)
 
     def view(self, begin):

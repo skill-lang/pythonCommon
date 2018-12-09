@@ -1,0 +1,7 @@
+open('rb') -> BufferedReader
+
+open('wb') -> BufferedWriter
+open('ab') -> BufferedWriter
+open('xb') -> BufferedWriter
+
+open('r+b') -> BufferedRandom

@@ -2,11 +2,12 @@ import abc
 import os
 import struct
 from typing import BinaryIO
+from io import BufferedWriter
 
 
 class OutStream(abc.ABC):
 
-    def __init__(self, file: BinaryIO):
+    def __init__(self, file: BufferedWriter):
         self.file = file
 
     def position(self):
@@ -30,19 +31,19 @@ class OutStream(abc.ABC):
 
     def i8(self, data):
         self.refresh()
-        self.file.write(struct.pack('b', data))
+        self.file.write(struct.pack('>b', data))
 
     def i16(self, data):
         self.refresh()
-        self.file.write(struct.pack('h', data))
+        self.file.write(struct.pack('>h', data))
 
     def i32(self, data):
         self.refresh()
-        self.file.write(struct.pack('i', data))
+        self.file.write(struct.pack('>i', data))
 
     def i64(self, data):
         self.refresh()
-        self.file.write(struct.pack('q', data))
+        self.file.write(struct.pack('>q', data))
 
     def v64(self, data):
         # TODO
@@ -50,11 +51,11 @@ class OutStream(abc.ABC):
 
     def f32(self, data):
         self.refresh()
-        self.file.write(struct.pack('f', data))
+        self.file.write(struct.pack('>f', data))
 
     def f64(self, data):
         self.refresh()
-        self.file.write(struct.pack('d', data))
+        self.file.write(struct.pack('>d', data))
 
     def has(self, n=0):
         """if n=0 then return number of bytes left in the file, else true if at least n bytes left in the file"""

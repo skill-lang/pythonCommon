@@ -8,5 +8,5 @@ class SkillObject(abc.ABC):
 
     @abc.abstractmethod
     def skillName(self):
-        return
+        pass
 

@@ -1,11 +1,12 @@
 from src.streams.OutStream import OutStream
 from typing import Union, BinaryIO
 from src.streams.MappedOutputStream import MappedOutputStream
+from io import BufferedWriter
 
 
 class FileOutputStream(OutStream):
 
-    def __init__(self, file: BinaryIO):
+    def __init__(self, file: BufferedWriter):
         super(FileOutputStream, self).__init__(file)
 
     def write(self, b: Union[bytes, bytearray]):
