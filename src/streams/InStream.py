@@ -19,12 +19,60 @@ class InStream(abc.ABC):
         return float(struct.unpack('>f', self.file.read(4))[0])
 
     def v32(self):
-        #TODO
-        pass
+        rval = self.i8()
+        if (rval & 0x80) != 0:
+            self.multibytev32(rval)
+        else:
+            return rval
+
+    def multibytev32(self, rval):
+        r = self.i8()
+        rval = (rval & 0x7f) | ((r & 0x7f) << 7)
+
+        if (r & 0x80) != 0:
+            r = self.i8()
+            rval = rval | ((r & 0x7f) << 14)
+            if (r & 0x80) != 0:
+                r = self.i8()
+                rval = rval | ((r & 0x7f) << 21)
+                if (r & 0x80) != 0:
+                    r = self.i8()
+                    rval = rval | ((r & 0x7f) << 28)
+                    if (r & 0x80) != 0:
+                        raise Exception("unexpected overlong v64 value (expected 32bit)")
 
     def v64(self):
-        #TODO
-        pass
+        rval = self.i8()
+        if (rval & 0x80) != 0:
+            self.multibytev64(rval)
+        else:
+            return rval
+
+    def multibytev64(self, rval):
+        r = self.i8()
+        rval = (rval & 0x7f) | ((r & 0x7f) << 7)
+
+        if (r & 0x80) != 0:
+            r = self.i8()
+            rval = rval | ((r & 0x7f) << 14)
+            if (r & 0x80) != 0:
+                r = self.i8()
+                rval = rval | ((r & 0x7f) << 21)
+                if (r & 0x80) != 0:
+                    r = self.i8()
+                    rval = rval | ((r & 0x7f) << 28)
+                    if (r & 0x80) != 0:
+                        r = self.i8()
+                        rval = rval | ((r & 0x7f) << 35)
+                        if (r & 0x80) != 0:
+                            r = self.i8()
+                            rval = rval | ((r & 0x7f) << 42)
+                            if (r & 0x80) != 0:
+                                r = self.i8()
+                                rval = rval | ((r & 0x7f) << 49)
+                                if (r & 0x80) != 0:
+                                    rval = rval | self.i8() << 56
+        return rval
 
     def i64(self):
         return struct.unpack('>q', self.file.read(8))[0]
