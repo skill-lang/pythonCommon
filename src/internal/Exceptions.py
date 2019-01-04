@@ -25,3 +25,9 @@ class ParseException(Exception):
 
     def __init__(self, inStream: FileInputStream, block, cause, msgFormat, *msgArgs):
         self.message = str.format("In block {} {}: {}", block + 1, inStream.position(), str.format(msgFormat, msgArgs))
+
+
+class SkillException(RuntimeError):
+
+    def __init__(self, msg: str, enableSuppression: bool, writableStackTrace: bool):
+        super(SkillException, self).__init__(msg, enableSuppression, writableStackTrace)

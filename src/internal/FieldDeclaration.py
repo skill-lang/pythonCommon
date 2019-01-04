@@ -1,4 +1,5 @@
 from src.internal.StoragePool import StoragePool
+from src.internal.FieldRestriction import FieldRestriction
 
 
 class FieldDeclaration:
@@ -8,3 +9,9 @@ class FieldDeclaration:
 
     def owner(self) -> StoragePool:
         return self.owner
+
+    def addRestriction(self, r: FieldRestriction):
+        pass
+
+    def addChunk(self, chunk):
+        pass

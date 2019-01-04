@@ -6,3 +6,6 @@ class Block:
         self.bpo = bpo
         self.count = count
         self.staticCount = staticCount
+
+    def get(self, i):
+        pass
