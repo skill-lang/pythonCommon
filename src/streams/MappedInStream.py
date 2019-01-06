@@ -2,12 +2,13 @@ from src.streams.InStream import InStream
 from typing import BinaryIO
 from copy import deepcopy
 from io import BufferedReader
+from pathlib import Path
 
 
 class MappedInStream(InStream):
 
-    def __init__(self, file: BufferedReader):
-        super(MappedInStream, self).__init__(file)
+    def __init__(self, path: Path):
+        super(MappedInStream, self).__init__(path)
 
     def view(self, begin):
         f = deepcopy(self.file)
@@ -18,5 +19,4 @@ class MappedInStream(InStream):
         return self.file
 
     def toString(self):
-        return "MappedInStream(" + super.position() + " -> " + super.eof() - super.file.tell() + ", next: " + super.file.read(
-            1) + ")"
+        return "MappedInStream(" + self.position() + " -> " + (self.eof() - self.file.tell()) + ", next: " + self.file.read(1).decode('utf-8') + ")"

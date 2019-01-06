@@ -2,6 +2,7 @@ import abc
 import os
 import struct
 from io import BufferedReader
+from pathlib import Path
 
 
 class InStream(abc.ABC):
@@ -9,8 +10,9 @@ class InStream(abc.ABC):
     Implementations of this class are used to turn a byte stream into a stream of integers and floats
     """
 
-    def __init__(self, file: BufferedReader):
-        self.file = file
+    def __init__(self, path: Path):
+        self.file: BufferedReader = None
+        self.path = path
 
     def f64(self):
         return float(struct.unpack('>d', self.file.read(8))[0])
@@ -40,6 +42,7 @@ class InStream(abc.ABC):
                     rval = rval | ((r & 0x7f) << 28)
                     if (r & 0x80) != 0:
                         raise Exception("unexpected overlong v64 value (expected 32bit)")
+        return rval
 
     def v64(self):
         rval = self.i8()

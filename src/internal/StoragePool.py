@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Iterable, Iterator, _T_co
 from src.internal.FieldType import FieldType
 from src.internal.SkillObject import SkillObject, SubType
 from src.internal.BasePool import BasePool
@@ -14,7 +14,8 @@ B = TypeVar('B', bound=SkillObject)
 T = TypeVar('T', bound=SkillObject)
 
 
-class StoragePool(FieldType, Generic[T, B]):
+class StoragePool(FieldType, Generic[T, B], Iterable):
+
     dataFields = []
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
@@ -48,7 +49,8 @@ class StoragePool(FieldType, Generic[T, B]):
     def nextPool(self):
         return self._nextPool_
 
-    def establishNextPool(self, types: []):
+    @staticmethod
+    def establishNextPool(types: []):
         L = []
         for i in range(len(types), -1, -1):
             t: StoragePool = types[i]
@@ -115,7 +117,6 @@ class StoragePool(FieldType, Generic[T, B]):
 
     @staticmethod
     def unfixPools(pools: []):
-        p: StoragePool
         for p in pools:
             p.__fixed__ = False
 
@@ -235,7 +236,6 @@ class StoragePool(FieldType, Generic[T, B]):
         self.data = self.basePool.data
         newInstances = self.newDynamicInstances().hasNext()
         newPool = (len(self.blocks) == 0)
-        newField = None
 
         exists = False
         for f in self.dataFields:
@@ -279,3 +279,6 @@ class StoragePool(FieldType, Generic[T, B]):
 
     def toString(self):
         return self.__name__
+
+    def __iter__(self) -> Iterator[_T_co]:
+        pass

@@ -55,7 +55,7 @@ class SkillFile(abc.ABC):
     def changePath(self, path): pass
 
     @abc.abstractmethod
-    def curreentPath(self): pass
+    def currentPath(self): pass
 
     @abc.abstractmethod
     def changeMode(self, writemode): pass

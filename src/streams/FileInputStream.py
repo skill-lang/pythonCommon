@@ -1,16 +1,16 @@
 from copy import deepcopy
-
 from src.streams import InStream, MappedInStream
 from typing import BinaryIO
 from io import BufferedReader
+from pathlib import Path
 
 
 class FileInputStream(InStream.InStream):
 
-    def __init__(self, file: BufferedReader):
-        super(FileInputStream, self).__init__(file)
+    def __init__(self, path: Path, readOnly):
+        super(FileInputStream, self).__init__(path)
         self.storedPosition = None
-        self.path = None
+        self.file = self.open(path, readOnly)
 
     def open(self, path, readOnly):
         self.path = path
