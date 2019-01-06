@@ -11,6 +11,7 @@ class FileInputStream(InStream.InStream):
         super(FileInputStream, self).__init__(path)
         self.storedPosition = None
         self.file = self.open(path, readOnly)
+        self.sharedFile = False
 
     def open(self, path, readOnly):
         self.path = path

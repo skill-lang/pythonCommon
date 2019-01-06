@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Iterable, Iterator, _T_co
+from typing import Generic, TypeVar, Mapping, _KT, _VT_co, Iterator, _T_co
 from src.internal.FieldType import FieldType
 from src.internal.SkillObject import SkillObject, SubType
 from src.internal.BasePool import BasePool
@@ -10,11 +10,8 @@ from src.internal.Exceptions import *
 from threading import Lock
 import copy
 
-B = TypeVar('B', bound=SkillObject)
-T = TypeVar('T', bound=SkillObject)
 
-
-class StoragePool(FieldType, Generic[T, B], Iterable):
+class StoragePool(FieldType, dict):
 
     dataFields = []
 
@@ -279,6 +276,3 @@ class StoragePool(FieldType, Generic[T, B], Iterable):
 
     def toString(self):
         return self.__name__
-
-    def __iter__(self) -> Iterator[_T_co]:
-        pass

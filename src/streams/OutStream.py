@@ -1,6 +1,7 @@
 import abc
 import os
 import struct
+import copy
 from typing import BinaryIO
 from io import BufferedWriter
 
@@ -45,9 +46,30 @@ class OutStream(abc.ABC):
         self.refresh()
         self.file.write(struct.pack('>q', data))
 
-    def v64(self, data):
-        # TODO
-        pass
+    def v64(self, data: int):
+        if self.file is None:
+            self.refresh()
+
+        size = 0
+        a = copy.deepcopy(data)
+        while a:
+            a = a >> 7
+            size += 1
+
+        if not size:
+            result = [0]
+            return result
+        elif size == 10:
+            size = 9
+
+        count = 0
+        result = []
+        while count < 8 and count < (size - 1):
+            result[count] = a >> (7*count)
+            result[count] |= 0x80
+            count += 1
+        result[count] = a >> (7 * count)
+        return result
 
     def f32(self, data):
         self.refresh()
