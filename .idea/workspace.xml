@@ -1,72 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="da413d86-5e72-458e-bd9b-92ddf8765439" name="Default Changelist" comment="" />
+    <list default="true" id="da413d86-5e72-458e-bd9b-92ddf8765439" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/internal/fieldTypes/ConstantTypes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/internal/fieldTypes/IntegerTypes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pythoncommon.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pythoncommon.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/internal/fieldTypes/Types.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/streams/FileInputStream.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/streams/FileInputStream.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="759273554">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="6" />
-          <entry key="project.open.time.0" value="3" />
-          <entry key="project.open.time.2" value="2" />
-          <entry key="project.open.time.3" value="1" />
-          <entry key="project.opened" value="6" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.open">
-        <counts>
-          <entry key="md" value="1" />
-          <entry key="py" value="7" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.open">
-        <counts>
-          <entry key="Markdown" value="1" />
-          <entry key="Python" value="7" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="py" value="655" />
-          <entry key="txt" value="39" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="PLAIN_TEXT" value="39" />
-          <entry key="Python" value="655" />
-        </counts>
-      </usages-collector>
-    </session>
-  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/age/Age.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/streams/FileInputStream.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="585">
+              <caret line="44" column="82" selection-start-line="44" selection-start-column="82" selection-end-line="44" selection-end-column="82" />
               <folding>
-                <marker date="1541327412295" expanded="true" signature="58:63" ph="..." />
+                <element signature="e#0#25#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/internal/SkillObject.py">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/internal/fieldTypes/IntegerTypes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="25" selection-start-line="3" selection-start-column="25" selection-end-line="3" selection-end-column="25" />
+            <state relative-caret-position="774">
+              <caret line="122" column="52" selection-start-line="122" selection-start-column="52" selection-end-line="122" selection-end-column="52" />
               <folding>
-                <marker date="1541346094511" expanded="true" signature="41:42" ph="..." />
-                <marker date="1541346094511" expanded="true" signature="41:46" ph="..." />
+                <element signature="e#0#55#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -97,6 +67,10 @@
         <option value="$PROJECT_DIR$/age/Age.py" />
         <option value="$PROJECT_DIR$/age/test/SimpleRead.py" />
         <option value="$PROJECT_DIR$/internal/SkillObject.py" />
+        <option value="$PROJECT_DIR$/src/streams/FileInputStream.py" />
+        <option value="$PROJECT_DIR$/src/internal/fieldTypes/Types.py" />
+        <option value="$PROJECT_DIR$/src/internal/fieldTypes/ConstantTypes.py" />
+        <option value="$PROJECT_DIR$/src/internal/fieldTypes/IntegerTypes.py" />
       </list>
     </option>
   </component>
@@ -116,8 +90,26 @@
         <subPane>
           <expand>
             <path>
-              <item name="pythoncommon" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pythoncommon" type="462c0819:PsiDirectoryNode" />
+              <item name="pythonCommon" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pythonCommon" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pythonCommon" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pythonCommon" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pythonCommon" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pythonCommon" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="internal" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pythonCommon" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pythonCommon" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="internal" type="462c0819:PsiDirectoryNode" />
+              <item name="fieldTypes" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -174,6 +166,9 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="StructureViewFactory">
+    <option name="ACTIVE_ACTIONS" value=",SHOW_INHERITED" />
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -196,9 +191,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="0" y="-1" width="1920" height="1053" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4989154" visible="true" weight="0.26066098" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4989154" visible="true" weight="0.2764141" />
       <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -214,11 +210,8 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Structure" order="3" sideWeight="0.5010846" side_tool="true" visible="true" weight="0.15618336" />
+      <window_info anchor="right" id="Structure" order="3" sideWeight="0.5010846" side_tool="true" visible="true" weight="0.15581644" />
     </layout>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added Age without Tests" />
@@ -234,29 +227,80 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/streams/InStream.py" />
-    <entry file="file://$PROJECT_DIR$/api/SkillFile.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/age/test/SimpleRead.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/age/Age.py">
+    <entry file="file://$PROJECT_DIR$/api/SkillFile.py" />
+    <entry file="file://$PROJECT_DIR$/age/test/SimpleRead.py" />
+    <entry file="file://$PROJECT_DIR$/age/Age.py" />
+    <entry file="file://$PROJECT_DIR$/internal/SkillObject.py" />
+    <entry file="file://$PROJECT_DIR$/src/streams/InStream.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        <state>
+          <caret selection-end-column="6" />
           <folding>
-            <marker date="1541327412295" expanded="true" signature="58:63" ph="..." />
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/internal/SkillObject.py">
+    <entry file="file://$PROJECT_DIR$/src/streams/FileOutputStream.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="25" selection-start-line="3" selection-start-column="25" selection-end-line="3" selection-end-column="25" />
+        <state>
           <folding>
-            <marker date="1541346094511" expanded="true" signature="41:42" ph="..." />
-            <marker date="1541346094511" expanded="true" signature="41:46" ph="..." />
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/streams/OutStream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-516">
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/streams/MappedOutputStream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/streams/MappedInStream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/fieldTypes/Types.py" />
+    <entry file="file://$PROJECT_DIR$/src/internal/fieldTypes/ConstantTypes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="60" column="14" selection-start-line="60" selection-start-column="14" selection-end-line="60" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/streams/FileInputStream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="44" column="82" selection-start-line="44" selection-start-column="82" selection-end-line="44" selection-end-column="82" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/fieldTypes/IntegerTypes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="774">
+          <caret line="122" column="52" selection-start-line="122" selection-start-column="52" selection-end-line="122" selection-end-column="52" />
+          <folding>
+            <element signature="e#0#55#0" expanded="true" />
           </folding>
         </state>
       </provider>

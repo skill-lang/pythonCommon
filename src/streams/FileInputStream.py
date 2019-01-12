@@ -3,9 +3,12 @@ from src.streams import InStream, MappedInStream
 from typing import BinaryIO
 from io import BufferedReader
 from pathlib import Path
+import threading
 
 
 class FileInputStream(InStream.InStream):
+
+    lock = threading.RLock()
 
     def __init__(self, path: Path, readOnly):
         super(FileInputStream, self).__init__(path)
@@ -39,7 +42,7 @@ class FileInputStream(InStream.InStream):
             raise IOError("There is no FileInputStream.storedPosition")
 
     def map(self, begin=0):
-        with self.file.lock():
+        with self.lock:  # TODO Lock should lock whole stream not just this method
             f = deepcopy(self.file)
         f.seek(self.file.tell() + begin)
         mis = MappedInStream.MappedInStream(f)
