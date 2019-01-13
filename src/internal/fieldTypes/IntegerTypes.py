@@ -120,4 +120,70 @@ class I64(Integer):
         return "i64"
 
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
-        return 8 * super(I64, self).calculateOffset()
+        return 8 * super(I64, self).calculateOffset(xs)
+
+
+class V64(Integer):
+
+    def __init__(self):
+        super(V64, self).__init__(11)
+
+    def readSingleField(self, instream: FileInputStream):
+        return instream.v64()
+
+    def singleOffset(self, ref):
+        if ref is None:
+            v = 0
+        else:
+            v = ref
+        if (v & 0xFFFFFFFFFFFFFF80) == 0:
+            return 1
+        elif (v & 0xFFFFFFFFFFFFC000) == 0:
+            return 2
+        elif (v & 0xFFFFFFFFFFE00000) == 0:
+            return 3
+        elif (v & 0xFFFFFFFFF0000000) == 0:
+            return 4
+        elif (v & 0xFFFFFFF800000000) == 0:
+            return 5
+        elif (v & 0xFFFFFC0000000000) == 0:
+            return 6
+        elif (v & 0xFFFE000000000000) == 0:
+            return 7
+        elif (v & 0xFF00000000000000) == 0:
+            return 8
+        else:
+            return 9
+
+    def writeSingleField(self, target, outstream: FileOutputStream):
+        if target is None:
+            outstream.v64(0)
+        else:
+            outstream.v64(target)
+
+    def toString(self):
+        return "v64"
+
+    def calculateOffset(self, xs: Union[dict, list, set, tuple]):
+        result = 0
+        for v in xs:
+            if (v & 0xFFFFFFFFFFFFFF80) == 0:
+                result += 1
+            elif (v & 0xFFFFFFFFFFFFC000) == 0:
+                result += 2
+            elif (v & 0xFFFFFFFFFFE00000) == 0:
+                result += 3
+            elif (v & 0xFFFFFFFFF0000000) == 0:
+                result += 4
+            elif (v & 0xFFFFFFF800000000) == 0:
+                result += 5
+            elif (v & 0xFFFFFC0000000000) == 0:
+                result += 6
+            elif (v & 0xFFFE000000000000) == 0:
+                result += 7
+            elif (v & 0xFF00000000000000) == 0:
+                result += 8
+            else:
+                result += 9
+        return result
+
