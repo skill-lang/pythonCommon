@@ -1,40 +1,47 @@
 import abc
 import logging
+import enum
 
 logger = logging.getLogger()
 
 
-def checkActualMode(*modes):
-    openMode = None
-    closeMode = None
-    for m in modes:
-        if m == "Create":
-            logger.debug("Tried to Create (ActualMode)")
-        elif m == "Read":
-            if openMode is None:
-                openMode = m
-            elif openMode != m:
-                raise IOError(logger.error("You can either create or read a file."))
-        elif m == "Append":
-            logger.debug("Tried to Append (ActualMode)")
-        elif m == "Write":
-            if closeMode is None:
-                closeMode = m
-            elif closeMode != m:
-                raise IOError(logger.error("You can either write or append to a file."))
-        elif m == "ReadOnly":
-            if closeMode is None:
-                closeMode = m
-            elif closeMode != m:
-                raise IOError(logger.error("You cannot combine ReadOnly with another write mode."))
-    if openMode is None: openMode = "Read"
-    if closeMode is None: closeMode = "Write"
+class ActualMode:
 
-    return openMode, closeMode
+    def __init__(self, *modes):
+        self.openMode = None
+        self.closeMode = None
+        for m in modes:
+            if m == "Create":
+                logger.debug("Tried to Create (ActualMode)")
+            elif m == "Read":
+                if self.openMode is None:
+                    self.openMode = m
+                elif self.openMode != m:
+                    raise IOError(logger.error("You can either create or read a file."))
+            elif m == "Append":
+                logger.debug("Tried to Append (ActualMode)")
+            elif m == "Write":
+                if self.closeMode is None:
+                    self.closeMode = m
+                elif self.closeMode != m:
+                    raise IOError(logger.error("You can either write or append to a file."))
+            elif m == "ReadOnly":
+                if self.closeMode is None:
+                    self.closeMode = m
+                elif self.closeMode != m:
+                    raise IOError(logger.error("You cannot combine ReadOnly with another write mode."))
+        if self.openMode is None: self.openMode = "Read"
+        if self.closeMode is None: self.closeMode = "Write"
 
 
 class SkillFile(abc.ABC):
-    Mode = ("Create", "Read", "Write", "Append", "ReadOnly")
+
+    class Mode(enum):
+        Create = 0
+        Read = 1
+        Write = 2
+        Append = 3
+        ReadOnly = 4
 
     @abc.abstractmethod
     def Strings(self): pass

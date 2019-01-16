@@ -5,23 +5,28 @@ from src.streams.FileInputStream import FileInputStream
 from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
 from src.internal.SkillObject import SkillObject
+from src.internal.fieldTypes.Annotation import Annotation
 from src.internal.Exceptions import *
 import traceback
 
 
 class SkillState(abc.ABC, SkillFile):
 
-    def __init__(self):
-        self.isWindows = (os.name == 'nt')
-        self.poolByName = {}
-        self.writeMode = None
-        self.path = None
-        self.input: FileInputStream = None
-        self.dirty = False
-        self.strings: StringPool = None
-        self.annotationType = None
-        self.types = []
-        self.pool = None
+    isWindows = (os.name == 'nt')
+
+    def __init__(self, strings: StringPool, path, mode: SkillFile.Mode, types: [],
+                 poolByName: {}, annotationType: Annotation):
+        self.strings: StringPool = strings
+        self.path = path
+        self.writeMode = mode
+        self.types = types
+        self.poolByName = poolByName
+        self.annotationType = annotationType
+
+
+        self.input: FileInputStream = strings.inStream
+        self.__dirty = False
+        self.pool = None  # TODO ThreadPoolExecutor
 
     def pool(self, name):
         return self.poolByName[name]
@@ -48,7 +53,7 @@ class SkillState(abc.ABC, SkillFile):
 
     def delete(self, target: SkillObject):
         if target is not None:
-            self.dirty = self.dirty | (target.skillId > 0)
+            self.__dirty = self.__dirty | (target.skillId > 0)
             self.poolByName[target.skillName()].delete(target)
 
     def changePath(self, path):
@@ -106,7 +111,7 @@ class SkillState(abc.ABC, SkillFile):
                     pass
                 return
             elif self.writeMode == "append":
-                if self.dirty:
+                if self.__dirty:
                     self.changeMode("write")
                     self.flush()
                 else:

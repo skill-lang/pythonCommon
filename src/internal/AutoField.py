@@ -5,5 +5,5 @@ T = TypeVar('T', bound=Any)
 Obj = TypeVar('Obj', bound=SkillObject)
 
 
-class AutoField(Generic[T, Obj]):
+class AutoField(list):
     pass
