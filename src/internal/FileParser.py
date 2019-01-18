@@ -7,7 +7,7 @@ from src.internal.FieldType import FieldType
 from typing import List, Mapping
 from src.internal.Exceptions import *
 from typing import Generic, TypeVar
-from src.internal.parts.Block import Block
+from src.internal.parts.Blocks import Block
 from src.internal.fieldTypes.BoolType import BoolType
 from src.internal.FieldDeclaration import FieldDeclaration
 from src.internal.FieldRestriction import FieldRestriction

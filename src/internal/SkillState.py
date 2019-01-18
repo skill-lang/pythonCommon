@@ -23,7 +23,6 @@ class SkillState(abc.ABC, SkillFile):
         self.poolByName = poolByName
         self.annotationType = annotationType
 
-
         self.input: FileInputStream = strings.inStream
         self.__dirty = False
         self.pool = None  # TODO ThreadPoolExecutor

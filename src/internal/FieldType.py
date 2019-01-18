@@ -1,13 +1,12 @@
-from abc import ABC
-from typing import Generic, TypeVar
-
-T = TypeVar('T')
+import abc
+from typing import *
 
 
-class FieldType(ABC, Generic[T]):
+class FieldType(abc.ABC, list):
 
-    def __init__(self, typeID: int):
-        self._typeID_ = typeID
+    def __init__(self, typeID):
+        super(FieldType, self).__init__()
+        self.typeID = typeID
 
     def typeID(self):
         return self.typeID
@@ -16,3 +15,23 @@ class FieldType(ABC, Generic[T]):
         if isinstance(obj, FieldType):
             return obj.typeID() == self.typeID()
         return False
+
+    @abc.abstractmethod
+    def readSingleField(self, inStream):
+        pass
+
+    @abc.abstractmethod
+    def calculateOffset(self, xs: Union[list, dict, set]):
+        pass
+
+    @abc.abstractmethod
+    def singleOffset(self, x):
+        pass
+
+    @abc.abstractmethod
+    def writeSingleField(self, data, out):
+        pass
+
+    @abc.abstractmethod
+    def toString(self):
+        pass

@@ -2,16 +2,13 @@ from src.internal.StoragePool import StoragePool
 from src.internal.FieldRestriction import FieldRestriction
 from src.internal.SkillObject import SkillObject
 from src.internal.FieldType import FieldType
-from typing import TypeVar, Generic
-
-T = TypeVar("T")
-R = TypeVar("R")
-Obj = TypeVar("Obj", bound= SkillObject)
+from src.internal.parts.Blocks import *
 
 
-class FieldDeclaration(Generic[T, Obj]):
+class FieldDeclaration(dict):
 
     def __init__(self, type: FieldType, name, owner: StoragePool, index=-1):
+        super(FieldDeclaration, self).__init__()
         self.type = type
         self.name = name
 
@@ -33,7 +30,10 @@ class FieldDeclaration(Generic[T, Obj]):
             for x in self.owner:
                 if not x.isDeleted():
                     for r in self.restrictions:
-                        r.check() # TODO get(x)? überprüfen
+                        r.check(self.get(x))
+
+    def toString(self):
+        return self.type.toString() + " " + self.name
 
     def equals(self, obj):
         if self == obj:
@@ -45,7 +45,7 @@ class FieldDeclaration(Generic[T, Obj]):
     def addChunk(self, chunk):
         self.dataChunks.append(chunk)
 
-    def addOffsetToLastChunk(self, fis, offset):
+    def addOffsetToLastChunk(self, offset):
         c = self.lastChunk()
         c.begin += offset
         c.end += offset
@@ -56,8 +56,8 @@ class FieldDeclaration(Generic[T, Obj]):
 
     def resetChunks(self, lbpo, newSize):
         self.dataChunks.clear()
-        self.dataChunks.append(None) # TODO add SimpleChunk(-1, -1, lbpo, newSize)
+        self.dataChunks.append(SimpleChunk(-1, -1, lbpo, newSize))
 
 
-class KnownField(Generic[R, T]):
+class KnownField(dict):
     pass
