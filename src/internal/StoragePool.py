@@ -14,6 +14,8 @@ import copy
 class StoragePool(FieldType, dict):
 
     dataFields = []
+    noKnownFields = []
+    noAutoFields: AutoField = AutoField()
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
         super(StoragePool, self).__init__(32 + poolIndex)
@@ -33,10 +35,8 @@ class StoragePool(FieldType, dict):
         self.blocks = []
         self.staticDataInstances: int = 0
         self._nextPool_: StoragePool
-        self.noAutoFields: AutoField = AutoField[0]
         self.newObjects = []
         self.data = []
-        self.noKnownFields = []
         self.__fixed__ = False
         self.deletedCount = 0
 
@@ -64,9 +64,6 @@ class StoragePool(FieldType, dict):
             else:
                 L[ids].__setNextPool__(p._nextPool_)
             p.__setNextPool__(t)
-
-    def noAutoFields(self) -> AutoField:
-        return self.noAutoFields
 
     def fields(self):
         """TODO: StaticFieldIterator? override"""
