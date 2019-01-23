@@ -3,9 +3,10 @@ from src.internal.FieldRestriction import FieldRestriction
 from src.internal.SkillObject import SkillObject
 from src.internal.FieldType import FieldType
 from src.internal.parts.Blocks import *
+import abc
 
 
-class FieldDeclaration(dict):
+class FieldDeclaration(dict, abc.ABC):
 
     def __init__(self, type: FieldType, name, owner: StoragePool, index=-1):
         super(FieldDeclaration, self).__init__()
@@ -58,6 +59,51 @@ class FieldDeclaration(dict):
         self.dataChunks.clear()
         self.dataChunks.append(SimpleChunk(-1, -1, lbpo, newSize))
 
+    @abc.abstractmethod
+    def rsc(self, i, end, inStream):
+        pass
+
+    @abc.abstractmethod
+    def rbc(self, target, inStream):
+        pass
+
+    @abc.abstractmethod
+    def osc(self, i, end):
+        pass
+
+    def obc(self, c: BulkChunk):
+        blocks: [] = self.owner.blocks
+        blockIndex = 0
+        endBlock = c.blockCount
+        while blockIndex < endBlock:
+            b: Block = blocks[blockIndex]
+            blockIndex += 1
+            i = b.bpo
+            self.osc(i, i + b.count)
+
+    @abc.abstractmethod
+    def wsc(self, i, end, outStream):
+        pass
+
+    def wbc(self, c: BulkChunk, outStream):
+        blocks: [] = self.owner.blocks
+        blockIndex = 0
+        endBlock = c.blockCount
+        while blockIndex < endBlock:
+            b: Block = blocks[blockIndex]
+            blockIndex += 1
+            i = b.bpo
+            self.wsc(i, i + b.count, outStream)
+
+    # TODO finish() because sth with semaphor
+
 
 class KnownField(dict):
     pass
+
+
+class NamedType(abc.ABC):
+
+    @abc.abstractmethod
+    def τPool(self):
+        pass

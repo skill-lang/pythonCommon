@@ -50,6 +50,10 @@ class FileParser(abc.ABC):
             # not end of runtime
             # implementation does things here
 
+    @abc.abstractmethod
+    def newPool(self, name, superPool, restrictions):
+        pass
+
     def stringBlock(self):
         try:
             count = self.inStream.v32()
@@ -62,7 +66,6 @@ class FileParser(abc.ABC):
                 for j in range(0, count):
                     add = StringPool.Position(self.inStream.position() + last, offset[j] - last)
                     self.strings.stringPositions.append(add)
-                    self.strings.idMap.append(None)
                     self.strings.idMap.append(None)
                     last = offset[j]
 
@@ -215,9 +218,9 @@ class FileParser(abc.ABC):
         self.inStream.jump(dataEnd)
 
     def typeRestriction(self) -> set:
-        pass
+        pass # TODO
 
-    def fieldRestriction(self, t: FieldType) -> set:
+    def fieldRestriction(self, t: FieldType) -> set:  # TODO
         rval = set()
 
         count = self.inStream.v32()
