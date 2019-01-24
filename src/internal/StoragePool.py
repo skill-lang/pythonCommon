@@ -3,8 +3,11 @@ from src.internal.BasePool import BasePool
 from src.internal.Blocks import Block
 from src.internal.AutoField import AutoField
 from src.streams.InStream import InStream
-from src.streams.OutStream import OutStream
+from src.internal.Iterator import *
 from src.internal.Exceptions import *
+from src.internal.LazyField import LazyField
+from src.internal.Blocks import *
+from src.internal.fieldTypes.IntegerTypes import *
 from threading import Lock
 import copy
 
@@ -64,12 +67,10 @@ class StoragePool(FieldType, dict):
             p.__setNextPool__(t)
 
     def fields(self):
-        """TODO: StaticFieldIterator? override"""
-        pass
+        return StaticFieldIterator(self)
 
     def allFields(self):
-        """TODO: FieldIterator? override"""
-        pass
+        return FieldIterator(self)
 
     def lastBlock(self) -> Block:
         return self.blocks[len(self.blocks) - 1]
@@ -77,21 +78,21 @@ class StoragePool(FieldType, dict):
     def newObject(self, index):
         return self.newObjects[index]
 
-    def newDynamicInstances(self):
-        """TODO: DynamicNewInstancesIterator?"""
-        pass
+    def newDynamicInstancesIterator(self):
+        return DynamicNewInstancesIterator(self)
 
     def newDynamicInstancesSize(self):
         rval = 0
-        # TODO TypeHierarchyIterator?
+        ts = TypeHierarchyIterator(self)
+        while ts.hasNext():
+            rval += len(ts.__next__().newObjects)
         return rval
 
     def staticSize(self):
         return self.staticDataInstances + len(self.newObjects)
 
     def staticInstances(self):
-        """TODO StaticDataIterator"""
-        pass
+        return StaticDataIterator(self)
 
     def fixed(self):
         return self.__fixed__
@@ -140,11 +141,10 @@ class StoragePool(FieldType, dict):
             if x is None:
                 result += 1
             else:
-                result += 0 # TODO add V64.singleV64Offset(x.skillID)
+                result += V64().singleOffset(x.skillID)
         return result
 
-    @staticmethod
-    def singleOffset(x: SkillObject):
+    def singleOffset(self, x: SkillObject):
         if x is None:
             return 1
         v = x.skillId
@@ -159,22 +159,29 @@ class StoragePool(FieldType, dict):
         else:
             return 5
 
-    @staticmethod
-    def writeSingleField(ref: SkillObject, out: OutStream):
-        if ref is None:
+    def writeSingleField(self, data, out):
+        if data is None:
             out.i8(0)
         else:
-            out.v64(ref.skillId)
+            out.v64(data.skillId)
 
     def size(self):
         if self.fixed():
             return self.cachedSize
         size = 0
-        # TODO TypeHierarchyIterator?
+        ts = TypeHierarchyIterator(self)
+        while ts.hasNext():
+            size += ts.__next__().staticSize()
+
+    def stream(self):
+        pass
 
     def toArray(self, a: []):
         rval: [] = copy.deepcopy(a)
-        # TODO DynamicDataIterator
+        ddi = self.iterator()
+        for i in range(0, len(rval)):
+            rval[i] = ddi.__next__()
+        return rval
 
     def add(self, e: SkillObject):
         if self.fixed():
@@ -189,13 +196,11 @@ class StoragePool(FieldType, dict):
     def owner(self):
         return self.basePool.owner()
 
-    def iterator(self):
-        # TODO: DynamicDataIterator
-        pass
+    def iterator(self) -> DynamicDataIterator:
+        return DynamicDataIterator(self)
 
     def typeOrderIterator(self):
-        # TODO: TypeOrderIterator
-        pass
+        return TypeOrderIterator(self)
 
     def make(self):
         raise SkillException("We prevent reflective creation of new instances, because it is bad style!")
@@ -215,8 +220,8 @@ class StoragePool(FieldType, dict):
         self.blocks.clear()
         self.blocks.append(Block(lbpoMap[self.typeID() - 32], self.cachedSize, self.staticDataInstances))
 
-    def addField(self, type: FieldType, name: str):
-        pass
+    def addField(self, fType: FieldType, name: str):
+        return LazyField(fType, name, self)
 
     def addKnownField(self, name, string, annotation):
         raise Exception("Arbitrary storage pools know no fields!")
@@ -226,7 +231,7 @@ class StoragePool(FieldType, dict):
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         self.data = self.basePool.data
-        newInstances = self.newDynamicInstances().hasNext()
+        newInstances = self.newDynamicInstancesIterator().hasNext()
         newPool = (len(self.blocks) == 0)
 
         exists = False
@@ -252,20 +257,15 @@ class StoragePool(FieldType, dict):
                         continue
                     c = None
                     if len(f.dataChunks) == 0 and blockCount != 1:
-                        # TODO: new BulkChunk
-                        pass
+                        c = BulkChunk(-1, -1, self.cachedSize, blockCount)
                     elif newInstances:
-                        # TODO: new SimpleChunk
-                        pass
+                        c = SimpleChunk(-1, -1, lbpo, lcount)
                     else:
                         continue
 
                     f.addChunk(c)
-
-                    lock = Lock()
-                    lock.acquire()
+                    # TODO synchronized
                     chunkMap[f] = c
-                    lock.release()
 
         self.newObjects.clear()
 

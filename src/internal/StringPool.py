@@ -7,7 +7,7 @@ from src.internal.FieldType import FieldType
 import threading
 
 
-class StringPool(FieldType):
+class StringPool(FieldType, list):
 
     typeID = 14
     lock = threading.RLock
@@ -106,6 +106,29 @@ class StringPool(FieldType):
                 out.put(end[i])
             for i in range(1, count + 1):
                 out.put(self.idMap[i].encode())
+
+    def prepareAndAppend(self, fos, sa):
+        for i in range(1, len(self.idMap)):
+            self.stringIDs[self.idMap[i]] = i
+        todo = []
+
+        for s in self.knownStrings:
+            if s not in self.stringIDs:
+                self.stringIDs[s] = len(self.idMap)
+                self.idMap.append(s)
+                todo.append(bytearray(s.encode('utf-8')))
+
+        count = len(todo)
+        fos.v64(count)
+
+        off = 0
+        end = []
+        for s in todo:
+            off += len(s)
+            end.append(off)
+        fos.put(end)
+        for s in todo:
+            fos.put(s)
 
     class Position:
 

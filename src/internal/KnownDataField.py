@@ -4,8 +4,8 @@ from src.streams.MappedInStream import MappedInStream
 
 class KnownDataField(FieldDeclaration, KnownField):
 
-    def __init__(self, type, name, owner):
-        super(KnownDataField, self).__init__(type, name, owner)
+    def __init__(self, fType, name, owner):
+        super(KnownDataField, self).__init__(fType, name, owner)
 
     def rbc(self, c, mis: MappedInStream):
         blocks: [] = self.owner.blocks

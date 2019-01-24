@@ -12,13 +12,13 @@ class InvalidPoolIndexException(Exception):
 class PoolSizeMismatchError(Exception):
 
     def __init__(self, block, position, begin, end, field: FieldDeclaration):
-        self.message = str.format("Corrupted data chunk in block {} between {} and {} in Field {} of type: {}", block + 1, begin, end, field.owner()) # TODO
+        self.message = str.format("Corrupted data chunk in block {} between {} and {} in Field {} of fType: {}", block + 1, begin, end, field.owner()) # TODO
 
 
 class TypeMismatchError(Exception):
 
     def __init__(self, type: FieldType, expected: str, field: str, pool: str):
-        self.message = str.format("During construction of {}.{}: Encountered incompatible type {} (expected: {})", pool, field, type.__str__(), expected)
+        self.message = str.format("During construction of {}.{}: Encountered incompatible fType {} (expected: {})", pool, field, type.__str__(), expected)
 
 
 class ParseException(Exception):

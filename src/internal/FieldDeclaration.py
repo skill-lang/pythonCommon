@@ -7,9 +7,9 @@ import abc
 
 class FieldDeclaration(dict, abc.ABC):
 
-    def __init__(self, type: FieldType, name, owner: StoragePool, index=-1):
+    def __init__(self, fType: FieldType, name, owner: StoragePool, index=-1):
         super(FieldDeclaration, self).__init__()
-        self.type = type
+        self.fType = fType
         self.name = name
 
         self.owner: StoragePool = owner
@@ -33,13 +33,13 @@ class FieldDeclaration(dict, abc.ABC):
                         r.check(self.get(x))
 
     def toString(self):
-        return self.type.toString() + " " + self.name
+        return self.fType.toString() + " " + self.name
 
     def equals(self, obj):
         if self == obj:
             return True
         if isinstance(obj, FieldDeclaration):
-            return obj.name == self.name and obj.type == self.type
+            return obj.name == self.name and obj.fType == self.fType
         return False
 
     def addChunk(self, chunk):

@@ -51,7 +51,7 @@ class BasePool(StoragePool, list):
         for p in TypeHierarchyIterator(self):
             lbpoMap[p.typeID - 32] = next
             next += len(p.newObjects)
-        newInstances = self.newDynamicInstances().hasNext()
+        newInstances = self.newDynamicInstancesIterator().hasNext()
 
         # check if we have to append at all
         if not newInstances and not (len(self.blocks) == 0) and not (len(self.dataFields) == 0):
@@ -67,7 +67,7 @@ class BasePool(StoragePool, list):
             # if we have to resize
             d: [] = copy.deepcopy(self.data)
             i = len(self.data)
-            dnii: DynamicNewInstancesIterator = self.newDynamicInstances()
+            dnii: DynamicNewInstancesIterator = self.newDynamicInstancesIterator()
             while dnii.hasNext():
                 instance = dnii.__next__()
                 d[i] = instance

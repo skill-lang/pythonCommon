@@ -6,8 +6,8 @@ from src.streams.MappedOutputStream import MappedOutputStream
 
 class DistributedField(FieldDeclaration, dict):
 
-    def __init__(self, type: FieldType, name, owner):
-        super(DistributedField, self).__init__(type, name, owner)
+    def __init__(self, fType: FieldType, name, owner):
+        super(DistributedField, self).__init__(fType, name, owner)
         self.data = {}
         self.newData = {}
 
@@ -21,7 +21,7 @@ class DistributedField(FieldDeclaration, dict):
     def rsc(self, i, h, inStream: MappedInStream):
         d: [] = self.owner.basePool.data
         for j in range(i, h):
-            self.data[d[j]] = self.type.readSingleField(inStream)
+            self.data[d[j]] = self.fType.readSingleField(inStream)
 
     def rbc(self, c, inStream: MappedInStream):
         d: [] = self.owner.basePool.data
@@ -33,7 +33,7 @@ class DistributedField(FieldDeclaration, dict):
             blockIndex += 1
             i = b.bpo
             for j in range(i , i + b.count):
-                self.data[d[j]] = self.type.readSingleField(inStream)
+                self.data[d[j]] = self.fType.readSingleField(inStream)
 
     def compress(self):
         self.data.update(self.newData)
@@ -43,13 +43,13 @@ class DistributedField(FieldDeclaration, dict):
         d: [] = self.owner.basePool.data
         rval = 0
         for j in range(i, h):
-            rval += self.type.singleOffset(self.data.get(d[j]))
+            rval += self.fType.singleOffset(self.data.get(d[j]))
         # offset += rval
 
     def wsc(self, i, h, out: MappedOutputStream):
         d: [] = self.owner.basePool.data
         for j in range(i, h):
-            self.type.writeSingleField(self.data.get(d[j]), out)
+            self.fType.writeSingleField(self.data.get(d[j]), out)
 
     def get(self, ref):
         if ref.skillID == -1:
