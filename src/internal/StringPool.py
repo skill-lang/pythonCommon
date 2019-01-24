@@ -1,7 +1,7 @@
 from src.streams.InStream import InStream
 from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
-
+from src.internal.fieldTypes.IntegerTypes import V64
 from src.streams.OutStream import OutStream
 from src.internal.FieldType import FieldType
 import threading
@@ -10,6 +10,7 @@ import threading
 class StringPool(FieldType):
 
     typeID = 14
+    lock = threading.RLock
 
     def __init__(self, inStream: FileInputStream):
         """DO NOT CALL IF YOU ARE NOT GENERATED OR INTERNAL CODE!"""
@@ -32,14 +33,14 @@ class StringPool(FieldType):
             if s is None:
                 result += 1
             else:
-                result += 2  # TODO V64.singleV64Offset(stringIDs.get(s)) instead of 2
+                result += V64().singleOffset(self.stringIDs.get(s))
         return result
 
     def singleOffset(self, name):
         if name is None:
             return 1
         else:
-            return 2  # TODO V64.singleV64Offset(stringIDs.get(name)) instead of 2
+            return V64().singleOffset(self.stringIDs.get(name))
 
     def writeSingleField(self, v, out: OutStream):
         if v is None:
@@ -66,6 +67,7 @@ class StringPool(FieldType):
             raise Exception
         if result is not None:
             return result
+
         # TODO synchronized(this)
         off: StringPool.Position = self.stringPositions[index]
         self.inStream.push(off.absoluteOffset)

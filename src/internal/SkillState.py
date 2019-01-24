@@ -8,11 +8,13 @@ from src.internal.SkillObject import SkillObject
 from src.internal.fieldTypes.Annotation import Annotation
 from src.internal.Exceptions import *
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 
 
 class SkillState(abc.ABC, SkillFile):
 
     isWindows = (os.name == 'nt')
+    threadPool = ThreadPoolExecutor()
 
     def __init__(self, strings: StringPool, path, mode: SkillFile.Mode, types: [],
                  poolByName: {}, annotationType: Annotation):
@@ -25,10 +27,6 @@ class SkillState(abc.ABC, SkillFile):
 
         self.input: FileInputStream = strings.inStream
         self.__dirty = False
-        self.pool = None  # TODO ThreadPoolExecutor
-
-    def pool(self, name):
-        return self.poolByName[name]
 
     def finalizePools(self, fis: FileInputStream):
         pass

@@ -1,8 +1,6 @@
-from typing import Generic, TypeVar, Mapping, _KT, _VT_co, Iterator, _T_co
-from src.internal.FieldType import FieldType
 from src.internal.SkillObject import SkillObject, SubType
 from src.internal.BasePool import BasePool
-from src.internal.parts.Blocks import Block
+from src.internal.Blocks import Block
 from src.internal.AutoField import AutoField
 from src.streams.InStream import InStream
 from src.streams.OutStream import OutStream

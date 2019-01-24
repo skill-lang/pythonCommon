@@ -1,5 +1,5 @@
 from src.internal.StoragePool import StoragePool
-from src.internal.parts.Blocks import Block
+from src.internal.Blocks import Block
 
 
 class DynamicDataIterator:

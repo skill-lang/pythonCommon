@@ -1,8 +1,7 @@
 from src.internal.StoragePool import StoragePool
 from src.internal.FieldRestriction import FieldRestriction
-from src.internal.SkillObject import SkillObject
 from src.internal.FieldType import FieldType
-from src.internal.parts.Blocks import *
+from src.internal.Blocks import *
 import abc
 
 

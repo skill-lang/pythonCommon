@@ -1,16 +1,10 @@
 import abc
-from src.streams.FileInputStream import FileInputStream
 from src.internal.fieldTypes.Annotation import Annotation
 from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
-from src.internal.FieldType import FieldType
-from typing import List, Mapping
 from src.internal.Exceptions import *
-from typing import Generic, TypeVar
-from src.internal.parts.Blocks import Block
-from src.internal.fieldTypes.BoolType import BoolType
+from src.internal.Blocks import Block
 from src.internal.FieldDeclaration import FieldDeclaration
-from src.internal.FieldRestriction import FieldRestriction
 
 
 class DataEntry:
