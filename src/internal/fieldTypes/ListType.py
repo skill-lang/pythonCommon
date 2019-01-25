@@ -1,9 +1,13 @@
+from src.internal.FieldType import FieldType
 from src.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
 class ListType(SingleArgumentType):
 
     typeID = 18
+
+    def __init__(self, groundType: FieldType):
+        super(ListType, self).__init__(self.typeID, groundType)
 
     def readSingleField(self, inStream):
         rval = []

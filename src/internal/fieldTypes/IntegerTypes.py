@@ -1,6 +1,8 @@
+from src.internal.FieldType import FieldType
 from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
 from typing import Union
+from abc import ABC
 
 
 class Singleton:
@@ -20,11 +22,10 @@ class Singleton:
         return Singleton.__instance
 
 
-class Integer(Singleton):
+class Integer(Singleton, FieldType, ABC):
 
     def __init__(self, typeID):
-        super(Integer, self).__init__()
-        self.typeID = typeID
+        super(Integer, self).__init__(typeID)
 
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
         return len(xs)
@@ -38,7 +39,7 @@ class I8(Integer):
     def readSingleField(self, instream: FileInputStream):
         return instream.i8()
 
-    def singleOffset(self):
+    def singleOffset(self, x):
         return 1
 
     def writeSingleField(self, target, outstream: FileOutputStream):
@@ -59,7 +60,7 @@ class I16(Integer):
     def readSingleField(self, instream: FileInputStream):
         return instream.i16()
 
-    def singleOffset(self):
+    def singleOffset(self, x):
         return 2
 
     def writeSingleField(self, target, outstream: FileOutputStream):
@@ -83,7 +84,7 @@ class I32(Integer):
     def readSingleField(self, instream: FileInputStream):
         return instream.i32()
 
-    def singleOffset(self):
+    def singleOffset(self, x):
         return 4
 
     def writeSingleField(self, target, outstream: FileOutputStream):
@@ -107,7 +108,7 @@ class I64(Integer):
     def readSingleField(self, instream: FileInputStream):
         return instream.i64()
 
-    def singleOffset(self):
+    def singleOffset(self, x):
         return 8
 
     def writeSingleField(self, target, outstream: FileOutputStream):
@@ -186,4 +187,3 @@ class V64(Integer):
             else:
                 result += 9
         return result
-

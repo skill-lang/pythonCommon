@@ -244,45 +244,45 @@ class FileParser(abc.ABC):
     def fieldType(self):
         typeID = self.inStream.v32()
         if typeID == 0:
-            return self.inStream.i8()
+            return ConstantI8(self.inStream.i8())
         elif typeID == 1:
-            return self.inStream.i16()
+            return ConstantI16(self.inStream.i16())
         elif typeID == 2:
-            return self.inStream.i32()
+            return ConstantI32(self.inStream.i32())
         elif typeID == 3:
-            return self.inStream.i64()
+            return ConstantI64(self.inStream.i64())
         elif typeID == 4:
-            return self.inStream.v64()
+            return ConstantV64(self.inStream.v64())
         elif typeID == 5:
             return self.annotation
         elif typeID == 6:
-            return self.inStream.bool()
+            return BoolType.get()
         elif typeID == 7:
-            return self.inStream.i8()
+            return I8().get()
         elif typeID == 8:
-            return self.inStream.i16()
+            return I16().get()
         elif typeID == 9:
-            return self.inStream.i32()
+            return I32().get()
         elif typeID == 10:
-            return self.inStream.i64()
+            return I64().get()
         elif typeID == 11:
-            return self.inStream.v64()
+            return V64().get()
         elif typeID == 12:
-            return self.inStream.f32()
+            return F32().get()
         elif typeID == 13:
-            return self.inStream.f64()
+            return F64().get()
         elif typeID == 14:
             return self.strings
         elif typeID == 15:
-            return   # TODO Constant length array
+            return ConstantLengthArray(self.inStream.v32(), self.fieldType())
         elif typeID == 17:
-            return None  # TODO variable length array
+            return VariableLengthArray(self.fieldType())
         elif typeID == 18:
-            return None  # TODO list
+            return ListType(self.fieldType())
         elif typeID == 19:
-            return None  # TODO set
+            return SetType(self.fieldType())
         elif typeID == 20:
-            return None  # TODO map
+            return MapType(self.fieldType(), self.fieldType())
         elif typeID >= 32:
             return self.types[typeID - 32]
         else:

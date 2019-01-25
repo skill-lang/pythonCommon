@@ -2,14 +2,10 @@ import abc
 from typing import *
 
 
-class FieldType(abc.ABC, list):
+class FieldType(abc.ABC):
 
     def __init__(self, typeID):
-        super(FieldType, self).__init__()
         self.typeID = typeID
-
-    def typeID(self):
-        return self.typeID
 
     def equals(self, obj):
         if isinstance(obj, FieldType):

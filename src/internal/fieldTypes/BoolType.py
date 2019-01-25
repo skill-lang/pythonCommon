@@ -1,11 +1,28 @@
+from typing import Union
+
+from src.internal.fieldTypes.IntegerTypes import Singleton
+from src.internal.FieldType import FieldType
+from src.streams.OutStream import OutStream
 
 
-class BoolType:
+class BoolType(Singleton, FieldType):
 
-    instance = None
+    typeID = 6
 
     def __init__(self):
-        pass
+        super(BoolType, self).__init__(self.typeID)
 
-    def get(self):
-        pass
+    def readSingleField(self, inStream):
+        return inStream.bool()
+
+    def calculateOffset(self, xs: Union[list, dict, set]):
+        return len(xs)
+
+    def singleOffset(self, x):
+        return 1
+
+    def writeSingleField(self, data, out: OutStream):
+        out.bool(data is not None and data)
+
+    def toString(self):
+        return "bool"
