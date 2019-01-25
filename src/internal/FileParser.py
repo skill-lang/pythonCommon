@@ -1,5 +1,14 @@
 import abc
 from src.internal.fieldTypes.Annotation import Annotation
+from src.internal.fieldTypes.BoolType import BoolType
+from src.internal.fieldTypes.ConstantLengthArray import ConstantLengthArray
+from src.internal.fieldTypes.ConstantTypes import *
+from src.internal.fieldTypes.FloatType import *
+from src.internal.fieldTypes.IntegerTypes import *
+from src.internal.fieldTypes.ListType import ListType
+from src.internal.fieldTypes.MapType import MapType
+from src.internal.fieldTypes.SetType import SetType
+from src.internal.fieldTypes.VariableLengthArray import VariableLengthArray
 from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
 from src.internal.Exceptions import *
@@ -265,7 +274,7 @@ class FileParser(abc.ABC):
         elif typeID == 14:
             return self.strings
         elif typeID == 15:
-            return None  # TODO Constant length array
+            return   # TODO Constant length array
         elif typeID == 17:
             return None  # TODO variable length array
         elif typeID == 18:

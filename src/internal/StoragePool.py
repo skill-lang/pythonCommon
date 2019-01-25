@@ -8,7 +8,7 @@ from src.internal.Exceptions import *
 from src.internal.LazyField import LazyField
 from src.internal.Blocks import *
 from src.internal.fieldTypes.IntegerTypes import *
-from threading import Lock
+import threading
 import copy
 
 
@@ -40,6 +40,7 @@ class StoragePool(FieldType, dict):
         self.data = []
         self.__fixed__ = False
         self.deletedCount = 0
+        self.lock = threading.Lock()
 
     def __setNextPool__(self, nx):
         self._nextPool_ = nx
@@ -260,8 +261,8 @@ class StoragePool(FieldType, dict):
                         continue
 
                     f.addChunk(c)
-                    # TODO synchronized
-                    chunkMap[f] = c
+                    with self.lock:
+                        chunkMap[f] = c
 
         self.newObjects.clear()
 

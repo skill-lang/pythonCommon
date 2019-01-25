@@ -21,6 +21,7 @@ class StringPool(FieldType, list):
         self.idMap = [].append(None)
         self.knownStrings = set()
         self.stringIDs = {}
+        self.lock = threading.Lock()
 
     def readSingleField(self, fis: InStream):
         return self.get(fis.v32())
@@ -68,20 +69,19 @@ class StringPool(FieldType, list):
         if result is not None:
             return result
 
-        # TODO synchronized(this)
-        off: StringPool.Position = self.stringPositions[index]
-        self.inStream.push(off.absoluteOffset)
-        chars = self.inStream.bytes(off.length)
-        self.inStream.pop()
+        with self.lock:
+            off: StringPool.Position = self.stringPositions[index]
+            self.inStream.push(off.absoluteOffset)
+            chars = self.inStream.bytes(off.length)
+            self.inStream.pop()
 
-        try:
-            result = chars.decode('utf-8')
-        except Exception as e:
-            pass
-            # TODO printstacktrace
-        self.idMap[index] = result
-        self.knownStrings.add(result)
-        # TODO end synchronized block
+            try:
+                result = chars.decode('utf-8')
+            except Exception as e:
+                pass
+                # TODO printstacktrace
+            self.idMap[index] = result
+            self.knownStrings.add(result)
         return result
 
     def prepareAndWrite(self, out: FileOutputStream, ws):
