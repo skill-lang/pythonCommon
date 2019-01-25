@@ -1,3 +1,4 @@
+from src.internal.StateWriter import StateWriter
 from src.streams.InStream import InStream
 from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
@@ -84,8 +85,7 @@ class StringPool(FieldType, list):
             self.knownStrings.add(result)
         return result
 
-    def prepareAndWrite(self, out: FileOutputStream, ws):
-        # TODO StateWriter ws
+    def prepareAndWrite(self, out: FileOutputStream, ws: StateWriter):
         self.idMap.clear()
         self.idMap.append(None)
 

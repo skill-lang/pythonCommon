@@ -7,6 +7,7 @@ from src.internal.fieldTypes.FloatType import *
 from src.internal.fieldTypes.IntegerTypes import *
 from src.internal.fieldTypes.ListType import ListType
 from src.internal.fieldTypes.MapType import MapType
+from src.internal.fieldTypes.ReferenceType import ReferenceType
 from src.internal.fieldTypes.SetType import SetType
 from src.internal.fieldTypes.VariableLengthArray import VariableLengthArray
 from src.internal.StringPool import StringPool
@@ -14,6 +15,7 @@ from src.internal.StoragePool import StoragePool
 from src.internal.Exceptions import *
 from src.internal.Blocks import *
 from src.internal.FieldDeclaration import FieldDeclaration
+from src.restrictions import *
 
 
 class DataEntry:
@@ -221,24 +223,36 @@ class FileParser(abc.ABC):
         self.inStream.jump(dataEnd)
 
     def typeRestriction(self) -> set:
-        pass # TODO
+        pass  # TODO not by me
 
-    def fieldRestriction(self, t: FieldType) -> set:  # TODO
+    def fieldRestriction(self, t: FieldType) -> set:
         rval = set()
 
-        count = self.inStream.v32()
-        for i in range(0, count, -1):
-            id = self.inStream.v32()
-            if id == 0: pass
-            if id == 1: pass
-            if id == 3: pass
-            if id == 5: pass
-            if id == 7: pass
-            if id == 9:
+        for count in range(self.inStream.v32(), 0, -1):
+            thisID = self.inStream.v32()
+            if thisID == 0:
+                if isinstance(t, ReferenceType):
+                    rval.add(NonNull.get())
+                else:
+                    raise Exception  # TODO Exception
+            elif thisID == 1:
+                if isinstance(t, ReferenceType):
+                    pass  # TODO not by me
+                else:
+                    pass  # TODO not by me
+            elif thisID == 3:
+                r = makeRestriction(t.typeID, self.inStream)
+                if r is None:
+                    raise Exception  # TODO Exception
+                rval.add(r)
+            elif thisID == 5: pass
+            elif thisID == 7: pass
+            elif thisID == 9:
                 pass
             else:
-                pass
-
+                if thisID <= 9 or 1 == (thisID % 2):
+                    raise Exception  # TODO Exception
+                print("Skipped unknown skippable type restriction. Please update the SKilL implementation.")
         return rval
 
     def fieldType(self):

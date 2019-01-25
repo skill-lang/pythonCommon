@@ -7,8 +7,8 @@ from pathlib import Path
 
 class MappedInStream(InStream):
 
-    def __init__(self, path: Path):
-        super(MappedInStream, self).__init__(path)
+    def __init__(self, reader: BufferedReader):
+        super(MappedInStream, self).__init__(reader)
 
     def view(self, begin):
         f = deepcopy(self.file)

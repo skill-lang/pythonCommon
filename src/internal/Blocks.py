@@ -1,3 +1,4 @@
+import abc
 
 
 class Block:
@@ -11,7 +12,7 @@ class Block:
         return self.bpo < skillID & skillID <= self.bpo + self.count
 
 
-class Chunk:
+class Chunk(abc.ABC):
 
     def __init__(self, begin, end, count):
         self.begin = begin

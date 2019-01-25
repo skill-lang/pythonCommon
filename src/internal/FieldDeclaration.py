@@ -1,8 +1,15 @@
+from src.internal.LazyField import LazyField
+from src.internal.SkillState import SkillState
 from src.internal.StoragePool import StoragePool
-from src.internal.FieldRestriction import FieldRestriction
+from src.internal.fieldDeclarations import IgnoredField
+from src.restrictions import FieldRestriction
 from src.internal.FieldType import FieldType
 from src.internal.Blocks import *
 import abc
+import threading
+
+from src.streams.FileInputStream import FileInputStream
+from src.streams.MappedInStream import MappedInStream
 
 
 class FieldDeclaration(dict, abc.ABC):
@@ -94,7 +101,36 @@ class FieldDeclaration(dict, abc.ABC):
             i = b.bpo
             self.wsc(i, i + b.count, outStream)
 
-    # TODO finish() because sth with semaphor
+    def finish(self, barrier: threading.Semaphore, readErrors: [], inStream: FileInputStream):
+        if isinstance(self, IgnoredField):
+            return 0
+
+        block = 0
+        for c in self.dataChunks:
+            blockCounter = block
+            block += 1
+            f = self
+            SkillState.threadPool.submit(runningFunction(inStream, c, self, barrier, readErrors))
+        return block
+
+
+def runningFunction(fis: FileInputStream, c: Chunk, f: FieldDeclaration, barrier: threading.Semaphore, readErrors: []):
+    ex: Exception = None  # TODO Exception
+    try:
+        map: MappedInStream = fis.map(0, c.begin)
+        if isinstance(c, BulkChunk):
+            f.rbc(c, map)
+        else:
+            i = c.bpo  # c is SimpleChunk => c has bpo
+            f.rsc(i, i + c.count, map)
+
+        if not map.eof() and not isinstance(f, LazyField):
+            ex = Exception  # TODO Exception
+    except Exception: pass  # TODO Exception
+    finally:
+        barrier.release()
+        if ex is not None:
+            readErrors.add(ex)
 
 
 class KnownField(dict):

@@ -79,7 +79,7 @@ class StateWriter(SerializationFunctions):
                 c = self.f.lastChunk()
                 i = c.bpo
                 self.f.osc(i, i + c.count)
-            except Exception: pass  #TODO do stuff but fix exceptions first
+            except Exception: pass  # TODO do stuff but fix exceptions first
             finally:
                 self.barrier.release()
 

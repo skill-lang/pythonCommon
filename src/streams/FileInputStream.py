@@ -4,20 +4,20 @@ from typing import BinaryIO
 from io import BufferedReader
 from pathlib import Path
 import threading
+import typing
 
 
 class FileInputStream(InStream.InStream):
 
-    lock = threading.RLock()
-
     def __init__(self, path: Path, readOnly):
-        super(FileInputStream, self).__init__(path)
+        self.file: BufferedReader = self.open(path, readOnly)
+        super(FileInputStream, self).__init__(self.file)
         self.storedPosition = None
-        self.file = self.open(path, readOnly)
-        self.sharedFile = False
 
-    def open(self, path, readOnly):
-        self.path = path
+        self.sharedFile = False
+        self.lock = threading.Lock()
+
+    def open(self, path, readOnly) -> BufferedReader:
         if readOnly:
             return open(path, 'rb')
         else:
@@ -41,10 +41,10 @@ class FileInputStream(InStream.InStream):
         else:
             raise IOError("There is no FileInputStream.storedPosition")
 
-    def map(self, begin=0):
-        with self.lock:  # TODO Lock should lock whole stream not just this method
+    def map(self, basePosition, begin=0):
+        with self.lock:
             f = deepcopy(self.file)
-        f.seek(self.file.tell() + begin)
+        f.seek(basePosition + begin)
         mis = MappedInStream.MappedInStream(f)
         return mis
 

@@ -10,9 +10,8 @@ class InStream(abc.ABC):
     Implementations of this class are used to turn a byte stream into a stream of integers and floats
     """
 
-    def __init__(self, path: Path):
-        self.file: BufferedReader = None
-        self.path = path
+    def __init__(self, reader: BufferedReader):
+        self.file: BufferedReader = reader
 
     def f64(self):
         return float(struct.unpack('>d', self.file.read(8))[0])
