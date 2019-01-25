@@ -12,12 +12,14 @@ class Annotation(FieldType):
     def __init__(self, types):
         super(Annotation, self).__init__(self.typeID)
         self.types = types
-        # TODO what is javas "assert"
-        self.__typeByName: {} = None
+        if self.types is None:
+            raise Exception  # TODO raise some useful Exception
+        self.typeByName: {} = None
 
     def fixTypes(self, poolByName):
-        # TODO assert self.__typeByName == None
-        self.__typeByName = poolByName
+        if self.typeByName is None:
+            raise Exception  # TODO raise useful Exception
+        self.typeByName = poolByName
 
     def readSingleField(self, inStream):
         t = inStream.v32()
@@ -33,20 +35,19 @@ class Annotation(FieldType):
                 result += 2
             else:
                 if isinstance(ref, NamedType):
-                    result += V64().singleOffset(ref.τPool().typeID - 31)
+                    result += V64().singleOffset(ref.tPool.typeID - 31)
                 else:
-                    result += V64().singleOffset(self.__typeByName[ref.skillName()].typeID - 31)
+                    result += V64().singleOffset(self.typeByName[ref.skillName()].typeID - 31)
                 result += V64().singleOffset(ref.getSkillID())
         return result
 
     def singleOffset(self, x):
         if x is None:
             return 2
-        name = None
         if isinstance(x, NamedType):
-            name = V64().singleOffset(x.τPool().typeID - 31)
+            name = V64().singleOffset(x.tPool.typeID - 31)
         else:
-            name = V64().singleOffset(self.__typeByName[x.skillName()].typeID - 31)
+            name = V64().singleOffset(self.typeByName[x.skillName()].typeID - 31)
         return name + V64().singleOffset(x.getSkillID())
 
     def writeSingleField(self, data, out):
@@ -55,9 +56,9 @@ class Annotation(FieldType):
             return
 
         if isinstance(data, NamedType):
-            out.v64(data.τPool().typeID() - 31)
+            out.v64(data.tPool.typeID() - 31)
         else:
-            out.v64(self.__typeByName[data.skillName()].typeID - 31)
+            out.v64(self.typeByName[data.skillName()].typeID - 31)
         out.v64(data.getSkillID())
 
     def toString(self):

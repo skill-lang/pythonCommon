@@ -42,15 +42,15 @@ class SkillState(abc.ABC, SkillFile):
         if target is None or target == 0:
             return True
         try:
-            if target.skillId > 0:
-                return target == self.poolByName[target.skillName()].getByID(target.skillId)
+            if target.skillID > 0:
+                return target == self.poolByName[target.skillName()].getByID(target.skillID)
             return target in self.poolByName[target.skillName()].newObjects
         except:
             return False
 
     def delete(self, target: SkillObject):
         if target is not None:
-            self.__dirty = self.__dirty | (target.skillId > 0)
+            self.__dirty = self.__dirty | (target.skillID > 0)
             self.poolByName[target.skillName()].delete(target)
 
     def changePath(self, path):

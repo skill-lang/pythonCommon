@@ -103,6 +103,4 @@ class KnownField(dict):
 
 class NamedType(abc.ABC):
 
-    @abc.abstractmethod
-    def τPool(self):
-        pass
+    tPool = None

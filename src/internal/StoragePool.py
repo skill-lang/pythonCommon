@@ -20,7 +20,7 @@ class StoragePool(FieldType, dict):
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
         super(StoragePool, self).__init__(32 + poolIndex)
-        self.__name__ = name
+        self.name = name
         self.superPool: StoragePool = superPool
         if superPool is None:
             self.typeHierarchyHeight = 0
@@ -113,12 +113,9 @@ class StoragePool(FieldType, dict):
         for p in pools:
             p.__fixed__ = False
 
-    def name(self):
-        return self.__name__
-
     def superName(self):
         if self.superPool is not None:
-            return self.superPool.name()
+            return self.superPool.name
         else:
             return None
 
@@ -147,7 +144,7 @@ class StoragePool(FieldType, dict):
     def singleOffset(self, x: SkillObject):
         if x is None:
             return 1
-        v = x.skillId
+        v = x.skillID
         if (v & 0xFFFFFF80) == 0:
             return 1
         elif (v & 0xFFFFC000) == 0:
@@ -190,7 +187,7 @@ class StoragePool(FieldType, dict):
 
     def delete(self, target: SkillObject):
         if not target.isDeleted():
-            target.skillId = 0
+            target.skillID = 0
             self.deletedCount += 1
 
     def owner(self):
@@ -255,7 +252,6 @@ class StoragePool(FieldType, dict):
                 for f in self.dataFields:
                     if f.index == 0:
                         continue
-                    c = None
                     if len(f.dataChunks) == 0 and blockCount != 1:
                         c = BulkChunk(-1, -1, self.cachedSize, blockCount)
                     elif newInstances:
