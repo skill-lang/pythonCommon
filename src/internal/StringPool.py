@@ -11,7 +11,7 @@ import threading
 class StringPool(FieldType, list):
 
     typeID = 14
-    lock = threading.RLock
+    lock = threading.Lock()
 
     def __init__(self, inStream: FileInputStream):
         """DO NOT CALL IF YOU ARE NOT GENERATED OR INTERNAL CODE!"""
@@ -22,7 +22,6 @@ class StringPool(FieldType, list):
         self.idMap = [].append(None)
         self.knownStrings = set()
         self.stringIDs = {}
-        self.lock = threading.Lock()
 
     def readSingleField(self, fis: InStream):
         return self.get(fis.v32())

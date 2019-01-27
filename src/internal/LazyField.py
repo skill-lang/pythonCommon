@@ -5,12 +5,12 @@ import threading
 
 
 class LazyField(DistributedField):
-    
+    lock = threading.Lock()
     chunkMap = {}
 
     def __init__(self, fType, name, owner):
         super(LazyField, self).__init__(fType, name, owner)
-        self.lock = threading.Lock()
+
 
     def load(self):
         for p in self.chunkMap:

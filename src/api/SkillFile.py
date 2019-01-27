@@ -65,7 +65,7 @@ class SkillFile(abc.ABC):
     def currentPath(self): pass
 
     @abc.abstractmethod
-    def changeMode(self, writemode): pass
+    def changeMode(self, writeMode): pass
 
     @abc.abstractmethod
     def loadLazyData(self): pass

@@ -4,7 +4,7 @@ from src.internal.StoragePool import StoragePool
 from src.internal.BasePool import BasePool
 from src.internal.Blocks import *
 from src.streams.FileOutputStream import FileOutputStream
-import threading
+from threading import Semaphore
 
 
 class StateAppender(SerializationFunctions):
@@ -13,7 +13,7 @@ class StateAppender(SerializationFunctions):
         super(StateAppender, self).__init__(state)
 
         i = 0
-        for t in  state.types:
+        for t in state.types:
             if len(t.blocks) == 0:
                 break
             i += 1
@@ -22,13 +22,14 @@ class StateAppender(SerializationFunctions):
 
         lbpoMap = []
         chunkMap = {}
-        barrier = threading.Semaphore()
+        barrier = Semaphore(0)
         bases = 0
         for p in state.types:
             if isinstance(p, BasePool):
                 bases += 1
                 SkillState.threadPool.submit(parallelRun1, p, lbpoMap, chunkMap, barrier)
-        barrier.release()
+        for _ in range(bases):
+            barrier.acquire()
 
         rPools = []
         for p in state.types:
@@ -48,7 +49,8 @@ class StateAppender(SerializationFunctions):
         for f in chunkMap:
             fieldCount += 1
             SkillState.threadPool.submit(parallelRun2, f, barrier)
-        barrier.acquire()
+        for _ in range(fieldCount):
+            barrier.acquire()
         fos.v64(fieldCount)
         fieldQueue = []
         stringIDs: [] = state.strings.stringIDs

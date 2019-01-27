@@ -1,8 +1,10 @@
 from typing import Generic, TypeVar
 from src.internal.SkillObject import SkillObject
+from src.internal.SkillState import SkillState
 from src.internal.StoragePool import StoragePool
 from src.internal.Iterator import *
 import copy
+from threading import Semaphore
 
 
 class BasePool(StoragePool, list):
@@ -10,21 +12,30 @@ class BasePool(StoragePool, list):
     def __init__(self, poolIndex, name, knownFields: [], autoFields):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields)
 
-    def newArray(self):
-        return []
-
-    def performAllocations(self):
-        pass
-        # TODO stuff with semaphor
+    def performAllocations(self, barrier: Semaphore):
+        reads = 0
+        # allocate data and link it to sub pools
+        data = []
+        subs = TypeHierarchyIterator(self)
+        while subs.hasNext():
+            subs.__next__().data = data
+        # allocate instances
+        subs = TypeHierarchyIterator(self)
+        while subs.hasNext():
+            s: StoragePool = subs.__next__()
+            for b in s.blocks:
+                reads += 1
+                SkillState.threadPool.submit(parallelRun(s, b, barrier))
+        return reads
 
     def compress(self, lbpoMap: []):
         # create our part of the lbpo map
-        next = 0
+        theNext = 0
         subs: TypeHierarchyIterator = TypeHierarchyIterator(self)
         while subs.hasNext():
             p: StoragePool = subs.__next__()
-            lbpo = lbpoMap[p.typeID() - 32] = next
-            next += p.staticSize() - p.deletedCount
+            lbpo = lbpoMap[p.typeID() - 32] = theNext
+            theNext += p.staticSize() - p.deletedCount
             for f in p.dataFields:
                 f.resetChunks(lbpo, p.cachedSize)
 
@@ -78,3 +89,8 @@ class BasePool(StoragePool, list):
         thi: TypeHierarchyIterator = TypeHierarchyIterator(self)
         while thi.hasNext():
             thi.__next__().updateAfterPrepareAppend(lbpoMap, chunkMap)
+
+
+def parallelRun(s: StoragePool, b: Block, barrier: Semaphore):
+    s.allocateInstances(b)
+    barrier.release()

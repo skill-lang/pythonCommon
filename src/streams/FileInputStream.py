@@ -1,33 +1,43 @@
 from copy import deepcopy
-from src.streams import InStream, MappedInStream
+from src.streams.InStream import InStream
+from src.streams.MappedInStream import MappedInStream
 from typing import BinaryIO
-from io import BufferedReader
+from io import BufferedReader, BufferedRandom
 from pathlib import Path
 import threading
-import typing
+from typing import *
+from os import PathLike
+
+R = TypeVar('R', BufferedReader, BufferedRandom)
 
 
-class FileInputStream(InStream.InStream):
+class FileInputStream(InStream):
 
-    def __init__(self, path: Path, readOnly):
-        self.file: BufferedReader = self.open(path, readOnly)
-        super(FileInputStream, self).__init__(self.file)
+    lock = threading.Lock()
+
+    def __init__(self, file: R, path, readOnly):
+        super(FileInputStream, self).__init__(file)
+        self.path = path
         self.storedPosition = None
+        self.sharedFile = not readOnly
 
-        self.sharedFile = False
-        self.lock = threading.Lock()
-
-    def open(self, path, readOnly) -> BufferedReader:
+    @staticmethod
+    def open(path, readOnly):
         if readOnly:
-            return open(path, 'rb')
+            file: R = open(path, 'rb')
         else:
-            return open(path, 'rb+')
+            file: R = open(path, 'rb+')
+        return FileInputStream(file, path, readOnly)
+
+    def shareFile(self):
+        self.sharedFile = True
+        return self.file
 
     def jump(self, position):
         self.file.seek(position)
 
     def jumpAndMap(self, offset):
-        m = self.map()
+        m = self.map(self.position())
         self.jump(offset)
         return m
 
@@ -45,8 +55,7 @@ class FileInputStream(InStream.InStream):
         with self.lock:
             f = deepcopy(self.file)
         f.seek(basePosition + begin)
-        mis = MappedInStream.MappedInStream(f)
-        return mis
+        return MappedInStream(f)
 
     def close(self):
         self.file.close()

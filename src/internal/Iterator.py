@@ -295,4 +295,4 @@ class TypeOrderIterator:
         return result
 
     def hasNext(self):
-        return
+        return (self.sdi is not None) and self.sdi.hasNext()

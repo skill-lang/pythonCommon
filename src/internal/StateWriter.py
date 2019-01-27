@@ -13,13 +13,14 @@ class StateWriter(SerializationFunctions):
         StoragePool.fixed(state.types)
         lbpoMap = []
 
-        self.barrier = threading.Semaphore()
+        self.barrier = threading.Semaphore(0)
         bases = 0
         for p in state.types:
             if isinstance(p, BasePool):
                 bases += 1
                 SkillState.threadPool.submit(compression(p, lbpoMap, self.barrier))
-        self.barrier.release()
+        for _ in range(bases):
+            self.barrier.acquire()
 
         state.strings.prepareAndWrite(fos, self)
         fos.v64(len(state.types))
@@ -28,7 +29,8 @@ class StateWriter(SerializationFunctions):
             for f in p.dataFields:
                 fieldCount += 1
                 SkillState.threadPool.submit(StateWriter.OT(f, self.barrier))
-        self.barrier.acquire()
+        for _ in range(fieldCount):
+            self.barrier.acquire()
 
         fieldQueue = []
         stringIDs = state.strings.stringIDs

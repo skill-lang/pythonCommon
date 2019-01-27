@@ -2,13 +2,15 @@ import abc
 import os
 import struct
 import copy
-from typing import BinaryIO
-from io import BufferedWriter
+from typing import BinaryIO, TypeVar
+from io import BufferedWriter, BufferedRandom
+
+W = TypeVar('W', BufferedWriter, BufferedRandom)
 
 
 class OutStream(abc.ABC):
 
-    def __init__(self, file: BufferedWriter):
+    def __init__(self, file: W):
         self.file = file
 
     def position(self):

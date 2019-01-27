@@ -17,6 +17,7 @@ class StoragePool(FieldType, dict):
     dataFields = []
     noKnownFields = []
     noAutoFields: AutoField = AutoField()
+    lock = threading.Lock()
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
         super(StoragePool, self).__init__(32 + poolIndex)
@@ -40,7 +41,7 @@ class StoragePool(FieldType, dict):
         self.data = []
         self.__fixed__ = False
         self.deletedCount = 0
-        self.lock = threading.Lock()
+
 
     def __setNextPool__(self, nx):
         self._nextPool_ = nx

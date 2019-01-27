@@ -79,7 +79,8 @@ class SerializationFunctions:
             t.writeErrors = writeErrors
             t.barrier = barrier
             SkillState.threadPool.execute(t)
-        barrier.acquire()
+        for _ in range(len(data)):
+            barrier.acquire()
         writeMap.close()
         fos.close()
 
@@ -110,6 +111,6 @@ class Task(threading.Thread):
             else:
                 self.f.wbc(c, self.outMap)
         except SkillException as s:
-            pass  # TODO lock writeErrors and add s ... and other exceptions
+            pass  # TODO don't lock writeErrors and add s ... and other exceptions
         finally:
             self.barrier.release()

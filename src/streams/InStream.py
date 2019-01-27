@@ -3,6 +3,10 @@ import os
 import struct
 from io import BufferedReader
 from pathlib import Path
+from io import BufferedReader, BufferedRandom
+from typing import TypeVar
+
+R = TypeVar('R', BufferedReader, BufferedRandom)
 
 
 class InStream(abc.ABC):
@@ -10,7 +14,7 @@ class InStream(abc.ABC):
     Implementations of this class are used to turn a byte stream into a stream of integers and floats
     """
 
-    def __init__(self, reader: BufferedReader):
+    def __init__(self, reader: R):
         self.file: BufferedReader = reader
 
     def f64(self):
