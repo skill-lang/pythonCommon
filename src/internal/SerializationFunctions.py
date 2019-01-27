@@ -1,3 +1,4 @@
+from src.internal.StoragePool import StoragePool
 from src.internal.StringPool import StringPool
 import threading
 from src.streams.MappedOutputStream import MappedOutputStream
@@ -17,10 +18,10 @@ class SerializationFunctions:
         if xs is not None:
             if mapType.keyType.typeID == 14:
                 for s in set(xs.keys):
-                    strings.append(s)
+                    strings.add(s)
             if mapType.valueType.typeID == 14:
                 for s in set(xs.values):
-                    strings.append(s)
+                    strings.add(s)
             if mapType.valueType.typeID == 20:
                 for s in xs.values:
                     SerializationFunctions.collectNestedStrings(strings, mapType.valueType, s)
@@ -87,7 +88,11 @@ class SerializationFunctions:
         for e in writeErrors:
             raise e
         if len(writeErrors) != 0:
-            raise writeErrors[0]
+            raise writeErrors.pop(0)
+
+        # Phase 4
+        state.strings.resetIDs()
+        StoragePool.unfixPools(state.types)
 
 
 class Task(threading.Thread):

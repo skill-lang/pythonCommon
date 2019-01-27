@@ -11,7 +11,6 @@ class LazyField(DistributedField):
     def __init__(self, fType, name, owner):
         super(LazyField, self).__init__(fType, name, owner)
 
-
     def load(self):
         for p in self.chunkMap:
             if p.count > 0:

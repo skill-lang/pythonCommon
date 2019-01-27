@@ -1,7 +1,6 @@
 from src.internal.SkillObject import SkillObject, SubType
 from src.internal.BasePool import BasePool
-from src.internal.Blocks import Block
-from src.internal.AutoField import AutoField
+from src.internal.fieldDeclarations import AutoField
 from src.streams.InStream import InStream
 from src.internal.Iterator import *
 from src.internal.Exceptions import *
@@ -12,7 +11,7 @@ import threading
 import copy
 
 
-class StoragePool(FieldType, dict):
+class StoragePool(FieldType):
 
     dataFields = []
     noKnownFields = []
@@ -36,18 +35,17 @@ class StoragePool(FieldType, dict):
         self.basePool: BasePool = None
         self.blocks = []
         self.staticDataInstances: int = 0
-        self._nextPool_: StoragePool
+        self.nextPool = None
         self.newObjects = []
         self.data = []
-        self.__fixed__ = False
+        self.fixed = False
         self.deletedCount = 0
 
-
-    def __setNextPool__(self, nx):
-        self._nextPool_ = nx
+    def setNextPool(self, nx):
+        self.nextPool = nx
 
     def nextPool(self):
-        return self._nextPool_
+        return self.nextPool
 
     @staticmethod
     def establishNextPool(types: []):
@@ -62,11 +60,11 @@ class StoragePool(FieldType, dict):
             if L[ids] is None:
                 L[ids] = t
 
-            if p._nextPool_ is None:
+            if p.nextPool is None:
                 L[p.typeID() - 32] = L[ids]
             else:
-                L[ids].__setNextPool__(p._nextPool_)
-            p.__setNextPool__(t)
+                L[ids].setNextPool(p.nextPool)
+            p.setNextPool(t)
 
     def fields(self):
         return StaticFieldIterator(self)
@@ -96,14 +94,11 @@ class StoragePool(FieldType, dict):
     def staticInstances(self):
         return StaticDataIterator(self)
 
-    def fixed(self):
-        return self.__fixed__
-
     @staticmethod
-    def fixedPools(pools: []):
+    def fixPools(pools: []):
         for p in pools:
             p.cachedSize = p.staticSize() - p.deletedCount
-            p.__fixed__ = True
+            p.fixed = True
 
         for i in range(len(pools), -1, -1):
             p = pools[i]
@@ -113,7 +108,7 @@ class StoragePool(FieldType, dict):
     @staticmethod
     def unfixPools(pools: []):
         for p in pools:
-            p.__fixed__ = False
+            p.fixed = False
 
     def superName(self):
         if self.superPool is not None:
@@ -165,7 +160,7 @@ class StoragePool(FieldType, dict):
             out.v64(data.skillId)
 
     def size(self):
-        if self.fixed():
+        if self.fixed:
             return self.cachedSize
         size = 0
         ts = TypeHierarchyIterator(self)
@@ -183,7 +178,7 @@ class StoragePool(FieldType, dict):
         return rval
 
     def add(self, e: SkillObject):
-        if self.fixed():
+        if self.fixed:
             raise Exception("can not fix a pool that contains new objects")
         self.newObjects.append(e)
 
@@ -195,7 +190,7 @@ class StoragePool(FieldType, dict):
     def owner(self):
         return self.basePool.owner()
 
-    def iterator(self) -> DynamicDataIterator:
+    def __iter__(self) -> DynamicDataIterator:
         return DynamicDataIterator(self)
 
     def typeOrderIterator(self):

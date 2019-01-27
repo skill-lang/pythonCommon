@@ -1,13 +1,11 @@
-from typing import Generic, TypeVar
-from src.internal.SkillObject import SkillObject
-from src.internal.SkillState import SkillState
-from src.internal.StoragePool import StoragePool
-from src.internal.Iterator import *
 import copy
 from threading import Semaphore
 
+from src.internal.Iterator import *
+from src.internal.SkillState import SkillState
 
-class BasePool(StoragePool, list):
+
+class BasePool(StoragePool):
 
     def __init__(self, poolIndex, name, knownFields: [], autoFields):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields)
@@ -58,15 +56,15 @@ class BasePool(StoragePool, list):
 
     def prepareAppend(self, lbpoMap: [], chunkMap: {}):
         # update lbpoMap
-        next = len(self.data)
+        theNext = len(self.data)
         for p in TypeHierarchyIterator(self):
-            lbpoMap[p.typeID - 32] = next
-            next += len(p.newObjects)
+            lbpoMap[p.typeID - 32] = theNext
+            theNext += len(p.newObjects)
         newInstances = self.newDynamicInstancesIterator().hasNext()
 
         # check if we have to append at all
         if not newInstances and not (len(self.blocks) == 0) and not (len(self.dataFields) == 0):
-            done  = True
+            done = True
             for f in self.dataFields:
                 if len(f.dataChunks) == 0:
                     done = False

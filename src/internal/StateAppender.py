@@ -18,7 +18,7 @@ class StateAppender(SerializationFunctions):
                 break
             i += 1
         newPoolIndex = 0
-        StoragePool.fixed(state.types)
+        StoragePool.fixPools(state.types)
 
         lbpoMap = []
         chunkMap = {}

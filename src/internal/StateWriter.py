@@ -13,7 +13,7 @@ class StateWriter(SerializationFunctions):
 
     def __init__(self, state, fos):
         super(StateWriter, self).__init__(state)
-        StoragePool.fixed(state.types)
+        StoragePool.fixPools(state.types)
         lbpoMap = []
 
         self.barrier = threading.Semaphore(0)
@@ -84,7 +84,7 @@ class StateWriter(SerializationFunctions):
                 c = self.f.lastChunk()
                 i = c.bpo
                 self.f.osc(i, i + c.count)
-            except Exception:
+            except:
                 traceback.print_exc()
                 print("Offset calculation failed, resulting file will be corrupted.")
                 self.f.offset = -sys.maxsize - 1

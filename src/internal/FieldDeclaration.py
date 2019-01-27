@@ -11,9 +11,10 @@ import threading
 
 from src.streams.FileInputStream import FileInputStream
 from src.streams.MappedInStream import MappedInStream
+from src.api.FieldDeclaration import FieldDeclaration as FD
 
 
-class FieldDeclaration(dict, abc.ABC):
+class FieldDeclaration(abc.ABC, FD):
 
     def __init__(self, fType: FieldType, name, owner: StoragePool, index=-1):
         super(FieldDeclaration, self).__init__()

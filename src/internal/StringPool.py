@@ -6,10 +6,9 @@ from src.internal.fieldTypes.IntegerTypes import V64
 from src.streams.OutStream import OutStream
 from src.internal.FieldType import FieldType
 import threading
-import traceback
 
 
-class StringPool(FieldType, list):
+class StringPool(FieldType):
 
     typeID = 14
     lock = threading.Lock()
@@ -24,8 +23,7 @@ class StringPool(FieldType, list):
         self.knownStrings = set()
         self.stringIDs = {}
 
-    def readSingleField(self, fis: InStream):
-        return self.get(fis.v32())
+    def readSingleField(self, fis: InStream): return self.get(fis.v32())
 
     def calculateOffset(self, xs):
         if len(self.stringIDs) < 128:
@@ -50,14 +48,11 @@ class StringPool(FieldType, list):
         else:
             out.v64(self.stringIDs.get(v))
 
-    def resetIDs(self):
-        self.stringIDs.clear()
+    def resetIDs(self): self.stringIDs.clear()
 
-    def toString(self):
-        return "string"
+    def toString(self): return "string"
 
-    def size(self):
-        return len(self.knownStrings)
+    def size(self): return len(self.knownStrings)
 
     def get(self, index):
         if index is 0:
@@ -125,6 +120,39 @@ class StringPool(FieldType, list):
         fos.put(end)
         for s in todo:
             fos.put(s)
+
+    def contains(self, obj): return obj in self.knownStrings
+
+    def __iter__(self): return self.knownStrings.__iter__()
+
+    def toArray(self): return list(self.knownStrings)
+
+    def add(self, e):
+        self.knownStrings.add(e)
+
+    def remove(self, obj): self.knownStrings.remove(obj)
+
+    def containsAll(self, c):
+        for x in c:
+            if x not in self.knownStrings:
+                return False
+        return True
+
+    def addAll(self, c): self.knownStrings.update(c)
+
+    def removeAll(self, c):
+        for x in c:
+            if x in self.knownStrings:
+                self.knownStrings.remove(x)
+
+    def retainAll(self, c):
+        for x in self.knownStrings:
+            if x not in c:
+                self.knownStrings.remove(x)
+
+    def clear(self): self.knownStrings.clear()
+
+    def hasInStream(self): return self.inStream is not None
 
     class Position:
 

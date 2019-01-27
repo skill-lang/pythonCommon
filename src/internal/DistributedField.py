@@ -4,7 +4,7 @@ from src.streams.MappedInStream import MappedInStream
 from src.streams.MappedOutputStream import MappedOutputStream
 
 
-class DistributedField(FieldDeclaration, dict):
+class DistributedField(FieldDeclaration):
 
     def __init__(self, fType: FieldType, name, owner):
         super(DistributedField, self).__init__(fType, name, owner)
