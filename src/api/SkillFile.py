@@ -11,21 +11,21 @@ class ActualMode:
         self.openMode = None
         self.closeMode = None
         for m in modes:
-            if m == "Create":
+            if m == SkillFile.Mode.Create:
                 logger.debug("Tried to Create (ActualMode)")
-            elif m == "Read":
+            elif m == SkillFile.Mode.Read:
                 if self.openMode is None:
                     self.openMode = m
                 elif self.openMode != m:
                     raise IOError(logger.error("You can either create or read a file."))
-            elif m == "Append":
+            elif m == SkillFile.Mode.Append:
                 logger.debug("Tried to Append (ActualMode)")
-            elif m == "Write":
+            elif m == SkillFile.Mode.Write:
                 if self.closeMode is None:
                     self.closeMode = m
                 elif self.closeMode != m:
                     raise IOError(logger.error("You can either write or append to a file."))
-            elif m == "ReadOnly":
+            elif m == SkillFile.Mode.ReadOnly:
                 if self.closeMode is None:
                     self.closeMode = m
                 elif self.closeMode != m:

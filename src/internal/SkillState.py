@@ -143,11 +143,11 @@ class SkillState(abc.ABC, SkillFile):
             if self.writeMode == SkillFile.Mode.Write:
                 if self.isWindows:
                     target = self.path
-                    with tempfile.TemporaryDirectory(None, "temp", ".") as d:
-                        f = tempfile.TemporaryFile('w+b', -1, None, None, ".sf", "write", d)
-                    self.changePath(os.path.join(d, f))
+                    f = tempfile.TemporaryFile('w+b', -1, None, None, ".sf", "write")
+                    self.changePath(f.name)
                     StateWriter(self, FileOutputStream.write(self.makeInStream()))
-                    # TODO create File
+                    f.name = target
+                    self.changePath(target)
                 else:
                     StateWriter(self, FileOutputStream.write(self.makeInStream()))
                 return
