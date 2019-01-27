@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 from src.internal.SerializationFunctions import *
 import threading
 from src.internal.Exceptions import *
@@ -52,7 +55,7 @@ class StateWriter(SerializationFunctions):
         offset = 0
         for f in fieldQueue:
             if f.offset < 0:
-                raise SkillException("aborting write because offset calculation failed")  # TODO Exception
+                raise SkillException("aborting write because offset calculation failed")
 
             fos.v64(f.index)
             fos.v64(stringIDs.get(f.name))
@@ -81,7 +84,10 @@ class StateWriter(SerializationFunctions):
                 c = self.f.lastChunk()
                 i = c.bpo
                 self.f.osc(i, i + c.count)
-            except Exception: pass  # TODO do stuff but fix exceptions first
+            except Exception:
+                traceback.print_exc()
+                print("Offset calculation failed, resulting file will be corrupted.")
+                self.f.offset = -sys.maxsize - 1
             finally:
                 self.barrier.release()
 

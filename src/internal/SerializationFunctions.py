@@ -85,7 +85,7 @@ class SerializationFunctions:
         fos.close()
 
         for e in writeErrors:
-            pass  # TODO printStackTrace
+            raise e
         if len(writeErrors) != 0:
             raise writeErrors[0]
 
@@ -111,6 +111,11 @@ class Task(threading.Thread):
             else:
                 self.f.wbc(c, self.outMap)
         except SkillException as s:
-            pass  # TODO don't lock writeErrors and add s ... and other exceptions
+            self.writeErrors.append(s)
+        except IOError as i:
+            self.writeErrors.append(SkillException("failed to write field " + self.f.toString(), i))
+        except Exception as e:
+            self.writeErrors.append(SkillException("unexpected failure while writing field []".format(
+                self.f.toString()), e))
         finally:
             self.barrier.release()

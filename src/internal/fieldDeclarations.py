@@ -17,13 +17,13 @@ class IgnoredField(abc.ABC):
 class AutoField(abc.ABC, FieldDeclaration, KnownField):
 
     def rsc(self, i, h, inStream):
-        raise Exception  # TODO Exception
+        raise Exception("one can not read auto fields!")
 
     def rbc(self, last, inStream):
-        raise Exception  # TODO Exception
+        raise Exception("one can not read auto fields!")
 
     def osc(self, i, end):
-        raise Exception  # TODO Exception
+        raise Exception("one get the offset of an auto field!")
 
     def wsc(self, i, end, outStream):
-        raise Exception  # TODO Exception
+        raise Exception("one can not write auto fields!")

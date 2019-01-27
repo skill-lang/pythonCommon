@@ -6,6 +6,7 @@ from src.internal.fieldTypes.IntegerTypes import V64
 from src.streams.OutStream import OutStream
 from src.internal.FieldType import FieldType
 import threading
+import traceback
 
 
 class StringPool(FieldType, list):
@@ -74,12 +75,8 @@ class StringPool(FieldType, list):
             self.inStream.push(off.absoluteOffset)
             chars = self.inStream.bytes(off.length)
             self.inStream.pop()
+            result = chars.decode('utf-8')
 
-            try:
-                result = chars.decode('utf-8')
-            except Exception as e:
-                pass
-                # TODO printstacktrace
             self.idMap[index] = result
             self.knownStrings.add(result)
         return result

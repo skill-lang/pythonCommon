@@ -1,5 +1,4 @@
 from typing import Union
-from src.internal.Exceptions import *
 from src.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
@@ -28,7 +27,7 @@ class ConstantLengthArray(SingleArgumentType):
 
     def writeSingleField(self, elements, out):
         if len(elements) != self.length:
-            raise Exception  # TODO IllegalArgumentException
+            raise Exception("constant length array has wrong size")
         for e in elements:
             self.groundType.writeSingleField(e, out)
 
@@ -37,5 +36,5 @@ class ConstantLengthArray(SingleArgumentType):
 
     def equals(self, obj):
         if isinstance(obj, ConstantLengthArray):
-            return (self.length == len(obj)) and self.groundType.equals(obj.groundType)
+            return (self.length == obj.length) and self.groundType.equals(obj.groundType)
         return False

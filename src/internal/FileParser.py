@@ -203,7 +203,7 @@ class FileParser(abc.ABC):
                         else:
                             f.addChunk(BulkChunk(self.offset, end, p.cachedSize, len(p.blocks)))
                     except SkillException as e:
-                        raise ParseException(self.inStream, self.blockCounter, None, None)  # TODO Exception add message
+                        raise ParseException(self.inStream, self.blockCounter, None, e.message)
                     legalFieldIDBarrier += 1
                 else:
                     end = self.inStream.v64()
@@ -234,7 +234,8 @@ class FileParser(abc.ABC):
                 if isinstance(t, ReferenceType):
                     rval.add(NonNull.get())
                 else:
-                    raise Exception  # TODO Exception
+                    raise ParseException(self.inStream, self.blockCounter, None,
+                                         "Nonnull restriction on non-reference type: {}", t.toString())
             elif thisID == 1:
                 if isinstance(t, ReferenceType):
                     pass  # TODO not by me
@@ -243,7 +244,8 @@ class FileParser(abc.ABC):
             elif thisID == 3:
                 r = makeRestriction(t.typeID, self.inStream)
                 if r is None:
-                    raise Exception  # TODO Exception
+                    raise ParseException(self.inStream, self.blockCounter, None,
+                                         "Type {} can not be range restricted!", t.toString())
                 rval.add(r)
             elif thisID == 5: pass
             elif thisID == 7: pass
@@ -251,7 +253,10 @@ class FileParser(abc.ABC):
                 pass
             else:
                 if thisID <= 9 or 1 == (thisID % 2):
-                    raise Exception  # TODO Exception
+                    raise ParseException(self.inStream, self.blockCounter, None,
+                                         "Found unknown field restriction %d. "
+                                         "Please regenerate your binding, if possible.",
+                                         thisID)
                 print("Skipped unknown skippable type restriction. Please update the SKilL implementation.")
         return rval
 
@@ -300,7 +305,7 @@ class FileParser(abc.ABC):
         elif typeID >= 32:
             return self.types[typeID - 32]
         else:
-            raise ParseException(self.inStream, self.blockCounter, None, "Invalid fType ID: []", typeID)
+            raise ParseException(self.inStream, self.blockCounter, None, "Invalid type ID: []", typeID)
 
     def read(self):
         pass

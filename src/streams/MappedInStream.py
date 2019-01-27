@@ -20,7 +20,8 @@ class MappedInStream(InStream):
         return self.file
 
     def jump(self):
-        return Exception  # TODO Exception
+        return Exception("there is no sane reason to jump in a mapped stream")
 
     def toString(self):
-        return "MappedInStream(" + self.position() + " -> " + (self.eof() - self.file.tell()) + ", next: " + self.file.read(1).decode('utf-8') + ")"
+        return "MappedInStream({} -> {}, next: {})".format(
+            self.position(), self.eof() - self.file.tell(), self.file.read(1).decode('utf-8'))

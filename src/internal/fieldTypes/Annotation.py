@@ -13,12 +13,12 @@ class Annotation(FieldType):
         super(Annotation, self).__init__(self.typeID)
         self.types = types
         if self.types is None:
-            raise Exception  # TODO raise some useful Exception
+            raise Exception("Annotation.types shouldn't be None")
         self.typeByName: {} = None
 
     def fixTypes(self, poolByName):
         if self.typeByName is None:
-            raise Exception  # TODO raise useful Exception
+            raise Exception("Annotation.typeByName shouldn't be None")
         self.typeByName = poolByName
 
     def readSingleField(self, inStream):

@@ -1,5 +1,6 @@
 import abc
 from src.internal.fieldTypes.IntegerTypes import Singleton
+from src.internal.Exceptions import *
 
 
 class FieldRestriction(abc.ABC):
@@ -15,7 +16,7 @@ class NonNull(FieldRestriction, Singleton):
 
     def check(self, value):
         if value is None:
-            raise Exception  # TODO Exception
+            raise SkillException("Null value violates @NonNull.")
 
 
 class Range(FieldRestriction):
@@ -26,7 +27,7 @@ class Range(FieldRestriction):
 
     def check(self, value):
         if value < self.min or self.max < value:
-            raise Exception  # TODO Exception
+            raise SkillException("{} is not in Range({}, {})".format(value, self.min, self.max))
 
 
 def makeRestriction(typeID, inStream):

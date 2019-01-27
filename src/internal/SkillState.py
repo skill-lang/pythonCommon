@@ -1,4 +1,3 @@
-import abc
 import os
 import shutil
 import tempfile
@@ -7,7 +6,6 @@ from src.internal.BasePool import BasePool
 from src.internal.LazyField import LazyField
 from src.internal.StateAppender import StateAppender
 from src.internal.StateWriter import StateWriter
-from src.streams.FileInputStream import FileInputStream
 from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
 from src.internal.SkillObject import SkillObject
@@ -16,7 +14,6 @@ from src.internal.Exceptions import *
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from threading import Semaphore
-
 from src.streams.FileOutputStream import FileOutputStream
 
 
@@ -70,7 +67,7 @@ class SkillState(abc.ABC, SkillFile):
             for _ in range(reads):
                 barrier.acquire()
             for e in readErrors:
-                pass  # TODO printstacktrace
+                raise e
             if not len(readErrors) == 0:
                 raise readErrors[0]
         except InterruptedError:
@@ -86,7 +83,7 @@ class SkillState(abc.ABC, SkillFile):
             if target.skillID > 0:
                 return target == self.poolByName[target.skillName()].getByID(target.skillID)
             return target in self.poolByName[target.skillName()].newObjects
-        except:
+        except Exception:
             return False
 
     def delete(self, target: SkillObject):
@@ -138,7 +135,8 @@ class SkillState(abc.ABC, SkillFile):
                 try:
                     f.check()
                 except SkillException as e:
-                    raise SkillException(format("check failed in [].[]:[]  []", p.name, f.name, 1, e)) # TODO e.getMessage instead of 1
+                    raise SkillException("check failed in [].[]:\n []".format(
+                        p.name, f.name, e.message), e)
 
     def flush(self):
         try:

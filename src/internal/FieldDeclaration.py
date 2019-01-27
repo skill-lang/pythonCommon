@@ -1,4 +1,5 @@
 from src.internal.LazyField import LazyField
+from src.internal.Exceptions import *
 from src.internal.SkillState import SkillState
 from src.internal.StoragePool import StoragePool
 from src.internal.fieldDeclarations import IgnoredField
@@ -110,27 +111,33 @@ class FieldDeclaration(dict, abc.ABC):
             blockCounter = block
             block += 1
             f = self
-            SkillState.threadPool.submit(runningFunction(inStream, c, self, barrier, readErrors))
+            SkillState.threadPool.submit(runningFunction(inStream, c, self, barrier, readErrors, blockCounter))
         return block
 
 
-def runningFunction(fis: FileInputStream, c: Chunk, f: FieldDeclaration, barrier: threading.Semaphore, readErrors: []):
-    ex: Exception = None  # TODO Exception
+def runningFunction(fis: FileInputStream, c, f: FieldDeclaration, barrier: threading.Semaphore, readErrors: [],
+                    blockCounter):
+    ex: SkillException = None
     try:
-        map: MappedInStream = fis.map(0, c.begin)
+        mis: MappedInStream = fis.map(0, c.begin)
         if isinstance(c, BulkChunk):
-            f.rbc(c, map)
+            f.rbc(c, mis)
         else:
             i = c.bpo  # c is SimpleChunk => c has bpo
-            f.rsc(i, i + c.count, map)
+            f.rsc(i, i + c.count, mis)
 
-        if not map.eof() and not isinstance(f, LazyField):
-            ex = Exception  # TODO Exception
-    except Exception: pass  # TODO Exception
+        if not mis.eof() and not isinstance(f, LazyField):
+            ex = PoolSizeMismatchError(blockCounter, c.begin, c.end, f)
+    except SkillException as s:
+        ex = s
+    except BufferError as b:
+        ex = PoolSizeMismatchError(blockCounter, c.begin, c.end, f, b)
+    except Exception as e:
+        ex = SkillException("internal error: unexpected foreign exception", e)
     finally:
         barrier.release()
         if ex is not None:
-            readErrors.add(ex)
+            readErrors.append(ex)
 
 
 class KnownField(dict):
