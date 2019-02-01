@@ -158,7 +158,7 @@ class SkillState(abc.ABC, SkillFile):
                 else:
                     StateAppender(self, FileOutputStream.append(self.makeInStream()))
                 return
-            elif self.writeMode == "readonly":
+            elif self.writeMode == SkillFile.Mode.ReadOnly:
                 raise SkillException("Cannot flush a read only file. Note: close will turn a file into read only.")
         except SkillException as e:
             raise e
@@ -173,9 +173,9 @@ class SkillState(abc.ABC, SkillFile):
         return self.input
 
     def close(self):
-        if self.writeMode != "readonly":
+        if self.writeMode != SkillFile.Mode.ReadOnly:
             self.flush()
-            self.writeMode = "readonly"
+            self.writeMode = SkillFile.Mode.ReadOnly
 
         if self.input is not None:
             try:

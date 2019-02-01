@@ -49,4 +49,5 @@ class FileOutputStream(OutStream):
 
     def close(self):
         if not self.file.closed:
+            self.file.flush()
             self.file.close()
