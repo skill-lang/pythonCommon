@@ -187,3 +187,24 @@ class V64(Integer):
             else:
                 result += 9
         return result
+
+    @staticmethod
+    def singleV64Offset(v):
+        if (v & 0xFFFFFFFFFFFFFF80) == 0:
+            return 1
+        elif (v & 0xFFFFFFFFFFFFC000) == 0:
+            return 2
+        elif (v & 0xFFFFFFFFFFE00000) == 0:
+            return 3
+        elif (v & 0xFFFFFFFFF0000000) == 0:
+            return 4
+        elif (v & 0xFFFFFFF800000000) == 0:
+            return 5
+        elif (v & 0xFFFFFC0000000000) == 0:
+            return 6
+        elif (v & 0xFFFE000000000000) == 0:
+            return 7
+        elif (v & 0xFF00000000000000) == 0:
+            return 8
+        else:
+            return 9

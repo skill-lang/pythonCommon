@@ -6,6 +6,9 @@ from src.internal.fieldTypes.IntegerTypes import V64
 from src.streams.OutStream import OutStream
 from src.internal.FieldType import FieldType
 import threading
+from typing import Union, TypeVar
+
+S = TypeVar('S', FileInputStream, type(None))
 
 
 class StringPool(FieldType):
@@ -13,7 +16,7 @@ class StringPool(FieldType):
     typeID = 14
     lock = threading.Lock()
 
-    def __init__(self, inStream: FileInputStream):
+    def __init__(self, inStream: S):
         """DO NOT CALL IF YOU ARE NOT GENERATED OR INTERNAL CODE!"""
         super(StringPool, self).__init__(self.typeID)
         self.inStream = inStream
