@@ -5,6 +5,9 @@ from src.streams.MappedOutputStream import MappedOutputStream
 
 
 class DistributedField(FieldDeclaration):
+    """
+    The fields data is distributed into an array (for now its a hash map) holding its instances.
+    """
 
     def __init__(self, fType: FieldType, name, owner):
         super(DistributedField, self).__init__(fType, name, owner)
@@ -12,6 +15,7 @@ class DistributedField(FieldDeclaration):
         self.newData = {}
 
     def check(self):
+        """Check consistency of restrictions on this field."""
         for r in self.restrictions:
             for x in self.data.values():
                 r.check(x)
@@ -36,6 +40,10 @@ class DistributedField(FieldDeclaration):
                 self.data[d[j]] = self.fType.readSingleField(inStream)
 
     def compress(self):
+        """
+        compress this field
+        Note: for now, deleted elements can survive in data
+        """
         self.data.update(self.newData)
         self.newData.clear()
 

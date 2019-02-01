@@ -6,11 +6,19 @@ from src.internal.SkillState import SkillState
 
 
 class BasePool(StoragePool):
+    """The base of a type hierarchy. Contains optimized representations of data compared to sub pools."""
 
     def __init__(self, poolIndex, name, knownFields: [], autoFields):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields)
+        self.owner = None  # owner is set by SKilLState.finish()
 
-    def performAllocations(self, barrier: Semaphore):
+    def performAllocations(self, barrier: Semaphore) -> int:
+        """
+        Allocates data and all instances for this pool and all of its sub-pools.
+        Note: invoked once upon state creation before deserialization of field data
+        :param barrier: used to synchronize parallel object allocation
+        :return:
+        """
         reads = 0
         # allocate data and link it to sub pools
         data = []
@@ -26,7 +34,12 @@ class BasePool(StoragePool):
                 SkillState.threadPool.submit(parallelRun(s, b, barrier))
         return reads
 
-    def compress(self, lbpoMap: []):
+    def compress(self, lbpoMap: []) -> None:
+        """
+        compress new instances into the data array and update skillIDs
+        :param lbpoMap
+        :return:
+        """
         # create our part of the lbpo map
         theNext = 0
         subs: TypeHierarchyIterator = TypeHierarchyIterator(self)
@@ -90,5 +103,6 @@ class BasePool(StoragePool):
 
 
 def parallelRun(s: StoragePool, b: Block, barrier: Semaphore):
+    """parallel function for performAllocations"""
     s.allocateInstances(b)
     barrier.release()
