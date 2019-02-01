@@ -15,11 +15,10 @@ class FileInputStream(InStream):
 
     lock = threading.Lock()
 
-    def __init__(self, file: R, path, readOnly):
+    def __init__(self, file: R, path):
         super(FileInputStream, self).__init__(file)
         self.path = path
         self.storedPosition = None
-        self.sharedFile = not readOnly
 
     @staticmethod
     def open(path, readOnly):
@@ -27,11 +26,7 @@ class FileInputStream(InStream):
             file: R = open(path, 'rb')
         else:
             file: R = open(path, 'rb+')
-        return FileInputStream(file, path, readOnly)
-
-    def shareFile(self):
-        self.sharedFile = True
-        return self.file
+        return FileInputStream(file, path)
 
     def jump(self, position):
         self.file.seek(position)
