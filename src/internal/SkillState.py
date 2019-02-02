@@ -112,7 +112,7 @@ class SkillState(abc.ABC, SkillFile):
             self.writeMode = writeMode
         elif writeMode == SkillFile.Mode.Append:
             raise Exception("Cannot change write mode from write to append, "
-                            "try to use open(path, 'create', 'append') instead.")
+                            "try to use open(path, Create, Append) instead.")
         elif writeMode == SkillFile.Mode.ReadOnly:
             raise Exception("Cannot change from read only to a write mode.")
         else:

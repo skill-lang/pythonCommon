@@ -307,5 +307,12 @@ class FileParser(abc.ABC):
         else:
             raise ParseException(self.inStream, self.blockCounter, None, "Invalid type ID: []", typeID)
 
-    def read(self):
-        pass
+    def read(self, cls, writeMode):
+        try:
+            r = cls(self.poolByName, self.strings, self.annotation, self.types, self.inStream, writeMode)
+            r.check()
+            return r
+        except SkillException as e:
+            raise ParseException(self.inStream, self.blockCounter, e, "Post serialization check failed!")
+        except Exception as e:
+            raise ParseException(self.inStream, self.blockCounter, e, "State instantiation failed!")

@@ -264,3 +264,12 @@ class StoragePool(FieldType):
 
     def toString(self):
         return self.__name__
+
+    class Builder(abc.ABC):
+
+        def __init__(self, pool, instance):
+            self.pool = pool
+            self.instance = instance
+
+        @abc.abstractmethod
+        def make(self): pass

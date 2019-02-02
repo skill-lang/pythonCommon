@@ -19,7 +19,6 @@ class FileOutputStream(OutStream):
         super(FileOutputStream, self).__init__(file)
         self.pos = position
 
-
     @staticmethod
     def write(target: FileInputStream):
         f: W = target.file
