@@ -1,3 +1,5 @@
+from src.internal.DistributedField import DistributedField
+from src.internal.LazyField import LazyField
 from src.internal.StoragePool import StoragePool
 from src.internal.StringPool import StringPool
 import threading
@@ -12,6 +14,52 @@ class SerializationFunctions:
 
     def __init__(self, state):
         self.state = state
+
+        strings = state.strings
+        for p in state.types:
+            strings.add(p.name)
+            for f in p.dataFields:
+                strings.add(f.name)
+
+                if f.fType.typeID == 14:
+                    for i in p:
+                        if not i.isDeleted():
+                            strings.add(i.get(f))
+
+                if f.fType.typeID in [15, 17, 18, 19]:
+                    if f.fType.groundType.typeID == 14:
+                        for i in p:
+                            if not i.isDeleted():
+                                xs = i.get(f)
+                                for s in xs:
+                                    strings.add(s)
+
+                if f.fType.typeID == 20:
+                    typ = f.fType
+                    k = typ.keyType.typeID == 14
+                    v = typ.valueType.typeID == 14
+                    if k or v:
+                        for i in p:
+                            if not i.isDeleted():
+                                xs = i.get(f)
+                                if xs is not None:
+                                    if k:
+                                        for s in xs:
+                                            strings.add(s)
+                                    if v:
+                                        for s in xs.values():
+                                            strings.add(s)
+                    if typ.valueType.typeID == 20:
+                        nested = typ.valueType
+                        if nested.keyType == 14 or nested.valueType.typeID == 14 or nested.valueType.typeID == 20:
+                            for i in p:
+                                if not i.isDeleted():
+                                    self.collectNestedStrings(strings, typ, i.get(f))
+
+                if isinstance(f, LazyField): f.ensureLoaded()
+                if isinstance(f, DistributedField): f.compress()
+        state.check()
+        state.strings.resetIDs()
 
     @staticmethod
     def collectNestedStrings(strings: StringPool, mapType, xs: {}):
@@ -57,7 +105,7 @@ class SerializationFunctions:
             outStream.v64(len(t))
             outStream.v64(t.groundType.typeID)
             return
-        elif t.typeID == 19:
+        elif t.typeID in [17, 18, 19]:
             outStream.i8(t.typeID)
             outStream.v64(t.groundType.typeID)
             return

@@ -1,12 +1,13 @@
 from src.internal.FieldType import FieldType
-from src.internal.fieldTypes.IntegerTypes import Singleton
+from src.internal.fieldTypes.IntegerTypes import singleton
 from typing import Union
 from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
 from abc import ABC
 
 
-class Float(Singleton, FieldType, ABC):
+@singleton
+class Float(FieldType, ABC):
     
     def __init__(self, typeID):
         super(Float, self).__init__(typeID)

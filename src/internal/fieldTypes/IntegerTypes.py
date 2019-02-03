@@ -5,24 +5,18 @@ from typing import Union
 from abc import ABC
 
 
-class Singleton:
+def singleton(cls):
+    instances = {}
 
-    __instance = None
-
-    def __init__(self):
-        if self.__instance is None:
-            Singleton.__instance = self
-        else:
-            raise Exception("This class is a singleton")
-
-    @staticmethod
-    def get():
-        if Singleton.__instance is None:
-            Singleton()
-        return Singleton.__instance
+    def getinstance():
+        if cls not in instances:
+            instances[cls] = cls()
+        return instances[cls]
+    return getinstance
 
 
-class Integer(Singleton, FieldType, ABC):
+@singleton
+class Integer(FieldType, ABC):
 
     def __init__(self, typeID):
         super(Integer, self).__init__(typeID)
