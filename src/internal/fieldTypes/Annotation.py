@@ -35,20 +35,20 @@ class Annotation(FieldType):
                 result += 2
             else:
                 if isinstance(ref, NamedType):
-                    result += V64().singleOffset(ref.tPool.typeID - 31)
+                    result += V64().singleV64Offset(ref.tPool.typeID - 31)
                 else:
-                    result += V64().singleOffset(self.typeByName[ref.skillName()].typeID - 31)
-                result += V64().singleOffset(ref.getSkillID())
+                    result += V64().singleV64Offset(self.typeByName[ref.skillName()].typeID - 31)
+                result += V64().singleV64Offset(ref.getSkillID())
         return result
 
     def singleOffset(self, x):
         if x is None:
             return 2
         if isinstance(x, NamedType):
-            name = V64().singleOffset(x.tPool.typeID - 31)
+            name = V64().singleV64Offset(x.tPool.typeID - 31)
         else:
-            name = V64().singleOffset(self.typeByName[x.skillName()].typeID - 31)
-        return name + V64().singleOffset(x.getSkillID())
+            name = V64().singleV64Offset(self.typeByName[x.skillName()].typeID - 31)
+        return name + V64().singleV64Offset(x.getSkillID())
 
     def writeSingleField(self, data, out):
         if data is None:

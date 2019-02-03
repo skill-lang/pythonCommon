@@ -37,14 +37,14 @@ class InterfacePool(FieldType):
             if x is None:
                 result += 1
             else:
-                result += V64().singleOffset(x.skillID)
+                result += V64().singleV64Offset(x.skillID)
         return result
 
     def singleOffset(self, x):
         if x is None:
             return 1
         else:
-            return V64().singleOffset(x.skillID)
+            return V64().singleV64Offset(x.skillID)
 
     def writeSingleField(self, data, out):
         if data is None:

@@ -135,7 +135,7 @@ class StoragePool(FieldType):
             if x is None:
                 result += 1
             else:
-                result += V64().singleOffset(x.skillID)
+                result += V64().singleV64Offset(x.skillID)
         return result
 
     def singleOffset(self, x: SkillObject):

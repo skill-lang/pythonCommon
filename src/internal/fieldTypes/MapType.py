@@ -27,7 +27,7 @@ class MapType(FieldType):
             if size == 0:
                 result += 1
             else:
-                result += V64().singleOffset(size) + self.keyType.calculateOffset(x.keys())
+                result += V64().singleV64Offset(size) + self.keyType.calculateOffset(x.keys())
                 result += self.valueType.calculateOffset(x.values())
         return result
 
@@ -38,7 +38,7 @@ class MapType(FieldType):
             size = len(x)
         if size == 0:
             return 1
-        return V64().singleOffset(len(x)) + self.keyType.calculateOffset(x.keys()) + self.valueType.calculateOffset(
+        return V64().singleV64Offset(len(x)) + self.keyType.calculateOffset(x.keys()) + self.valueType.calculateOffset(
             x.values())
 
     def writeSingleField(self, data, out):

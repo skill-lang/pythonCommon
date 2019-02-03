@@ -21,13 +21,13 @@ class SingleArgumentType(FieldType, ABC):
             if size == 0:
                 result += 1
             else:
-                result += V64().singleOffset(size)
+                result += V64().singleV64Offset(size)
                 result += self.groundType.calculateOffset(x)
 
     def singleOffset(self, x):
         if x is None:
             return 1
-        return V64().singleOffset(len(x) + self.groundType.calculateOffset(x))
+        return V64().singleV64Offset(len(x) + self.groundType.calculateOffset(x))
 
     def writeSingleField(self, x, out):
         if x is None:

@@ -36,14 +36,14 @@ class StringPool(FieldType):
             if s is None:
                 result += 1
             else:
-                result += V64().singleOffset(self.stringIDs.get(s))
+                result += V64().singleV64Offset(self.stringIDs.get(s))
         return result
 
     def singleOffset(self, name):
         if name is None:
             return 1
         else:
-            return V64().singleOffset(self.stringIDs.get(name))
+            return V64().singleV64Offset(self.stringIDs.get(name))
 
     def writeSingleField(self, v, out: OutStream):
         if v is None:

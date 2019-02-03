@@ -5,18 +5,16 @@ from typing import Union
 from abc import ABC
 
 
-def singleton(cls):
-    instances = {}
+class Singleton(type):
+    _instances = {}
 
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
+    def __new__(mcs, *args, **kwargs):
+        if mcs not in mcs._instances:
+            mcs._instances[mcs] = super(Singleton, mcs).__new__(mcs, args, kwargs)
+        return mcs._instances[mcs]
 
 
-@singleton
-class Integer(FieldType, ABC):
+class Integer(FieldType, ABC, metaclass=Singleton):
 
     def __init__(self, typeID):
         super(Integer, self).__init__(typeID)
