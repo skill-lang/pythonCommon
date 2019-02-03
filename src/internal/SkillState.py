@@ -121,7 +121,7 @@ class SkillState(abc.ABC, SkillFile):
     def loadLazyData(self):
         ID = len(self.strings.idMap)
         while ID != 0:
-            var = self.strings.get(0)
+            var = self.strings.get(ID)
             ID -= 1
 
         for p in self.types:

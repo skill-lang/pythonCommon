@@ -12,6 +12,8 @@ class FieldType(ABC):
             return obj.typeID() == self.typeID()
         return False
 
+    def hashCode(self): return self.typeID
+
     @abstractmethod
     def readSingleField(self, inStream):
         pass
