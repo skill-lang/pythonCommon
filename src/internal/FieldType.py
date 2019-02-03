@@ -1,8 +1,8 @@
-import abc
+from abc import ABC, abstractmethod
 from typing import *
 
 
-class FieldType(abc.ABC):
+class FieldType(ABC):
 
     def __init__(self, typeID):
         self.typeID = typeID
@@ -12,22 +12,22 @@ class FieldType(abc.ABC):
             return obj.typeID() == self.typeID()
         return False
 
-    @abc.abstractmethod
+    @abstractmethod
     def readSingleField(self, inStream):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def calculateOffset(self, xs: Union[list, dict, set]):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def singleOffset(self, x):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def writeSingleField(self, data, out):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def toString(self):
         pass

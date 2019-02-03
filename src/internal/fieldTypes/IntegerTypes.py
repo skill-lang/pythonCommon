@@ -3,18 +3,20 @@ from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
 from typing import Union
 from abc import ABC
+from logging import getLogger
 
 
-class Singleton(type):
-    _instances = {}
+class Singleton(object):
+    _instance = {}
 
-    def __new__(mcs, *args, **kwargs):
-        if mcs not in mcs._instances:
-            mcs._instances[mcs] = super(Singleton, mcs).__new__(mcs, args, kwargs)
-        return mcs._instances[mcs]
+    def __new__(cls, *args, **kwargs):
+        if cls not in cls._instance:
+            cls._instance[cls] = super(Singleton, cls).__new__(cls)
+            getLogger().log(10, "new instance of" + cls.__class__.__name__)
+        return cls._instance[cls]
 
 
-class Integer(FieldType, ABC, metaclass=Singleton):
+class Integer(FieldType, ABC, Singleton):
 
     def __init__(self, typeID):
         super(Integer, self).__init__(typeID)

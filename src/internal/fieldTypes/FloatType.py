@@ -6,7 +6,7 @@ from src.streams.FileOutputStream import FileOutputStream
 from abc import ABC
 
 
-class Float(FieldType, ABC, metaclass=Singleton):
+class Float(FieldType, ABC, Singleton):
     
     def __init__(self, typeID):
         super(Float, self).__init__(typeID)
