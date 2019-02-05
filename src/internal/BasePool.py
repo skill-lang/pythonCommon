@@ -103,6 +103,6 @@ class BasePool(StoragePool):
 
 
 def parallelRun(s: StoragePool, b: Block, barrier: Semaphore):
-    """parallel function for performAllocations"""
+    """allocates block to storagepool in parallel"""
     s.allocateInstances(b)
     barrier.release()

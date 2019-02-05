@@ -6,12 +6,10 @@ from src.internal.StoragePool import StoragePool
 
 class SkillObject(abc.ABC):
 
+    skillName = None
+
     def _init_(self, skillId):
         self.skillID = skillId
-
-    @abc.abstractmethod
-    def skillName(self):
-        pass
 
     def isDeleted(self):
         return 0 == self.skillID
@@ -24,7 +22,7 @@ class SkillObject(abc.ABC):
 
     def prettyString(self, sf):
         string = "Age(self: " + self  # TODO
-        p = sf.poolByName.get(self.skillName())
+        p = sf.poolByName.get(self.skillName)
         self.printFs(p.allFields(), string)
         string += ")"
         return string
