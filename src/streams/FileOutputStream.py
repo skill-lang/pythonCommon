@@ -23,7 +23,7 @@ class FileOutputStream(OutStream):
     def write(target: FileInputStream):
         f: W = target.file
         if f.closed:
-            f = open(target.path, 'wb+')
+            f = open(target.path, 'rb+')
         f.seek(0)
         return FileOutputStream(f)
 
@@ -31,10 +31,12 @@ class FileOutputStream(OutStream):
     def append(target: FileInputStream):
         f: W = target.file
         if f.closed:
-            f = open(target.path, 'rb+')
-        size = os.stat(target.path).st_size
-        f.seek(size)
-        return FileOutputStream(f, size)
+            f = open(target.path, 'ab+')
+            return FileOutputStream(f)
+        else:
+            size = os.stat(target.path).st_size
+            f.seek(size)
+            return FileOutputStream(f, size)
 
     def put(self, data):
         self.refresh()
