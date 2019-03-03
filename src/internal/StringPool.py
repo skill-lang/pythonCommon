@@ -22,7 +22,7 @@ class StringPool(FieldType):
         self.inStream = inStream
         self.stringPositions = []
         self.stringPositions.append(StringPool.Position(-1, -1))
-        self.idMap = [].append(None)
+        self.idMap = list()
         self.knownStrings = set()
         self.stringIDs = {}
 

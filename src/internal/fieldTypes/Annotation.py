@@ -2,7 +2,7 @@ from typing import Union
 
 from src.internal.FieldType import FieldType
 from src.internal.fieldTypes.IntegerTypes import V64
-from src.internal.FieldDeclaration import NamedType
+from src.internal.NamedType import NamedType
 
 
 class Annotation(FieldType):

@@ -1,20 +1,8 @@
-import abc
 from src.internal.FieldDeclaration import FieldDeclaration
+from src.internal.KnownField import KnownField
 
 
-class KnownField(abc.ABC): pass
-
-
-class InterfaceField(abc.ABC): pass
-
-
-class IgnoredField(abc.ABC):
-
-    @abc.abstractmethod
-    def read(self, inStream): pass
-
-
-class AutoField(abc.ABC, FieldDeclaration, KnownField):
+class AutoField(FieldDeclaration, KnownField):
 
     def rsc(self, i, h, inStream):
         raise Exception("one can not read auto fields!")

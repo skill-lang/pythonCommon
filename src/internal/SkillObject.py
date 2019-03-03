@@ -1,15 +1,9 @@
-import abc
 
-from src.internal.FieldDeclaration import NamedType
-from src.internal.StoragePool import StoragePool
-
-
-class SkillObject(abc.ABC):
-
-    skillName = None
+class SkillObject:
 
     def _init_(self, skillId):
         self.skillID = skillId
+        self.skillName = None
 
     def isDeleted(self):
         return 0 == self.skillID
@@ -31,16 +25,3 @@ class SkillObject(abc.ABC):
         while fieldIterator.hasNext():
             f = fieldIterator.__next__()
             string += ", " + f.name + ": " + f.get(self)
-
-
-class SubType(SkillObject, NamedType):
-
-    def __init__(self, tpool: StoragePool, skillID):
-        super(SubType, self).__init__(skillID)
-        self.tpool: StoragePool = tpool
-
-    def skillName(self):
-        return self.tpool.name
-
-    def toString(self):
-        return self.skillName() + "#" + self.skillID

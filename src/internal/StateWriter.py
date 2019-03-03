@@ -1,27 +1,25 @@
 import sys
 import traceback
 
-from src.internal.SerializationFunctions import *
+from src.internal.SerializationFunctions import SerializationFunctions, Task
 import threading
-from src.internal.Exceptions import *
-from src.internal.StoragePool import StoragePool
-from src.internal.BasePool import BasePool
-from src.internal.SkillState import SkillState
+from src.internal.Exceptions import SkillException
+from src.internal.threadpool import threadPool
 
 
 class StateWriter(SerializationFunctions):
 
     def __init__(self, state, fos):
         super(StateWriter, self).__init__(state)
-        StoragePool.fixPools(state.types)
+        self.fixPools(state.types)
         lbpoMap = []
 
         self.barrier = threading.Semaphore(0)
         bases = 0
         for p in state.types:
-            if isinstance(p, BasePool):
+            if p.owner is None:
                 bases += 1
-                SkillState.threadPool.submit(compression(p, lbpoMap, self.barrier))
+                threadPool.submit(compression(p, lbpoMap, self.barrier))
         for _ in range(bases):
             self.barrier.acquire()
 
@@ -31,7 +29,7 @@ class StateWriter(SerializationFunctions):
         for p in state.types:
             for f in p.dataFields:
                 fieldCount += 1
-                SkillState.threadPool.submit(StateWriter.OT(f, self.barrier))
+                threadPool.submit(StateWriter.OT(f, self.barrier))
         for _ in range(fieldCount):
             self.barrier.acquire()
 
@@ -41,7 +39,6 @@ class StateWriter(SerializationFunctions):
             fos.v64(stringIDs.get[p.name])
             LCount = p.lastBlock().count
             fos.v64(LCount)
-            self.restrictions(p, fos)
             if p.superPool is None:
                 fos.i8(0)
             else:
@@ -60,7 +57,6 @@ class StateWriter(SerializationFunctions):
             fos.v64(f.index)
             fos.v64(stringIDs.get(f.name))
             self.writeType(f.type, fos)
-            self.restrictions(f, fos)
             end = offset + f.offset
             fos.v64(end)
 
@@ -92,6 +88,6 @@ class StateWriter(SerializationFunctions):
                 self.barrier.release()
 
 
-def compression(p: BasePool, lbpoMap: [], barrier):
+def compression(p, lbpoMap: [], barrier):
     p.compress(lbpoMap)
     barrier.release()

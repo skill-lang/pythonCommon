@@ -1,11 +1,10 @@
-from abc import ABC
 from typing import Union
 
 from src.internal.FieldType import FieldType
 from src.internal.fieldTypes.IntegerTypes import V64
 
 
-class SingleArgumentType(FieldType, ABC):
+class SingleArgumentType(FieldType):
 
     def __init__(self, typeID, groundType: FieldType):
         super(SingleArgumentType, self).__init__(typeID)

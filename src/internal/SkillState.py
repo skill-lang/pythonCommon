@@ -1,40 +1,34 @@
 import os
 import shutil
 import tempfile
-from src.api.SkillFile import *
-from src.internal.BasePool import BasePool
-from src.internal.LazyField import LazyField
 from src.internal.StateAppender import StateAppender
 from src.internal.StateWriter import StateWriter
-from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
-from src.internal.SkillObject import SkillObject
-from src.internal.fieldTypes.Annotation import Annotation
-from src.internal.Exceptions import *
+from src.internal.Exceptions import SkillException
+from src.internal.Mode import Mode
 import traceback
-from concurrent.futures import ThreadPoolExecutor
 from threading import Semaphore
 from src.streams.FileOutputStream import FileOutputStream
+from src.streams.FileInputStream import FileInputStream
 
 
-class SkillState(abc.ABC, SkillFile):
+class SkillState:
 
     isWindows = (os.name == 'nt')
-    threadPool = ThreadPoolExecutor()
 
-    def __init__(self, strings: StringPool, path, mode: SkillFile.Mode, types: [],
-                 poolByName: {}, annotationType: Annotation):
-        self.strings: StringPool = strings
+    def __init__(self, strings, path, mode: Mode, types: [],
+                 poolByName: {}, annotationType):
+        self.strings = strings
         self.path = path
-        self.writeMode: SkillFile.Mode = mode
+        self.writeMode: Mode = mode
         self.types = types
         self.poolByName = poolByName
         self.annotationType = annotationType
 
-        self.input: FileInputStream = strings.inStream
+        self.input = strings.inStream
         self.dirty = False
 
-    def finalizePools(self, fis: FileInputStream):
+    def finalizePools(self, fis):
         try:
             StoragePool.establishNextPool(self.types)
 
@@ -42,7 +36,7 @@ class SkillState(abc.ABC, SkillFile):
             reads = 0
             fieldNames = set()
             for p in self.allTypes():
-                if isinstance(p, BasePool):
+                if p.owner is None:  # if p is BasePool
                     p.owner = self
                     reads += p.performAllocations(barrier)
                 # add missing field declarations
@@ -73,10 +67,10 @@ class SkillState(abc.ABC, SkillFile):
         except InterruptedError:
             traceback.print_exc()
 
-    def String(self):
+    def Strings(self):
         return self.strings
 
-    def contains(self, target: SkillObject):
+    def contains(self, target):
         if target is None or target == 0:
             return True
         try:
@@ -86,20 +80,20 @@ class SkillState(abc.ABC, SkillFile):
         except Exception:
             return False
 
-    def delete(self, target: SkillObject):
+    def delete(self, target):
         if target is not None:
             self.dirty = self.dirty | (target.skillID > 0)
             self.poolByName[target.skillName()].delete(target)
 
     def changePath(self, path):
-        if self.writeMode == SkillFile.Mode.Append:
+        if self.writeMode == Mode.Append:
             if self.path == path:
                 return
             if os.path.exists(path):
                 os.remove(path)
             shutil.copy2(self.path, path)
-        elif self.writeMode == SkillFile.Mode.ReadOnly:
-            self.writeMode = SkillFile.Mode.Write
+        elif self.writeMode == Mode.ReadOnly:
+            self.writeMode = Mode.Write
         else:
             return
         self.path = path
@@ -108,25 +102,23 @@ class SkillState(abc.ABC, SkillFile):
         if self.writeMode == writeMode:
             return
 
-        if writeMode == SkillFile.Mode.Write:
+        if writeMode == Mode.Write:
             self.writeMode = writeMode
-        elif writeMode == SkillFile.Mode.Append:
+        elif writeMode == Mode.Append:
             raise Exception("Cannot change write mode from write to append, "
                             "try to use open(path, Create, Append) instead.")
-        elif writeMode == SkillFile.Mode.ReadOnly:
+        elif writeMode == Mode.ReadOnly:
             raise Exception("Cannot change from read only to a write mode.")
         else:
             return
 
     def loadLazyData(self):
-        ID = len(self.strings.idMap)
-        while ID != 0:
-            var = self.strings.get(ID)
+        for ID in range(0, len(self.strings.idMap)):
+            self.strings.get(ID)
             ID -= 1
-
         for p in self.types:
             for f in p.dataFields:
-                if isinstance(f, LazyField):
+                if f.isLazy:
                     f.ensureLoaded()
 
     def check(self):
@@ -140,7 +132,7 @@ class SkillState(abc.ABC, SkillFile):
 
     def flush(self):
         try:
-            if self.writeMode == SkillFile.Mode.Write:
+            if self.writeMode == Mode.Write:
                 if self.isWindows:
                     target = self.path
                     f = tempfile.TemporaryFile('w+b', -1, None, None, ".sf", "write")
@@ -151,14 +143,14 @@ class SkillState(abc.ABC, SkillFile):
                 else:
                     StateWriter(self, FileOutputStream.write(self.makeInStream()))
                 return
-            elif self.writeMode == SkillFile.Mode.Append:
+            elif self.writeMode == Mode.Append:
                 if self.dirty:
-                    self.changeMode(SkillFile.Mode.Write)
+                    self.changeMode(Mode.Write)
                     self.flush()
                 else:
                     StateAppender(self, FileOutputStream.append(self.makeInStream()))
                 return
-            elif self.writeMode == SkillFile.Mode.ReadOnly:
+            elif self.writeMode == Mode.ReadOnly:
                 raise SkillException("Cannot flush a read only file. Note: close will turn a file into read only.")
         except SkillException as e:
             raise e
@@ -173,12 +165,15 @@ class SkillState(abc.ABC, SkillFile):
         return self.input
 
     def close(self):
-        if self.writeMode != SkillFile.Mode.ReadOnly:
+        if self.writeMode != Mode.ReadOnly:
             self.flush()
-            self.writeMode = SkillFile.Mode.ReadOnly
+            self.writeMode = Mode.ReadOnly
 
         if self.input is not None:
             try:
                 self.input.close()
             except IOError:
                 traceback.print_exc()
+
+    def currentPath(self):
+        return self.path

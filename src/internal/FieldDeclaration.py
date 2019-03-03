@@ -1,45 +1,27 @@
-from src.internal.LazyField import LazyField
-from src.internal.Exceptions import *
-from src.internal.SkillState import SkillState
-from src.internal.StoragePool import StoragePool
-from src.internal.fieldDeclarations import IgnoredField
-from src.restrictions import FieldRestriction
-from src.internal.FieldType import FieldType
-from src.internal.Blocks import *
-import abc
+from src.internal.Exceptions import SkillException, PoolSizeMismatchError
+from src.internal.Blocks import BulkChunk, SimpleChunk
 import threading
-
-from src.streams.FileInputStream import FileInputStream
-from src.streams.MappedInStream import MappedInStream
-from src.api.FieldDeclaration import FieldDeclaration as fD
+from src.internal.threadpool import threadPool
 
 
-class FieldDeclaration(abc.ABC, fD):
+class FieldDeclaration:
 
-    def __init__(self, fType: FieldType, name, owner: StoragePool, index=-1):
+    isLazy = False
+    isDistributed = False
+
+    def __init__(self, fType, name, owner, index=-1):
         super(FieldDeclaration, self).__init__()
         self.fType = fType
         self.name = name
 
-        self.owner: StoragePool = owner
+        self.owner = owner
         self.owner.dataFields.append(self)
         if index == -1:
             self.index = len(self.owner.dataFields)
         else:
             self.owner.autoFields[-index] = self
 
-        self.restrictions = set()
         self.dataChunks = []
-
-    def addRestriction(self, r: FieldRestriction):
-        self.restrictions.add(r)
-
-    def check(self):
-        if len(self.restrictions) != 0:
-            for x in self.owner:
-                if not x.isDeleted():
-                    for r in self.restrictions:
-                        r.check(self.get(x))
 
     def toString(self):
         return self.fType.toString() + " " + self.name
@@ -67,15 +49,12 @@ class FieldDeclaration(abc.ABC, fD):
         self.dataChunks.clear()
         self.dataChunks.append(SimpleChunk(-1, -1, lbpo, newSize))
 
-    @abc.abstractmethod
     def rsc(self, i, end, inStream):
         pass
 
-    @abc.abstractmethod
     def rbc(self, target, inStream):
         pass
 
-    @abc.abstractmethod
     def osc(self, i, end):
         pass
 
@@ -84,12 +63,11 @@ class FieldDeclaration(abc.ABC, fD):
         blockIndex = 0
         endBlock = c.blockCount
         while blockIndex < endBlock:
-            b: Block = blocks[blockIndex]
+            b = blocks[blockIndex]
             blockIndex += 1
             i = b.bpo
             self.osc(i, i + b.count)
 
-    @abc.abstractmethod
     def wsc(self, i, end, outStream):
         pass
 
@@ -98,36 +76,32 @@ class FieldDeclaration(abc.ABC, fD):
         blockIndex = 0
         endBlock = c.blockCount
         while blockIndex < endBlock:
-            b: Block = blocks[blockIndex]
+            b = blocks[blockIndex]
             blockIndex += 1
             i = b.bpo
             self.wsc(i, i + b.count, outStream)
 
-    def finish(self, barrier: threading.Semaphore, readErrors: [], inStream: FileInputStream):
-        if isinstance(self, IgnoredField):
-            return 0
-
+    def finish(self, barrier: threading.Semaphore, readErrors: [], inStream):
         block = 0
         for c in self.dataChunks:
             blockCounter = block
             block += 1
-            f = self
-            SkillState.threadPool.submit(runningFunction(inStream, c, self, barrier, readErrors, blockCounter))
+            threadPool.submit(runningFunction(inStream, c, self, barrier, readErrors, blockCounter))
         return block
 
 
-def runningFunction(fis: FileInputStream, c, f: FieldDeclaration, barrier: threading.Semaphore, readErrors: [],
+def runningFunction(fis, c, f: FieldDeclaration, barrier: threading.Semaphore, readErrors: [],
                     blockCounter):
     ex: SkillException = None
     try:
-        mis: MappedInStream = fis.map(0, c.begin)
+        mis = fis.map(0, c.begin)
         if isinstance(c, BulkChunk):
             f.rbc(c, mis)
         else:
             i = c.bpo  # c is SimpleChunk => c has bpo
             f.rsc(i, i + c.count, mis)
 
-        if not mis.eof() and not isinstance(f, LazyField):
+        if not mis.eof() and not f.isLazy:
             ex = PoolSizeMismatchError(blockCounter, c.begin, c.end, f)
     except SkillException as s:
         ex = s
@@ -139,12 +113,3 @@ def runningFunction(fis: FileInputStream, c, f: FieldDeclaration, barrier: threa
         barrier.release()
         if ex is not None:
             readErrors.append(ex)
-
-
-class KnownField(dict):
-    pass
-
-
-class NamedType(abc.ABC):
-
-    tPool = None

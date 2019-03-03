@@ -1,10 +1,8 @@
 from typing import Union
-
 from src.internal.FieldType import FieldType
-from abc import ABC
 
 
-class ConstantInteger(FieldType, ABC):
+class ConstantInteger(FieldType):
 
     def __init__(self, typeID, value):
         super(ConstantInteger, self).__init__(typeID)

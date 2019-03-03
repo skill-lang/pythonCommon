@@ -1,15 +1,12 @@
-from src.internal.SerializationFunctions import *
-from src.internal.SkillState import SkillState
-from src.internal.StoragePool import StoragePool
-from src.internal.BasePool import BasePool
-from src.internal.Blocks import *
-from src.streams.FileOutputStream import FileOutputStream
+from src.internal.SerializationFunctions import SerializationFunctions, Task
+from src.internal.Blocks import SimpleChunk
 from threading import Semaphore
+from src.internal.threadpool import threadPool
 
 
 class StateAppender(SerializationFunctions):
 
-    def __init__(self, state: SkillState, fos: FileOutputStream):
+    def __init__(self, state, fos):
         super(StateAppender, self).__init__(state)
 
         i = 0
@@ -18,16 +15,16 @@ class StateAppender(SerializationFunctions):
                 break
             i += 1
         newPoolIndex = 0
-        StoragePool.fixPools(state.types)
+        self.fixPools(state.types)
 
         lbpoMap = []
         chunkMap = {}
         barrier = Semaphore(0)
         bases = 0
         for p in state.types:
-            if isinstance(p, BasePool):
+            if p.owner is None:
                 bases += 1
-                SkillState.threadPool.submit(parallelRun1, p, lbpoMap, chunkMap, barrier)
+                threadPool.submit(parallelRun1, p, lbpoMap, chunkMap, barrier)
         for _ in range(bases):
             barrier.acquire()
 
@@ -48,7 +45,7 @@ class StateAppender(SerializationFunctions):
         fieldCount = 0
         for f in chunkMap:
             fieldCount += 1
-            SkillState.threadPool.submit(parallelRun2, f, barrier)
+            threadPool.submit(parallelRun2, f, barrier)
         for _ in range(fieldCount):
             barrier.acquire()
         fos.v64(fieldCount)
@@ -66,7 +63,6 @@ class StateAppender(SerializationFunctions):
                 count = p.lastBlock().count
                 fos.v64(count)
                 if newPool:
-                    self.restrictions(p, fos)
                     if p.superName() is None:
                         fos.i8(0)
                     else:
@@ -89,7 +85,6 @@ class StateAppender(SerializationFunctions):
                 if len(f.dataChunks) == 1:
                     fos.v64(stringIDs[f.name])
                     self.writeType(f.type, fos)
-                    self.restrictions(f, fos)
                 end = offset + f.offset
                 fos.v64(end)
                 data.append(Task(f, offset, end))
@@ -97,7 +92,7 @@ class StateAppender(SerializationFunctions):
         self.writeFieldData(state, fos, data, offset, barrier)
 
 
-def parallelRun1(p: BasePool, lbpoMap, chunkMap, barrier):
+def parallelRun1(p, lbpoMap, chunkMap, barrier):
     p.prepareAppend(lbpoMap, chunkMap)
     barrier.release()
 

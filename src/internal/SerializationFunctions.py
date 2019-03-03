@@ -1,13 +1,9 @@
-from src.internal.DistributedField import DistributedField
-from src.internal.LazyField import LazyField
-from src.internal.StoragePool import StoragePool
-from src.internal.StringPool import StringPool
 import threading
-from src.streams.MappedOutputStream import MappedOutputStream
-from src.internal.Blocks import *
-from src.internal.Exceptions import *
+from src.internal.Blocks import SimpleChunk
+from src.internal.Exceptions import SkillException
 import copy
-from src.internal.SkillState import SkillState
+from src.streams.MappedOutputStream import MappedOutputStream
+from src.internal.threadpool import threadPool
 
 
 class SerializationFunctions:
@@ -56,13 +52,14 @@ class SerializationFunctions:
                                 if not i.isDeleted():
                                     self.collectNestedStrings(strings, typ, i.get(f))
 
-                if isinstance(f, LazyField): f.ensureLoaded()
-                if isinstance(f, DistributedField): f.compress()
-        state.check()
+                if f.isLazy:
+                    f.ensureLoaded()
+                if f.isDistributed:
+                    f.compress()
         state.strings.resetIDs()
 
     @staticmethod
-    def collectNestedStrings(strings: StringPool, mapType, xs: {}):
+    def collectNestedStrings(strings, mapType, xs: {}):
         if xs is not None:
             if mapType.keyType.typeID == 14:
                 for s in set(xs.keys):
@@ -73,10 +70,6 @@ class SerializationFunctions:
             if mapType.valueType.typeID == 20:
                 for s in xs.values:
                     SerializationFunctions.collectNestedStrings(strings, mapType.valueType, s)
-
-    @staticmethod
-    def restrictions(pool, outStream):
-        outStream.i8(0)
 
     @staticmethod
     def writeType(t, outStream):
@@ -118,16 +111,15 @@ class SerializationFunctions:
             outStream.v64(t.typeID)
             return
 
-    @staticmethod
-    def writeFieldData(state, fos, data: [], offset, barrier: threading.Semaphore):
+    def writeFieldData(self, state, fos, data: [], offset, barrier: threading.Semaphore):
         writeErrors = []
-        writeMap: MappedOutputStream = fos.mapBlock(offset)
+        writeMap = fos.mapBlock(offset)
 
         for t in data:
             t.outMap = copy.deepcopy(writeMap)
             t.writeErrors = writeErrors
             t.barrier = barrier
-            SkillState.threadPool.execute(t)
+            threadPool.execute(t)
         for _ in range(len(data)):
             barrier.acquire()
         writeMap.close()
@@ -140,7 +132,23 @@ class SerializationFunctions:
 
         # Phase 4
         state.strings.resetIDs()
-        StoragePool.unfixPools(state.types)
+        self.unfixPools(state.types)
+
+    @staticmethod
+    def fixPools(pools: []):
+        for p in pools:
+            p.cachedSize = p.staticSize() - p.deletedCount
+            p.fixed = True
+
+        for i in range(len(pools), -1, -1):
+            p = pools[i]
+            if p.superPool is not None:
+                p.superPool.cachedSize += p.cachedSize
+
+    @staticmethod
+    def unfixPools(pools: []):
+        for p in pools:
+            p.fixed = False
 
 
 class Task(threading.Thread):

@@ -1,5 +1,3 @@
-import abc
-
 
 class Block:
     """
@@ -26,7 +24,7 @@ class Block:
         return self.bpo < skillID & skillID <= self.bpo + self.count
 
 
-class Chunk(abc.ABC):
+class Chunk:
     """
     Chunks contain information on where field data can be found.
     Note: indices of recipient of the field data is not necessarily continuous; make use of staticInstances!

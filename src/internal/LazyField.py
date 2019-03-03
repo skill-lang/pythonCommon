@@ -1,12 +1,12 @@
 from src.internal.DistributedField import DistributedField
-from src.streams.MappedInStream import MappedInStream
-from src.internal.Blocks import *
+from src.internal.Blocks import SimpleChunk, BulkChunk
 import threading
 
 
 class LazyField(DistributedField):
     lock = threading.Lock()
     chunkMap = {}
+    isLazy = True
 
     def __init__(self, fType, name, owner):
         super(LazyField, self).__init__(fType, name, owner)
@@ -25,15 +25,11 @@ class LazyField(DistributedField):
         if self.chunkMap is not None:
             self.load()
 
-    def check(self):
-        if self.chunkMap is None:
-            super(LazyField, self).check()
-
-    def rsc(self, i, h, inStream: MappedInStream):
+    def rsc(self, i, h, inStream):
         with self.lock:
             self.chunkMap[SimpleChunk(i, h, 1, 1)] = inStream
 
-    def rbc(self, c, inStream: MappedInStream):
+    def rbc(self, c, inStream):
         with self.lock:
             self.chunkMap[c] = inStream
 

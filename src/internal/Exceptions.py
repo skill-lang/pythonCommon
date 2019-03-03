@@ -1,7 +1,3 @@
-from src.internal.FieldDeclaration import FieldDeclaration
-from src.internal.FieldType import FieldType
-from src.streams.FileInputStream import FileInputStream
-
 
 class InvalidPoolIndexException(Exception):
     """Thrown, if an index into a pool is invalid."""
@@ -14,7 +10,7 @@ class InvalidPoolIndexException(Exception):
 class PoolSizeMismatchError(Exception):
     """Thrown, if field deserialization consumes less bytes then specified by the header."""
 
-    def __init__(self, block, begin, end, field: FieldDeclaration, position=-1):
+    def __init__(self, block, begin, end, field, position=-1):
         if position != -1:
             super(PoolSizeMismatchError, self).__init__(
                 "Corrupted data chunk in block {} at {} between {} and {} in Field {}.{} of type: {}",
@@ -28,7 +24,7 @@ class PoolSizeMismatchError(Exception):
 class TypeMismatchError(Exception):
     """Thrown in case of a type miss-match on a field type."""
 
-    def __init__(self, fType: FieldType, expected: str, field: str, pool: str):
+    def __init__(self, fType, expected: str, field: str, pool: str):
         super(TypeMismatchError, self).__init__(
             "During construction of {}.{}: Encountered incompatible type {} (expected: {})",
             pool, field, fType.toString(), expected)

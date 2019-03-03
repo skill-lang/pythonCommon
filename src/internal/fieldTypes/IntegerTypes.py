@@ -2,7 +2,6 @@ from src.internal.FieldType import FieldType
 from src.streams.FileInputStream import FileInputStream
 from src.streams.FileOutputStream import FileOutputStream
 from typing import Union
-from abc import ABC
 from logging import getLogger
 
 
@@ -16,7 +15,7 @@ class Singleton(object):
         return cls._instance[cls]
 
 
-class Integer(FieldType, ABC, Singleton):
+class Integer(FieldType, Singleton):
 
     def __init__(self, typeID):
         super(Integer, self).__init__(typeID)

@@ -1,11 +1,8 @@
-from src.internal.StoragePool import StoragePool
-from src.internal.Blocks import Block
-
 
 class DynamicDataIterator:
 
-    def __init__(self, storagePool: StoragePool):
-        self.p: StoragePool = storagePool
+    def __init__(self, storagePool):
+        self.p = storagePool
         self.endHeight = storagePool.typeHierarchyHeight
         self.lastBlock = len(storagePool.blocks)
         self.secondIndex = 0
@@ -13,7 +10,7 @@ class DynamicDataIterator:
         self.last = 0
 
         while self.index == self.last & self.secondIndex < self.lastBlock:
-            b: Block = self.p.get(self.secondIndex)
+            b = self.p.get(self.secondIndex)
             self.index = b.bpo
             self.last = self.index + b.count
             self.secondIndex += 1
@@ -32,11 +29,11 @@ class DynamicDataIterator:
 
     def __next__(self):
         if self.secondIndex <= self.lastBlock:
-            r = self.p.data[self.index]
+            r = self.p.__data[self.index]
             self.index += 1
             if self.index == self.last:
                 while self.index == self.last & self.secondIndex < self.lastBlock:
-                    b: Block = self.p.blocks.get(self.secondIndex)
+                    b = self.p.blocks.get(self.secondIndex)
                     self.index = b.bpo
                     self.last = self.index + b.count
                     self.secondIndex += 1
@@ -75,7 +72,7 @@ class DynamicDataIterator:
         return self.p is not None
 
     def nextP(self):
-        n: StoragePool = self.p.nextPool()
+        n = self.p.nextPool()
         if n is not None and self.endHeight < n.typeHierarchyHeight:
             self.p = n
         else:
@@ -84,7 +81,7 @@ class DynamicDataIterator:
 
 class DynamicNewInstancesIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         self.ts = TypeHierarchyIterator(storagePool)
         self.last = len(storagePool.newObjects)
         self.index = 0
@@ -125,7 +122,7 @@ class DynamicNewInstancesIterator:
 
 class FieldIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         self.p = storagePool
         self.i = -len(storagePool.autoFields)
         while self.p is not None and self.i == 0 and len(self.p.dataFields) == 0:
@@ -156,36 +153,15 @@ class FieldIterator:
         return self.p is not None
 
 
-class InterfaceIterator:
-
-    def __init__(self, ps: []):
-        self.ps = ps
-        self.i = 0
-        while self.i < len(self.ps):
-            self.xs: DynamicDataIterator = self.ps[self.i].iterator()
-            self.i += 1
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        r = self.xs.__next__()
-        if not self.xs.hasNext():
-            while self.i < len(self.ps):
-                self.xs = self.ps[self.i].iterator()
-                self.i += 1
-        return r
-
-
 class StaticDataIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         self.p = storagePool
         self.lastBlock = len(storagePool.blocks)
         self.index = self.last = self.secondIndex = 0
 
         while self.index == self.last and self.secondIndex < self.lastBlock:
-            b: Block = self.p.blocks[self.secondIndex]
+            b = self.p.blocks[self.secondIndex]
             self.index = b.bpo
             self.last = self.index + b.staticCount
             self.secondIndex += 1
@@ -200,11 +176,11 @@ class StaticDataIterator:
 
     def __next__(self):
         if self.secondIndex <= self.lastBlock:
-            r = self.p.data[self.index]
+            r = self.p.__data[self.index]
             self.index += 1
             if self.index == self.last:
                 while self.index == self.last and self.secondIndex < self.lastBlock:
-                    b: Block = self.p.blocks[self.secondIndex]
+                    b = self.p.blocks[self.secondIndex]
                     self.index = b.bpo
                     self.last = self.index + b.staticCount
                     self.secondIndex += 1
@@ -224,7 +200,7 @@ class StaticDataIterator:
 
 class StaticFieldIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         if len(storagePool.autoFields) == 0 and len(storagePool.dataFields):
             self.p = None
             self.i = 0
@@ -248,7 +224,7 @@ class StaticFieldIterator:
 
 class TypeHierarchyIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         self.p = storagePool
         self.end = storagePool.typeHierarchyHeight
 
@@ -273,10 +249,10 @@ class TypeHierarchyIterator:
 
 class TypeOrderIterator:
 
-    def __init__(self, storagePool: StoragePool):
+    def __init__(self, storagePool):
         self.ts = TypeHierarchyIterator(storagePool)
         while self.ts.hasNext():
-            t: StoragePool = self.ts.__next__()
+            t = self.ts.__next__()
             if t.staticSize() != 0:
                 self.sdi = StaticDataIterator(t)
                 break
@@ -288,7 +264,7 @@ class TypeOrderIterator:
         result = self.sdi.__next__()
         if not self.sdi.hasNext():
             while self.ts.hasNext():
-                t: StoragePool = self.ts.__next__()
+                t = self.ts.__next__()
                 if t.staticSize() != 0:
                     self.sdi = StaticDataIterator(t)
                     break

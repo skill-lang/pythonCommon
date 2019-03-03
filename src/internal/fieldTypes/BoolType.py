@@ -1,12 +1,11 @@
 from typing import Union
 
-from src.internal.fieldTypes.IntegerTypes import singleton
+from src.internal.fieldTypes.IntegerTypes import Singleton
 from src.internal.FieldType import FieldType
 from src.streams.OutStream import OutStream
 
 
-@singleton
-class BoolType(FieldType):
+class BoolType(FieldType, Singleton):
 
     typeID = 6
 

@@ -1,21 +1,28 @@
-import abc
 from src.internal.fieldTypes.Annotation import Annotation
 from src.internal.fieldTypes.BoolType import BoolType
 from src.internal.fieldTypes.ConstantLengthArray import ConstantLengthArray
-from src.internal.fieldTypes.ConstantTypes import *
-from src.internal.fieldTypes.FloatType import *
-from src.internal.fieldTypes.IntegerTypes import *
+from src.internal.fieldTypes.ConstantTypes import ConstantI8
+from src.internal.fieldTypes.ConstantTypes import ConstantI16
+from src.internal.fieldTypes.ConstantTypes import ConstantI32
+from src.internal.fieldTypes.ConstantTypes import ConstantI64
+from src.internal.fieldTypes.ConstantTypes import ConstantV64
+from src.internal.fieldTypes.FloatType import F32
+from src.internal.fieldTypes.FloatType import F64
+from src.internal.fieldTypes.IntegerTypes import I8
+from src.internal.fieldTypes.IntegerTypes import I16
+from src.internal.fieldTypes.IntegerTypes import I32
+from src.internal.fieldTypes.IntegerTypes import I64
+from src.internal.fieldTypes.IntegerTypes import V64
 from src.internal.fieldTypes.ListType import ListType
 from src.internal.fieldTypes.MapType import MapType
-from src.internal.fieldTypes.ReferenceType import ReferenceType
 from src.internal.fieldTypes.SetType import SetType
 from src.internal.fieldTypes.VariableLengthArray import VariableLengthArray
 from src.internal.StringPool import StringPool
 from src.internal.StoragePool import StoragePool
-from src.internal.Exceptions import *
-from src.internal.Blocks import *
+from src.internal.Exceptions import SkillException, ParseException, InvalidPoolIndexException
+from src.internal.Blocks import Block, SimpleChunk, BulkChunk
 from src.internal.FieldDeclaration import FieldDeclaration
-from src.restrictions import *
+from src.streams.FileInputStream import FileInputStream
 
 
 class DataEntry:
@@ -32,7 +39,7 @@ class LFEntry:
         self.p = p
 
 
-class FileParser(abc.ABC):
+class FileParser:
 
     localFields = []
 
@@ -55,8 +62,8 @@ class FileParser(abc.ABC):
             # not end of runtime
             # implementation does things here
 
-    @abc.abstractmethod
-    def newPool(self, name, superPool, restrictions):
+    @staticmethod
+    def newPool(name: str, superPool: StoragePool, types: []):
         pass
 
     def stringBlock(self):
@@ -100,7 +107,6 @@ class FileParser(abc.ABC):
             if name in self.poolByName:
                 definition: StoragePool = self.poolByName.get(name)
             else:
-                rest = self.typeRestriction()
                 superID = self.inStream.v32()
                 # superDef: StoragePool = None
                 if superID == 0:
@@ -114,7 +120,7 @@ class FileParser(abc.ABC):
                     superDef: StoragePool = self.types[superID - 1]
 
                 try:
-                    definition = self.newPool(name, superDef, rest)
+                    definition = self.newPool(name, superDef, self.types)
                     if definition.superPool is not superDef:
                         if superDef is None:
                             raise ParseException(self.inStream, self.blockCounter, None,
@@ -192,12 +198,9 @@ class FileParser(abc.ABC):
                         raise ParseException(self.inStream, self.blockCounter, None,
                                              "corrupted file: nullptr in field name")
                     t = self.fieldType()
-                    rest: {} = self.fieldRestriction(t)
                     end = self.inStream.v64()
                     try:
                         f: FieldDeclaration = p.addField(t, fieldName)
-                        for r in rest:
-                            f.addRestriction(r)
                         if len(p.blocks) == 1:
                             f.addChunk(SimpleChunk(self.offset, end, lastBlock.bpo, lastBlock.count))
                         else:
@@ -222,44 +225,6 @@ class FileParser(abc.ABC):
             dataEnd = max(dataEnd, end)
         self.inStream.jump(dataEnd)
 
-    def typeRestriction(self) -> set:
-        pass  # TODO not by me
-
-    def fieldRestriction(self, t: FieldType) -> set:
-        rval = set()
-
-        for count in range(self.inStream.v32(), 0, -1):
-            thisID = self.inStream.v32()
-            if thisID == 0:
-                if isinstance(t, ReferenceType):
-                    rval.add(NonNull.get())
-                else:
-                    raise ParseException(self.inStream, self.blockCounter, None,
-                                         "Nonnull restriction on non-reference type: {}", t.toString())
-            elif thisID == 1:
-                if isinstance(t, ReferenceType):
-                    pass  # TODO not by me
-                else:
-                    pass  # TODO not by me
-            elif thisID == 3:
-                r = makeRestriction(t.typeID, self.inStream)
-                if r is None:
-                    raise ParseException(self.inStream, self.blockCounter, None,
-                                         "Type {} can not be range restricted!", t.toString())
-                rval.add(r)
-            elif thisID == 5: pass
-            elif thisID == 7: pass
-            elif thisID == 9:
-                pass
-            else:
-                if thisID <= 9 or 1 == (thisID % 2):
-                    raise ParseException(self.inStream, self.blockCounter, None,
-                                         "Found unknown field restriction %d. "
-                                         "Please regenerate your binding, if possible.",
-                                         thisID)
-                print("Skipped unknown skippable type restriction. Please update the SKilL implementation.")
-        return rval
-
     def fieldType(self):
         typeID = self.inStream.v32()
         if typeID == 0:
@@ -275,21 +240,21 @@ class FileParser(abc.ABC):
         elif typeID == 5:
             return self.annotation
         elif typeID == 6:
-            return BoolType.get()
+            return BoolType()
         elif typeID == 7:
-            return I8().get()
+            return I8()
         elif typeID == 8:
-            return I16().get()
+            return I16()
         elif typeID == 9:
-            return I32().get()
+            return I32()
         elif typeID == 10:
-            return I64().get()
+            return I64()
         elif typeID == 11:
-            return V64().get()
+            return V64()
         elif typeID == 12:
-            return F32().get()
+            return F32()
         elif typeID == 13:
-            return F64().get()
+            return F64()
         elif typeID == 14:
             return self.strings
         elif typeID == 15:
