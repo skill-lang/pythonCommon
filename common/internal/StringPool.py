@@ -1,7 +1,6 @@
 from common.internal.StateWriter import StateWriter
 from common.streams.InStream import InStream
 from common.streams.FileInputStream import FileInputStream
-from common.streams.FileOutputStream import FileOutputStream
 from common.internal.fieldTypes.IntegerTypes import V64
 from common.streams.OutStream import OutStream
 from common.internal.FieldType import FieldType
@@ -22,7 +21,8 @@ class StringPool(FieldType):
         self.inStream = inStream
         self.stringPositions = []
         self.stringPositions.append(StringPool.Position(-1, -1))
-        self.idMap = list()
+        self.idMap = []
+        self.idMap.append(None)
         self.knownStrings = set()
         self.stringIDs = {}
 
@@ -62,7 +62,7 @@ class StringPool(FieldType):
     def get(self, index):
         if index is 0:
             return None
-
+        result = None
         try:
             result = self.idMap[index]
         except IndexError:
@@ -81,7 +81,7 @@ class StringPool(FieldType):
             self.knownStrings.add(result)
         return result
 
-    def prepareAndWrite(self, out: FileOutputStream, ws: StateWriter):
+    def prepareAndWrite(self, out, ws: StateWriter):
         self.idMap.clear()
         self.idMap.append(None)
 
@@ -99,7 +99,7 @@ class StringPool(FieldType):
                 off += len(self.idMap[i])
                 end.append(off)
             for i in range(0, len(end)):
-                out.put(bytes(end[i]))
+                out.i32(end[i])
             for i in range(1, count + 1):
                 out.put(self.idMap[i].encode())
 
@@ -124,7 +124,7 @@ class StringPool(FieldType):
             end.append(off)
         fos.put(end)
         for s in todo:
-            fos.put(s)
+            fos.putString(s)
 
     def contains(self, obj): return obj in self.knownStrings
 

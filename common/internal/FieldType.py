@@ -24,3 +24,6 @@ class FieldType:
 
     def writeSingleField(self, data, out):
         pass
+
+    def toString(self):
+        pass

@@ -118,7 +118,7 @@ class SerializationFunctions:
             t.outMap = writeMap
             t.writeErrors = writeErrors
             t.barrier = barrier
-            threadPool.submit(t.run())
+            threadPool.submit(t.run)
         for _ in range(len(data)):
             barrier.acquire()
         writeMap.close()
@@ -149,6 +149,10 @@ class SerializationFunctions:
         for p in pools:
             p.fixed = False
 
+    @staticmethod
+    def restrictions(outStream):
+        outStream.i8(0)
+
 
 class Task(threading.Thread):
 
@@ -175,7 +179,7 @@ class Task(threading.Thread):
         except IOError as i:
             self.writeErrors.append(SkillException("failed to write field " + self.f.toString(), i))
         except Exception as e:
-            self.writeErrors.append(SkillException("unexpected failure while writing field []".format(
+            self.writeErrors.append(SkillException("unexpected failure while writing field {}".format(
                 self.f.toString()), e))
         finally:
             self.barrier.release()

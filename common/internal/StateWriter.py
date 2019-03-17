@@ -24,6 +24,8 @@ class StateWriter(SerializationFunctions):
         for _ in range(bases):
             self.barrier.acquire()
 
+        # **************** Phase 3: Write ******************
+        # write string block
         state.strings.prepareAndWrite(fos, self)
         fos.v64(len(state.types))
         fieldCount = 0
@@ -34,12 +36,14 @@ class StateWriter(SerializationFunctions):
         for _ in range(fieldCount):
             self.barrier.acquire()
 
+        # write types
         fieldQueue = []
         stringIDs = state.strings.stringIDs
         for p in state.types:
             fos.v64(stringIDs[p.name])
             LCount = p.lastBlock().count
             fos.v64(LCount)
+            self.restrictions(fos)
             if p.superPool is None:
                 fos.i8(0)
             else:
@@ -49,6 +53,7 @@ class StateWriter(SerializationFunctions):
             fos.v64(len(p.dataFields))
             fieldQueue.extend(p.dataFields)
 
+        # write fields
         data = []
         offset = 0
         for f in fieldQueue:
@@ -58,9 +63,11 @@ class StateWriter(SerializationFunctions):
             fos.v64(f.index)
             fos.v64(stringIDs.get(f.name))
             self.writeType(f.fType, fos)
+            self.restrictions(fos)
             end = offset + f.offset
             fos.v64(end)
 
+            # write instances
             c = f.lastChunk()
             c.begin = offset
             c.end = end

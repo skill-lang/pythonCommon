@@ -14,12 +14,12 @@ class DistributedField(FieldDeclaration):
         self.newData = {}
 
     def rsc(self, i, h, inStream):
-        d: [] = self.owner.basePool.data()
+        d: [] = self.owner.basePool._data
         for j in range(i, h):
             self.data[d[j]] = self.fType.readSingleField(inStream)
 
     def rbc(self, c, inStream):
-        d: [] = self.owner.basePool.data()
+        d: [] = self.owner.basePool._data
         blocks: [] = self.owner.blocks
         blockIndex = 0
         endBlock = c.blockCount
@@ -39,14 +39,14 @@ class DistributedField(FieldDeclaration):
         self.newData.clear()
 
     def osc(self, i, h):
-        d: [] = self.owner.basePool.data()
+        d: [] = self.owner.basePool._data
         rval = 0
         for j in range(i, h):
             rval += self.fType.singleOffset(self.data.get(d[j]))
         # offset += rval
 
     def wsc(self, i, h, out):
-        d: [] = self.owner.basePool.data()
+        d: [] = self.owner.basePool._data
         for j in range(i, h):
             self.fType.writeSingleField(self.data.get(d[j]), out)
 

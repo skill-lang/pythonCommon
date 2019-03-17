@@ -25,7 +25,7 @@ class BasePool(StoragePool):
         data = []
         subs = TypeHierarchyIterator(self)
         while subs.hasNext():
-            subs.__next__().data = data
+            subs.__next__()._data = data
         # allocate instances
         subs = TypeHierarchyIterator(self)
         while subs.hasNext():
@@ -64,14 +64,14 @@ class BasePool(StoragePool):
                 i.skillID = p
 
         # update after compressing
-        self.__data = d
+        self.data = d
         subs = TypeHierarchyIterator(self)
         while subs.hasNext():
             subs.__next__().updateAfterCompress(lbpoMap)
 
     def prepareAppend(self, lbpoMap: [], chunkMap: {}):
         # update lbpoMap
-        theNext = len(self.__data)
+        theNext = len(self.data)
         for p in TypeHierarchyIterator(self):
             lbpoMap[p.typeID - 32] = theNext
             theNext += len(p.newObjects)
@@ -89,15 +89,15 @@ class BasePool(StoragePool):
 
         if newInstances:
             # if we have to resize
-            d: [] = copy.deepcopy(self.__data)
-            i = len(self.__data)
+            d: [] = copy.deepcopy(self.data)
+            i = len(self.data)
             dnii: DynamicNewInstancesIterator = self.newDynamicInstancesIterator()
             while dnii.hasNext():
                 instance = dnii.__next__()
                 d[i] = instance
                 i += 1
                 instance.skillID = i
-            self.__data = d
+            self.data = d
 
         thi: TypeHierarchyIterator = TypeHierarchyIterator(self)
         while thi.hasNext():

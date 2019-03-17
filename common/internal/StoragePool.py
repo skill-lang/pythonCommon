@@ -32,13 +32,13 @@ class StoragePool(FieldType):
         self.knownFields = knownFields
         self.autoFields = autoFields
 
-        self.cachedSize: int = None
+        self.cachedSize = 0
         self.basePool = None
         self.blocks = []
         self.staticDataInstances: int = 0
         self.nextPool = None
         self.newObjects = []
-        self.__data = []
+        self.data = []
         self.fixed = False
         self.deletedCount = 0
 
@@ -95,9 +95,6 @@ class StoragePool(FieldType):
     def staticInstances(self):
         return StaticDataIterator(self)
 
-    def data(self):
-        return self.__data
-
     def superName(self):
         if self.superPool is not None:
             return self.superPool.name
@@ -105,18 +102,18 @@ class StoragePool(FieldType):
             return None
 
     def getByID(self, index: int):
-        if len(self.__data) < 1 or (len(self.__data) - 1) <= index:
+        if len(self.data) < 1 or (len(self.data) - 1) <= index:
             return None
-        return self.__data[index]
+        return self.data[index]
 
     def readSingleField(self, instream):
         index = instream.v32() - 1
-        if (index < 0) or (len(self.__data) <= index):
+        if (index < 0) or (len(self.data) <= index):
             return None
-        return self.__data[index]
+        return self.data[index]
 
     def calculateOffset(self, xs: []):
-        if len(self.__data) < 128:
+        if len(self.data) < 128:
             return len(xs)
         result = 0
         for x in xs:
@@ -185,14 +182,14 @@ class StoragePool(FieldType):
         i = last.bpo
         high = i + last.staticCount
         while i < high:
-            self.__data[i] = SubType(self, i + 1)
+            self.data[i] = SubType(self, i + 1)
             i += 1
 
     def updateAfterCompress(self, lbpoMap: []):
         if self.basePool is not None:
-            self.__data = self.basePool.data()
+            self.data = self.basePool._data
         else:
-            self.__data = None
+            self.data = None
 
         self.staticDataInstances += len(self.newObjects) - self.deletedCount
         self.deletedCount = 0
@@ -211,9 +208,9 @@ class StoragePool(FieldType):
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         if self.basePool is not None:
-            self.__data = self.basePool.data()
+            self.data = self.basePool._data
         else:
-            self.__data = None
+            self.data = None
 
         newInstances = self.newDynamicInstancesIterator().hasNext()
         newPool = (len(self.blocks) == 0)

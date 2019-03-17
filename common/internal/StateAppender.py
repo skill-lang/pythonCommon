@@ -28,6 +28,7 @@ class StateAppender(SerializationFunctions):
         for _ in range(bases):
             barrier.acquire()
 
+        # locate relevant pools
         rPools = []
         for p in state.types:
             if (p.typeID - 32) >= newPoolIndex:
@@ -49,6 +50,8 @@ class StateAppender(SerializationFunctions):
         for _ in range(fieldCount):
             barrier.acquire()
         fos.v64(fieldCount)
+
+        # write headers
         fieldQueue = []
         stringIDs: [] = state.strings.stringIDs
         for p in rPools:
@@ -59,6 +62,7 @@ class StateAppender(SerializationFunctions):
                     fields.append(f)
 
             if newPool or (len(fields) != 0 and len(p) > 0):
+                self.restrictions(fos)
                 fos.v64(stringIDs[p.name])
                 count = p.lastBlock().count
                 fos.v64(count)
@@ -77,6 +81,7 @@ class StateAppender(SerializationFunctions):
                     fos.v64(len(fields))
                     fieldQueue.append(fields)
 
+        # write fields
         data = []
         offset = 0
         for fie in fieldQueue:
@@ -85,6 +90,7 @@ class StateAppender(SerializationFunctions):
                 if len(f.dataChunks) == 1:
                     fos.v64(stringIDs[f.name])
                     self.writeType(f.type, fos)
+                    self.restrictions(fos)
                 end = offset + f.offset
                 fos.v64(end)
                 data.append(Task(f, offset, end))

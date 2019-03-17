@@ -21,39 +21,6 @@ class InStream(abc.ABC):
     def f32(self):
         return float(struct.unpack('>f', self.file.read(4))[0])
 
-    def v32(self):
-        a = []
-        result = ''
-        for i in range(0, 5):
-            b = bin(int(self.file.read(1).hex(), 16))[2:].zfill(8)
-            a.append(b)
-            if b.startswith('0'):
-                break
-        for j in range(0, len(a)):
-            if j != 4:
-                result = result + a[j][1:]
-            else:
-                result = result + a[j]
-        result = int(result, 2)
-        return result
-
-    def multibytev32(self, rval):
-        r = self.i8()
-        rval = (rval & 0x7f) | ((r & 0x7f) << 7)
-
-        if (r & 0x80) != 0:
-            r = self.i8()
-            rval = rval | ((r & 0x7f) << 14)
-            if (r & 0x80) != 0:
-                r = self.i8()
-                rval = rval | ((r & 0x7f) << 21)
-                if (r & 0x80) != 0:
-                    r = self.i8()
-                    rval = rval | ((r & 0x7f) << 28)
-                    if (r & 0x80) != 0:
-                        raise Exception("unexpected overlong v64 value (expected 32bit)")
-        return rval
-
     def v64(self):
         a = []
         result = ''

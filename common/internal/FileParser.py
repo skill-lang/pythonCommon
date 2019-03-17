@@ -43,7 +43,7 @@ class FileParser:
 
     localFields = []
 
-    def __init__(self, inStream: FileInputStream):
+    def __init__(self, inStream: FileInputStream, knownTypes, knownSubTypes):
         self.inStream = inStream
 
         self.types = []
@@ -55,6 +55,9 @@ class FileParser:
         self.blockIDBarrier = 0
         self.fieldDataQueue = []
         self.offset = 0
+        
+        self.knownTypes = knownTypes
+        self.knownSubTypes = knownSubTypes
 
         while not inStream.eof():
             self.stringBlock()
@@ -80,14 +83,17 @@ class FileParser:
                     self.strings.stringPositions.append(add)
                     self.strings.idMap.append(None)
                     last = offset[j]
-
                 self.inStream.jump(self.inStream.position() + last)
         except Exception as e:
             raise ParseException(self.inStream, self.blockCounter, e, "corrupted string block")
 
-    def typeDefinition(self):
+    def typeDefinition(self, i):
+        """
+        :param i: ith type in type block (starts with 0)
+        :return:
+        """
         try:
-            n = self.strings.get(self.inStream.v32())
+            n = self.strings.get(self.inStream.v64())
             name: str = n
         except InvalidPoolIndexException as e:
             raise ParseException(self.inStream, self.blockCounter, e, "corrupted fType header")
@@ -95,31 +101,31 @@ class FileParser:
         if name is None:
             raise ParseException(self.inStream, self.blockCounter, None, "corrupted file: nullptr in typename")
 
-        if self.seenTypes.__contains__(name):
+        if name in self.seenTypes:
             raise ParseException(self.inStream, self.blockCounter, None, "Duplicate definition of fType {}", name)
         self.seenTypes.add(name)
 
-        # try to parse the fType definition
+        # try to parse the type definition
         try:
-            count = self.inStream.v32()
+            count = self.inStream.v64()
             # definition: StoragePool = None
             if name in self.poolByName:
                 definition: StoragePool = self.poolByName.get(name)
             else:
-                superID = self.inStream.v32()
+                superID = self.inStream.v64()
                 # superDef: StoragePool = None
                 if superID == 0:
                     superDef: StoragePool = None
-                elif superID > self.types.__len__():
+                elif superID > len(self.types):
                     raise ParseException(self.inStream, self.blockCounter, None,
                                          "Type {} refers to an ill-formed super fType.\n"
                                          + "          found: {}; current number of other types {}",
-                                         name, superID, self.types.__len__())
+                                         name, superID, len(self.types))
                 else:
                     superDef: StoragePool = self.types[superID - 1]
 
                 try:
-                    definition = self.newPool(name, superDef, self.types, [], [])  # TODO empty list?
+                    definition = self.newPool(name, superDef, self.types, self.knownTypes, self.knownSubTypes)
                     if definition.superPool is not superDef:
                         if superDef is None:
                             raise ParseException(self.inStream, self.blockCounter, None,
@@ -134,14 +140,17 @@ class FileParser:
                     raise ParseException(self.inStream, self.blockCounter, ex,
                                          "The super fType of {} stored in the file does not match the specification!",
                                          name)
-            if self.blockIDBarrier < definition.typeID():
-                self.blockIDBarrier = definition.typeID()
+            if self.blockIDBarrier < definition.typeID:
+                self.blockIDBarrier = definition.typeID
             else:
                 raise ParseException(self.inStream, self.blockCounter, None,
                                      "Found unordered fType block. Type {} has id {}, barrier was {}.", name,
-                                     definition.typeID(), self.blockIDBarrier)
+                                     definition.typeID, self.blockIDBarrier)
 
-            bpo = definition.basePool.cachedSize
+            if definition.basePool is None:
+                bpo = 0
+            else:
+                bpo = definition.basePool.cachedSize
             if definition.superPool is not None:
                 if count != 0:
                     bpo += self.inStream.v64()
@@ -163,9 +172,9 @@ class FileParser:
     def typeBlock(self):
 
         # parse fType
-        count = self.inStream.v32()
-        for i in range(0, count, -1):
-            self.typeDefinition()
+        count = self.inStream.v64()
+        for i in range(0, count):
+            self.typeDefinition(i)
 
         # resize pools by updating cachedSize and staticCount
         for e in self.localFields:
@@ -175,7 +184,7 @@ class FileParser:
 
             if b.count != 0:
                 parent: StoragePool = p.superPool
-                if parent is None:
+                if parent is not None:
                     sb: Block = parent.lastBlock()
                     delta = sb.staticCount - (b.bpo - sb.bpo)
                     if delta > 0:
@@ -186,13 +195,13 @@ class FileParser:
         for lfe in self.localFields:
             p: StoragePool = lfe.p
             legalFieldIDBarrier = 1 + len(p.dataFields)
-            lastBlock: Block = p.blocks.get(len(p.blocks) - 1)
+            lastBlock: Block = p.blocks[len(p.blocks) - 1]
             for fieldcounter in range(lfe.count, 0, -1):
-                ID = self.inStream.v32()
+                ID = self.inStream.v64()
                 if ID > legalFieldIDBarrier or ID <= 0:
                     raise ParseException(self.inStream, self.blockCounter, None, "Found an illegal field ID: []", ID)
                 if ID == legalFieldIDBarrier:
-                    fieldName = self.strings.get(self.inStream.v32())
+                    fieldName = self.strings.get(self.inStream.v64())
                     if fieldName is None:
                         raise ParseException(self.inStream, self.blockCounter, None,
                                              "corrupted file: nullptr in field name")
@@ -225,7 +234,7 @@ class FileParser:
         self.inStream.jump(dataEnd)
 
     def fieldType(self):
-        typeID = self.inStream.v32()
+        typeID = self.inStream.v64()
         if typeID == 0:
             return ConstantI8(self.inStream.i8())
         elif typeID == 1:
@@ -257,7 +266,7 @@ class FileParser:
         elif typeID == 14:
             return self.strings
         elif typeID == 15:
-            return ConstantLengthArray(self.inStream.v32(), self.fieldType())
+            return ConstantLengthArray(self.inStream.v64(), self.fieldType())
         elif typeID == 17:
             return VariableLengthArray(self.fieldType())
         elif typeID == 18:
