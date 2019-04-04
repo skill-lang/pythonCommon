@@ -14,11 +14,11 @@ class PoolSizeMismatchError(Exception):
         if position != -1:
             super(PoolSizeMismatchError, self).__init__(
                 "Corrupted data chunk in block {} at {} between {} and {} in Field {}.{} of type: {}",
-                block + 1, position, begin, end, field.owner.name, field.name, field.fType.toString())
+                block + 1, position, begin, end, field.owner.name(), field.name(), field.fieldType().__str__())
         else:
             super(PoolSizeMismatchError, self).__init__(
                 "Corrupted data chunk in block {} between {} and {} in Field {}.{} of type: {}",
-                block + 1, begin, end, field.owner.name, field.name, field.fType.toString())
+                block + 1, begin, end, field.owner.name(), field.name(), field.fieldType().__str__())
 
 
 class TypeMismatchError(Exception):
@@ -27,7 +27,7 @@ class TypeMismatchError(Exception):
     def __init__(self, fType, expected: str, field: str, pool: str):
         super(TypeMismatchError, self).__init__(
             "During construction of {}.{}: Encountered incompatible type {} (expected: {})",
-            pool, field, fType.toString(), expected)
+            pool, field, fType.__str__(), expected)
 
 
 class ParseException(Exception):

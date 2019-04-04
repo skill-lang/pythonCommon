@@ -29,38 +29,15 @@ class InStream(abc.ABC):
             a.append(b)
             if b.startswith('0'):
                 break
-        for j in range(0, len(a)):
+        for j in range(len(a) - 1, -1, -1):
             if j != 8:
                 result = result + a[j][1:]
             else:
                 result = result + a[j]
         result = int(result, 2)
+        if result > ((2**63)-1):
+            result = ((2**64) - result) * (-1)
         return result
-
-    def multiByteV64(self, rval):
-        r = self.i8()
-        rval = rval | ((r & 0x7f) << 7)
-        if (rval & 0x80) != 0:
-            r = self.i8()
-            rval = rval | ((r & 0x7f) << 14)
-            if (r & 0x80) != 0:
-                r = self.i8()
-                rval = rval | ((r & 0x7f) << 21)
-                if (r & 0x80) != 0:
-                    r = self.i8()
-                    rval = rval | ((r & 0x7f) << 28)
-                    if (r & 0x80) != 0:
-                        r = self.i8()
-                        rval = rval | ((r & 0x7f) << 35)
-                        if (r & 0x80) != 0:
-                            r = self.i8()
-                            rval = rval | ((r & 0x7f) << 42)
-                            if (r & 0x80) != 0:
-                                r = self.i8()
-                                rval = rval | ((r & 0x7f) << 49)
-                                if (r & 0x80) != 0:
-                                    rval = rval | self.i8() << 56
-        return rval
 
     def i64(self):
         return struct.unpack('>q', self.file.read(8))[0]

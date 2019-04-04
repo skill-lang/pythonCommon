@@ -24,4 +24,4 @@ class SkillObject:
     def printFs(self, fieldIterator, string):
         while fieldIterator.hasNext():
             f = fieldIterator.__next__()
-            string += ", " + f.name + ": " + f.get(self)
+            string += ", " + f.name() + ": " + f.get(self)

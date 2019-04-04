@@ -23,12 +23,12 @@ class ConstantInteger(FieldType):
 
 class ConstantI8(ConstantInteger):
 
-    typeID = 0
+    _typeID = 0
 
     def __init__(self, value):
-        super(ConstantI8, self).__init__(self.typeID, value)
+        super(ConstantI8, self).__init__(self.typeID(), value)
 
-    def toString(self):
+    def __str__(self):
         return "const i8 = []".format(self.value())
 
     def equals(self, obj):
@@ -39,12 +39,12 @@ class ConstantI8(ConstantInteger):
 
 class ConstantI16(ConstantInteger):
 
-    typeID = 1
+    _typeID = 1
 
     def __init__(self, value):
-        super(ConstantI16, self).__init__(self.typeID, value)
+        super(ConstantI16, self).__init__(self.typeID(), value)
 
-    def toString(self):
+    def __str__(self):
         return "const i16 = []".format(self.value())
 
     def equals(self, obj):
@@ -55,12 +55,12 @@ class ConstantI16(ConstantInteger):
 
 class ConstantI32(ConstantInteger):
 
-    typeID = 2
+    _typeID = 2
 
     def __init__(self, value):
-        super(ConstantI32, self).__init__(self.typeID, value)
+        super(ConstantI32, self).__init__(self.typeID(), value)
 
-    def toString(self):
+    def __str__(self):
         return "const i32 = []".format(self.value())
 
     def equals(self, obj):
@@ -71,12 +71,12 @@ class ConstantI32(ConstantInteger):
 
 class ConstantI64(ConstantInteger):
 
-    typeID = 3
+    _typeID = 3
 
     def __init__(self, value):
-        super(ConstantI64, self).__init__(self.typeID, value)
+        super(ConstantI64, self).__init__(self.typeID(), value)
 
-    def toString(self):
+    def __str__(self):
         return "const i64 = []".format(self.value())
 
     def equals(self, obj):
@@ -87,12 +87,12 @@ class ConstantI64(ConstantInteger):
 
 class ConstantV64(ConstantInteger):
 
-    typeID = 4
+    _typeID = 4
 
     def __init__(self, value):
-        super(ConstantV64, self).__init__(self.typeID, value)
+        super(ConstantV64, self).__init__(self.typeID(), value)
 
-    def toString(self):
+    def __str__(self):
         return "const v64 = []".format(self.value())
 
     def equals(self, obj):

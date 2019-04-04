@@ -4,14 +4,17 @@ from typing import Union
 class FieldType:
 
     def __init__(self, typeID):
-        self.typeID = typeID
+        self._typeID = typeID
+
+    def typeID(self):
+        return self._typeID
 
     def equals(self, obj):
         if isinstance(obj, FieldType):
             return obj.typeID() == self.typeID()
         return False
 
-    def hashCode(self): return self.typeID
+    def hashCode(self): return self.typeID()
 
     def readSingleField(self, inStream):
         pass
@@ -25,5 +28,5 @@ class FieldType:
     def writeSingleField(self, data, out):
         pass
 
-    def toString(self):
+    def __str__(self):
         pass

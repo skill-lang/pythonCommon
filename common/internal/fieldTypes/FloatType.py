@@ -34,7 +34,7 @@ class F32(Float):
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
         return 4 * super(F32, self).calculateOffset(xs)
 
-    def toString(self):
+    def __str__(self):
         return "f32"
 
 
@@ -58,5 +58,5 @@ class F64(Float):
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
         return 8 * super(F64, self).calculateOffset(xs)
 
-    def toString(self):
+    def __str__(self):
         return "f64"

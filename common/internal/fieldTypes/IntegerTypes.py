@@ -41,7 +41,7 @@ class I8(Integer):
         else:
             outstream.i8(target)
 
-    def toString(self):
+    def __str__(self):
         return "i8"
 
 
@@ -62,7 +62,7 @@ class I16(Integer):
         else:
             outstream.i16(target)
 
-    def toString(self):
+    def __str__(self):
         return "i16"
 
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
@@ -86,7 +86,7 @@ class I32(Integer):
         else:
             outstream.i32(target)
 
-    def toString(self):
+    def __str__(self):
         return "i32"
     
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
@@ -110,7 +110,7 @@ class I64(Integer):
         else:
             outstream.i64(target)
 
-    def toString(self):
+    def __str__(self):
         return "i64"
 
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):
@@ -155,7 +155,7 @@ class V64(Integer):
         else:
             outstream.v64(target)
 
-    def toString(self):
+    def __str__(self):
         return "v64"
 
     def calculateOffset(self, xs: Union[dict, list, set, tuple]):

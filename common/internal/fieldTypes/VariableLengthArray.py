@@ -10,14 +10,14 @@ class VariableLengthArray(SingleArgumentType):
         super(VariableLengthArray, self).__init__(self.typeID, groundType)
 
     def readSingleField(self, inStream):
-        i = inStream.v32()
+        i = inStream.v64()
         rval = []
         while i != 0:
             i -= 1
             rval.append(self.groundType.readSingleField(inStream))
 
-    def toString(self):
-        return self.groundType.toString() + "[]"
+    def __str__(self):
+        return self.groundType.__str__() + "[]"
 
     def equals(self, obj):
         if isinstance(obj, VariableLengthArray):

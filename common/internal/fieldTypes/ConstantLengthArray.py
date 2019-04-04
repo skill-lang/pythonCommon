@@ -4,10 +4,10 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 class ConstantLengthArray(SingleArgumentType):
 
-    typeID = 15
+    _typeID = 15
 
     def __init__(self, length, groundType):
-        super(ConstantLengthArray, self).__init__(self.typeID, groundType)
+        super(ConstantLengthArray, self).__init__(self.typeID(), groundType)
         self.length = length
 
     def readSingleField(self, inStream):
@@ -31,8 +31,8 @@ class ConstantLengthArray(SingleArgumentType):
         for e in elements:
             self.groundType.writeSingleField(e, out)
 
-    def toString(self):
-        return self.groundType.toString() + "[" + self.length + "]"
+    def __str__(self):
+        return self.groundType.__str__() + "[" + self.length + "]"
 
     def equals(self, obj):
         if isinstance(obj, ConstantLengthArray):

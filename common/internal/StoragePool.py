@@ -14,14 +14,13 @@ from abc import ABC, abstractmethod
 
 class StoragePool(FieldType):
 
-    dataFields = []
     noKnownFields = []
     noAutoFields = []
     lock = threading.Lock()
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
         super(StoragePool, self).__init__(32 + poolIndex)
-        self.name = name
+        self._name = name
         self.superPool: StoragePool = superPool
         if superPool is None:
             self.typeHierarchyHeight = 0
@@ -30,27 +29,33 @@ class StoragePool(FieldType):
             self.typeHierarchyHeight = superPool.typeHierarchyHeight + 1
             self.basePool = superPool.basePool
         self.knownFields = knownFields
-        self.autoFields = autoFields
+        self._autoFields = autoFields
 
-        self.cachedSize = 0
-        self.basePool = None
+        self._cachedSize = 0
         self.blocks = []
         self.staticDataInstances: int = 0
-        self.nextPool = None
+        self._nextPool = None
         self.newObjects = []
-        self.data = []
-        self.fixed = False
-        self.deletedCount = 0
+        self._data = []
+        self._dataFields = []
+        self._fixed = False
+        self._deletedCount = 0
 
     def setNextPool(self, nx):
-        self.nextPool = nx
+        self._nextPool = nx
 
     def nextPool(self):
-        return self.nextPool
+        return self._nextPool
+
+    def name(self):
+        return self._name
+
+    def data(self):
+        return self._data
 
     @staticmethod
-    def establishNextPool(types: []):
-        L = []
+    def _establishNextPool(types: []):
+        L = [None for i in range(0, len(types))]
         for i in range(len(types) - 1, -1, -1):
             t: StoragePool = types[i]
             p: StoragePool = t.superPool
@@ -61,10 +66,10 @@ class StoragePool(FieldType):
             if L[ids] is None:
                 L[ids] = t
 
-            if p.nextPool is None:
+            if p.nextPool() is None:
                 L[p.typeID() - 32] = L[ids]
             else:
-                L[ids].setNextPool(p.nextPool)
+                L[ids].setNextPool(p.nextPool())
             p.setNextPool(t)
 
     def fields(self):
@@ -79,14 +84,14 @@ class StoragePool(FieldType):
     def newObject(self, index):
         return self.newObjects[index]
 
-    def newDynamicInstancesIterator(self):
+    def _newDynamicInstances(self):
         return DynamicNewInstancesIterator(self)
 
-    def newDynamicInstancesSize(self):
+    def _newDynamicInstancesSize(self):
         rval = 0
         ts = TypeHierarchyIterator(self)
-        while ts.hasNext():
-            rval += len(ts.__next__().newObjects)
+        for t in ts:
+            rval += len(t.newObjects)
         return rval
 
     def staticSize(self):
@@ -97,23 +102,23 @@ class StoragePool(FieldType):
 
     def superName(self):
         if self.superPool is not None:
-            return self.superPool.name
+            return self.superPool.name()
         else:
             return None
 
     def getByID(self, index: int):
-        if len(self.data) < 1 or (len(self.data) - 1) <= index:
+        if len(self._data) < 1 or len(self._data) <= index:
             return None
-        return self.data[index]
+        return self._data[index]
 
     def readSingleField(self, instream):
-        index = instream.v32() - 1
-        if (index < 0) or (len(self.data) <= index):
+        index = instream.v64() - 1
+        if (index < 0) or (len(self._data) <= index):
             return None
-        return self.data[index]
+        return self._data[index]
 
     def calculateOffset(self, xs: []):
-        if len(self.data) < 128:
+        if len(self._data) < 128:
             return len(xs)
         result = 0
         for x in xs:
@@ -142,17 +147,17 @@ class StoragePool(FieldType):
         if data is None:
             out.i8(0)
         else:
-            out.v64(data.skillId)
+            out.v64(data.skillID)
 
     def size(self):
-        if self.fixed:
-            return self.cachedSize
+        if self._fixed:
+            return self._cachedSize
         size = 0
         ts = TypeHierarchyIterator(self)
-        while ts.hasNext():
-            size += ts.__next__().staticSize()
+        for t in ts:
+            size += t.staticSize()
 
-    def toArray(self, a: []):
+    def toList(self, a: []):
         rval: [] = copy.deepcopy(a)
         ddi = self.__iter__()
         for i in range(0, len(rval)):
@@ -160,14 +165,14 @@ class StoragePool(FieldType):
         return rval
 
     def add(self, e: SkillObject):
-        if self.fixed:
+        if self._fixed:
             raise Exception("can not fix a pool that contains new objects")
         self.newObjects.append(e)
 
     def delete(self, target: SkillObject):
         if not target.isDeleted():
             target.skillID = 0
-            self.deletedCount += 1
+            self._deletedCount += 1
 
     def owner(self):
         return self.basePool.owner()
@@ -178,24 +183,21 @@ class StoragePool(FieldType):
     def typeOrderIterator(self):
         return TypeOrderIterator(self)
 
-    def allocateInstances(self, last: Block):
+    def _allocateInstances(self, last: Block):
         i = last.bpo
         high = i + last.staticCount
         while i < high:
-            self.data[i] = SubType(self, i + 1)
+            self._data[i] = self._cls(i + 1)  # warning is not important. StoragePool._cls is set in generated internal
             i += 1
 
-    def updateAfterCompress(self, lbpoMap: []):
-        if self.basePool is not None:
-            self.data = self.basePool._data
-        else:
-            self.data = None
+    def _updateAfterCompress(self, lbpoMap: []):
+        self._data = self.basePool.data()
 
-        self.staticDataInstances += len(self.newObjects) - self.deletedCount
-        self.deletedCount = 0
+        self.staticDataInstances += len(self.newObjects) - self._deletedCount
+        self._deletedCount = 0
         self.newObjects.clear()
         self.blocks.clear()
-        self.blocks.append(Block(lbpoMap[self.typeID - 32], self.cachedSize, self.staticDataInstances))
+        self.blocks.append(Block(lbpoMap[self.typeID() - 32], self._cachedSize, self.staticDataInstances))
 
     def addField(self, fType: FieldType, name: str):
         return LazyField(fType, name, self)
@@ -208,22 +210,23 @@ class StoragePool(FieldType):
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         if self.basePool is not None:
-            self.data = self.basePool._data
+            self._data = self.basePool.data
         else:
-            self.data = None
+            self._data = None
 
-        newInstances = self.newDynamicInstancesIterator().hasNext()
+        it = self._newDynamicInstances()
+        newInstances = it.index != it.last
         newPool = (len(self.blocks) == 0)
 
         exists = False
-        for f in self.dataFields:
+        for f in self._dataFields:
             if len(f.dataChunks) == 0:
                 exists = True
                 break
         newField = exists
 
         if newPool or newInstances or newField:
-            lcount = self.newDynamicInstancesSize()
+            lcount = self._newDynamicInstancesSize()
             if lcount == 0:
                 lbpo = 0
             else:
@@ -233,11 +236,11 @@ class StoragePool(FieldType):
             self.staticDataInstances += len(self.newObjects)
 
             if newInstances or not newPool:
-                for f in self.dataFields:
+                for f in self._dataFields:
                     if f.index == 0:
                         continue
                     if len(f.dataChunks) == 0 and blockCount != 1:
-                        c = BulkChunk(-1, -1, self.cachedSize, blockCount)
+                        c = BulkChunk(-1, -1, self._cachedSize, blockCount)
                     elif newInstances:
                         c = SimpleChunk(-1, -1, lbpo, lcount)
                     else:
@@ -249,8 +252,8 @@ class StoragePool(FieldType):
 
         self.newObjects.clear()
 
-    def toString(self):
-        return self.__name__
+    def __str__(self):
+        return self._name
 
     class Builder(ABC):
 

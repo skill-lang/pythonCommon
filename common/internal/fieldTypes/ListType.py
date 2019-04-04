@@ -11,12 +11,12 @@ class ListType(SingleArgumentType):
 
     def readSingleField(self, inStream):
         rval = []
-        for i in range(inStream.v32(), 0, -1):
+        for i in range(inStream.v64(), 0, -1):
             rval.append(self.groundType.readSingleField(inStream))
         return rval
 
-    def toString(self):
-        return "list<" + self.groundType.toString() + ">"
+    def __str__(self):
+        return "list<" + self.groundType.__str__() + ">"
 
     def equals(self, obj):
         if isinstance(obj, ListType):

@@ -11,38 +11,38 @@ class LazyField(DistributedField):
     def __init__(self, fType, name, owner):
         super(LazyField, self).__init__(fType, name, owner)
 
-    def load(self):
+    def __load(self):
         for p in self.chunkMap:
             if p.count > 0:
                 if isinstance(p, BulkChunk):
-                    super(LazyField, self).rbc(p, self.chunkMap[p])
+                    super(LazyField, self)._rbc(p, self.chunkMap[p])
                 else:
                     c = p
-                    super(LazyField, self).rsc(c.begin, c.end, self.chunkMap[p])
+                    super(LazyField, self)._rsc(c.begin, c.end, self.chunkMap[p])
         self.chunkMap = None
 
-    def ensureLoaded(self):
+    def _ensureLoaded(self):
         if self.chunkMap is not None:
-            self.load()
+            self.__load()
 
-    def rsc(self, i, h, inStream):
+    def _rsc(self, i, h, inStream):
         with self.lock:
             self.chunkMap[SimpleChunk(i, h, 1, 1)] = inStream
 
-    def rbc(self, c, inStream):
+    def _rbc(self, c, inStream):
         with self.lock:
             self.chunkMap[c] = inStream
 
     def get(self, ref):
         if ref.skillID == -1:
-            return self.newData.get(ref)
+            return self._newData.get(ref)
         if self.chunkMap is not None:
-            self.load()
+            self.__load()
         return super(LazyField, self).get(ref)
 
     def set(self, ref, value):
         if ref.skillID == -1:
-            self.newData[ref] = value
+            self._newData[ref] = value
         else:
             if self.chunkMap is not None:
                 super(LazyField, self).set(ref, value)

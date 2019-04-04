@@ -9,7 +9,7 @@ class SubType(SkillObject, NamedType):
         self.tpool = tpool
 
     def skillName(self):
-        return self.tpool.name
+        return self.tpool.name()
 
     def toString(self):
         return self.skillName() + "#" + self.skillID

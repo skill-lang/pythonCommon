@@ -7,10 +7,10 @@ from common.streams.OutStream import OutStream
 
 class BoolType(FieldType, Singleton):
 
-    typeID = 6
+    _typeID = 6
 
     def __init__(self):
-        super(BoolType, self).__init__(self.typeID)
+        super(BoolType, self).__init__(self.typeID())
 
     def readSingleField(self, inStream):
         return inStream.bool()
@@ -24,5 +24,5 @@ class BoolType(FieldType, Singleton):
     def writeSingleField(self, data, out: OutStream):
         out.bool(data is not None and data)
 
-    def toString(self):
+    def __str__(self):
         return "bool"

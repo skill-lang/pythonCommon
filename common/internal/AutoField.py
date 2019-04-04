@@ -4,14 +4,19 @@ from common.internal.KnownField import KnownField
 
 class AutoField(FieldDeclaration, KnownField):
 
-    def rsc(self, i, h, inStream):
+    def __init__(self, fType, name, owner, index):
+        super(AutoField, self).__init__(fType, name, owner, True)
+        self.index = index
+        self.owner._autoFields[-index] = self
+
+    def _rsc(self, i, h, inStream):
         raise Exception("one can not read auto fields!")
 
-    def rbc(self, last, inStream):
+    def _rbc(self, last, inStream):
         raise Exception("one can not read auto fields!")
 
-    def osc(self, i, end):
+    def _osc(self, i, end):
         raise Exception("one get the offset of an auto field!")
 
-    def wsc(self, i, end, outStream):
+    def _wsc(self, i, end, outStream):
         raise Exception("one can not write auto fields!")

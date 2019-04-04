@@ -2,18 +2,16 @@ import copy
 from threading import Semaphore
 from common.internal.Iterator import *
 from common.internal.StoragePool import StoragePool
-from common.internal.threadpool import threadPool
 
 
 class BasePool(StoragePool):
     """The base of a type hierarchy. Contains optimized representations of data compared to sub pools."""
 
-    owner = None
-
     def __init__(self, poolIndex, name, knownFields: [], autoFields: []):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields)
+        self._owner = None
 
-    def performAllocations(self, barrier: Semaphore) -> int:
+    def _performAllocations(self, barrier: Semaphore) -> int:
         """
         Allocates data and all instances for this pool and all of its sub-pools.
         Note: invoked once upon state creation before deserialization of field data
@@ -22,20 +20,20 @@ class BasePool(StoragePool):
         """
         reads = 0
         # allocate data and link it to sub pools
-        data = []
+        data = [None for _ in range(0, self._cachedSize)]
         subs = TypeHierarchyIterator(self)
-        while subs.hasNext():
-            subs.__next__()._data = data
+        for s in subs:
+            s._data = data
         # allocate instances
         subs = TypeHierarchyIterator(self)
-        while subs.hasNext():
-            s: StoragePool = subs.__next__()
+        for s in subs:
             for b in s.blocks:
                 reads += 1
-                threadPool.submit(parallelRun(s, b, barrier))
+                s._allocateInstances(b)
+                barrier.release()
         return reads
 
-    def compress(self, lbpoMap: []) -> None:
+    def _compress(self, lbpoMap: []) -> None:
         """
         compress new instances into the data array and update skillIDs
         :param lbpoMap
@@ -44,43 +42,39 @@ class BasePool(StoragePool):
         # create our part of the lbpo map
         theNext = 0
         subs: TypeHierarchyIterator = TypeHierarchyIterator(self)
-        while subs.hasNext():
-            p: StoragePool = subs.__next__()
+        for p in subs:
             lbpo = theNext
-            lbpoMap[p.typeID - 32] = theNext
-            theNext += p.staticSize() - p.deletedCount
-            for f in p.dataFields:
-                f.resetChunks(lbpo, p.cachedSize)
+            lbpoMap[p.typeID() - 32] = theNext
+            theNext += p.staticSize() - p._deletedCount
+            for f in p._dataFields:
+                f._resetChunks(lbpo, p._cachedSize)
 
         # make d smaller than data
-        d = [0 in range(0, self.size() - 1)]
-        p = 0
+        d = []
         toi: TypeOrderIterator = TypeOrderIterator(self)
-        while toi.hasNext():
-            i = toi.__next__()
+        for i in toi:
             if i.skillID != 0:
-                d[p] = i
-                p += 1
-                i.skillID = p
+                d.append(i)
+                i.skillID = len(d) - 1
 
         # update after compressing
-        self.data = d
+        self._data = d
         subs = TypeHierarchyIterator(self)
-        while subs.hasNext():
-            subs.__next__().updateAfterCompress(lbpoMap)
+        for s in subs:
+            s._updateAfterCompress(lbpoMap)
 
-    def prepareAppend(self, lbpoMap: [], chunkMap: {}):
+    def _prepareAppend(self, lbpoMap: [], chunkMap: {}):
         # update lbpoMap
-        theNext = len(self.data)
+        theNext = len(self._data)
         for p in TypeHierarchyIterator(self):
-            lbpoMap[p.typeID - 32] = theNext
+            lbpoMap[p.typeID() - 32] = theNext
             theNext += len(p.newObjects)
-        newInstances = self.newDynamicInstancesIterator().hasNext()
+        newInstances = self._newDynamicInstances().hasNext()
 
         # check if we have to append at all
-        if not newInstances and not (len(self.blocks) == 0) and not (len(self.dataFields) == 0):
+        if not newInstances and not (len(self.blocks) == 0) and not (len(self._dataFields) == 0):
             done = True
-            for f in self.dataFields:
+            for f in self._dataFields:
                 if len(f.dataChunks) == 0:
                     done = False
                     break
@@ -89,22 +83,18 @@ class BasePool(StoragePool):
 
         if newInstances:
             # if we have to resize
-            d: [] = copy.deepcopy(self.data)
-            i = len(self.data)
-            dnii: DynamicNewInstancesIterator = self.newDynamicInstancesIterator()
-            while dnii.hasNext():
-                instance = dnii.__next__()
+            d: [] = copy.deepcopy(self._data)
+            i = len(self._data)
+            dnii: DynamicNewInstancesIterator = self._newDynamicInstances()
+            for instance in dnii:
                 d[i] = instance
                 i += 1
                 instance.skillID = i
-            self.data = d
+            self._data = d
 
         thi: TypeHierarchyIterator = TypeHierarchyIterator(self)
-        while thi.hasNext():
-            thi.__next__().updateAfterPrepareAppend(lbpoMap, chunkMap)
+        for t in thi:
+            t.updateAfterPrepareAppend(lbpoMap, chunkMap)
 
-
-def parallelRun(s: StoragePool, b, barrier: Semaphore):
-    """allocates block to storagepool in parallel"""
-    s.allocateInstances(b)
-    barrier.release()
+    def owner(self):
+        return self._owner

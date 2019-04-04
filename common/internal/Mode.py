@@ -18,7 +18,6 @@ class ActualMode:
         self.openMode = None
         self.closeMode = None
         for m in modes:
-            logger.debug("ActualMode", m)
             if m == Mode.Read or m == Mode.Create:
                 if self.openMode is None:
                     self.openMode = m
@@ -35,6 +34,6 @@ class ActualMode:
                 elif self.closeMode != m:
                     raise IOError(logger.error("You cannot combine ReadOnly with another write mode."))
         if self.openMode is None:
-            self.openMode = "Read"
+            self.openMode = Mode.Read
         if self.closeMode is None:
-            self.closeMode = "Write"
+            self.closeMode = Mode.Write

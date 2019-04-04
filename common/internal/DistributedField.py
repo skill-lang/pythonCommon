@@ -10,16 +10,16 @@ class DistributedField(FieldDeclaration):
 
     def __init__(self, fType, name, owner):
         super(DistributedField, self).__init__(fType, name, owner)
-        self.data = {}
-        self.newData = {}
+        self._data = {}
+        self._newData = {}
 
-    def rsc(self, i, h, inStream):
-        d: [] = self.owner.basePool._data
+    def _rsc(self, i, h, inStream):
+        d: [] = self.owner.basePool.data()
         for j in range(i, h):
-            self.data[d[j]] = self.fType.readSingleField(inStream)
+            self._data[d[j]] = self._fType.readSingleField(inStream)
 
-    def rbc(self, c, inStream):
-        d: [] = self.owner.basePool._data
+    def _rbc(self, c, inStream):
+        d: [] = self.owner.basePool.data()
         blocks: [] = self.owner.blocks
         blockIndex = 0
         endBlock = c.blockCount
@@ -28,35 +28,35 @@ class DistributedField(FieldDeclaration):
             blockIndex += 1
             i = b.bpo
             for j in range(i, i + b.count):
-                self.data[d[j]] = self.fType.readSingleField(inStream)
+                self._data[d[j]] = self._fType.readSingleField(inStream)
 
-    def compress(self):
+    def _compress(self):
         """
         compress this field
         Note: for now, deleted elements can survive in data
         """
-        self.data.update(self.newData)
-        self.newData.clear()
+        self._data.update(self._newData)
+        self._newData.clear()
 
-    def osc(self, i, h):
-        d: [] = self.owner.basePool._data
+    def _osc(self, i, h):
+        d: [] = self.owner.basePool.data()
         rval = 0
         for j in range(i, h):
-            rval += self.fType.singleOffset(self.data.get(d[j]))
+            rval += self._fType.singleOffset(self._data.get(d[j]))
         # offset += rval
 
-    def wsc(self, i, h, out):
-        d: [] = self.owner.basePool._data
+    def _wsc(self, i, h, out):
+        d: [] = self.owner.basePool.data()
         for j in range(i, h):
-            self.fType.writeSingleField(self.data.get(d[j]), out)
+            self._fType.writeSingleField(self._data.get(d[j]), out)
 
     def get(self, ref):
         if ref.skillID == -1:
-            return self.newData[ref]
-        return self.data.get(ref)
+            return self._newData[ref]
+        return self._data.get(ref)
 
     def set(self, ref, value):
         if ref.skillID == -1:
-            self.newData[ref] = value
+            self._newData[ref] = value
         else:
-            self.data[ref] = value
+            self._data[ref] = value

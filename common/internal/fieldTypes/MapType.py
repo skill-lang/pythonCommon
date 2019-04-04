@@ -5,15 +5,15 @@ from common.internal.fieldTypes.IntegerTypes import V64
 
 
 class MapType(FieldType):
-    typeID = 20
+    _typeID = 20
 
     def __init__(self, keyType, valueType):
-        super(MapType, self).__init__(self.typeID)
+        super(MapType, self).__init__(self.typeID())
         self.keyType = keyType
         self.valueType = valueType
 
     def readSingleField(self, inStream):
-        i = inStream.v32()
+        i = inStream.v64()
         rval = {}
         while i != 0:
             i -= 1
@@ -54,7 +54,7 @@ class MapType(FieldType):
             self.keyType.writeSingleField(e, out)
             self.valueType.writeSingleField(data[e], out)
 
-    def toString(self):
+    def __str__(self):
         return "map<{}, {}>".format(self.keyType, self.valueType)
 
     def equals(self, obj):

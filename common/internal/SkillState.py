@@ -10,6 +10,7 @@ import traceback
 from threading import Semaphore
 from common.streams.FileOutputStream import FileOutputStream
 from common.streams.FileInputStream import FileInputStream
+from common.internal.BasePool import BasePool
 
 
 class SkillState:
@@ -18,35 +19,35 @@ class SkillState:
 
     def __init__(self, strings, path, mode: Mode, types: [],
                  poolByName: {}, annotationType):
-        self.strings = strings
-        self.path = path
-        self.writeMode: Mode = mode
-        self.types = types
-        self.poolByName = poolByName
-        self.annotationType = annotationType
+        self._strings = strings
+        self.__path = path
+        self.__writeMode: Mode = mode
+        self.__types = types
+        self._poolByName = poolByName
+        self.__annotationType = annotationType
 
-        self.input = strings.inStream
-        self.dirty = False
+        self.__input = strings.inStream
+        self.__dirty = False
 
-    def finalizePools(self, fis):
+    def _finalizePools(self, fis):
         try:
-            StoragePool.establishNextPool(self.types)
+            StoragePool._establishNextPool(self.__types)
 
             barrier = Semaphore(0)
             reads = 0
             fieldNames = set()
             for p in self.allTypes():
-                if p.owner is None:  # if p is BasePool
-                    p.owner = self
-                    reads += p.performAllocations(barrier)
+                if isinstance(p, BasePool):  # if p is BasePool
+                    p._owner = self
+                    reads += p._performAllocations(barrier)
                 # add missing field declarations
                 fieldNames.clear()
-                for f in p.dataFields:
-                    fieldNames.add(f.name)
+                for f in p._dataFields:
+                    fieldNames.add(f.name())
                 # ensure existence of known fields
                 for n in p.knownFields:
                     if n not in fieldNames:
-                        p.addKnownField(n, self.strings, self.annotationType)
+                        p.addKnownField(n, self._strings, self.__annotationType)
             for _ in range(reads):
                 barrier.acquire()
 
@@ -54,10 +55,10 @@ class SkillState:
             reads = 0
             readErrors = []
             for p in self.allTypes():
-                for f in p.dataFields:
-                    reads += f.finish(barrier, readErrors, fis)
+                for f in p._dataFields:
+                    reads += f._finish(barrier, readErrors, fis)
 
-            self.annotationType.fixTypes(self.poolByName)
+            self.__annotationType.fixTypes(self._poolByName)
             for _ in range(reads):
                 barrier.acquire()
             for e in readErrors:
@@ -68,42 +69,42 @@ class SkillState:
             traceback.print_exc()
 
     def Strings(self):
-        return self.strings
+        return self._strings
 
     def contains(self, target):
         if target is None or target == 0:
             return True
         try:
             if target.skillID > 0:
-                return target == self.poolByName[target.skillName()].getByID(target.skillID)
-            return target in self.poolByName[target.skillName()].newObjects
+                return target == self._poolByName[target.skillName()].getByID(target.skillID)
+            return target in self._poolByName[target.skillName()].newObjects
         except Exception:
             return False
 
     def delete(self, target):
         if target is not None:
-            self.dirty = self.dirty | (target.skillID > 0)
-            self.poolByName[target.skillName()].delete(target)
+            self.__dirty = self.__dirty | (target.skillID > 0)
+            self._poolByName[target.skillName()].delete(target)
 
     def changePath(self, path):
-        if self.writeMode == Mode.Append:
-            if self.path == path:
+        if self.__writeMode == Mode.Append:
+            if self.__path == path:
                 return
             if os.path.exists(path):
                 os.remove(path)
-            shutil.copy2(self.path, path)
-        elif self.writeMode == Mode.ReadOnly:
-            self.writeMode = Mode.Write
+            shutil.copy2(self.__path, path)
+        elif self.__writeMode == Mode.ReadOnly:
+            self.__writeMode = Mode.Write
         else:
             return
-        self.path = path
+        self.__path = path
 
     def changeMode(self, writeMode):
-        if self.writeMode == writeMode:
+        if self.__writeMode == writeMode:
             return
 
         if writeMode == Mode.Write:
-            self.writeMode = writeMode
+            self.__writeMode = writeMode
         elif writeMode == Mode.Append:
             raise Exception("Cannot change write mode from write to append, "
                             "try to use open(path, Create, Append) instead.")
@@ -113,35 +114,35 @@ class SkillState:
             return
 
     def loadLazyData(self):
-        for ID in range(0, len(self.strings.idMap)):
-            self.strings.get(ID)
+        for ID in range(0, len(self._strings.idMap)):
+            self._strings.get(ID)
             ID -= 1
-        for p in self.types:
-            for f in p.dataFields:
+        for p in self.__types:
+            for f in p._dataFields:
                 if f.isLazy:
-                    f.ensureLoaded()
+                    f._ensureLoaded()
 
     def flush(self):
         try:
-            if self.writeMode == Mode.Write:
+            if self.__writeMode == Mode.Write:
                 if self.isWindows:
-                    target = self.path
+                    target = self.__path
                     f = tempfile.TemporaryFile('w+b', -1, None, None, ".sf", "write")
-                    self.changePath(f.name)
-                    StateWriter(self, FileOutputStream.write(self.makeInStream()))
-                    f.name = target
+                    self.changePath(f.name())
+                    StateWriter(self, FileOutputStream.write(self.__makeInStream()))
+                    f._name = target
                     self.changePath(target)
                 else:
-                    StateWriter(self, FileOutputStream.write(self.makeInStream()))
+                    StateWriter(self, FileOutputStream.write(self.__makeInStream()))
                 return
-            elif self.writeMode == Mode.Append:
-                if self.dirty:
+            elif self.__writeMode == Mode.Append:
+                if self.__dirty:
                     self.changeMode(Mode.Write)
                     self.flush()
                 else:
-                    StateAppender(self, FileOutputStream.append(self.makeInStream()))
+                    StateAppender(self, FileOutputStream.append(self.__makeInStream()))
                 return
-            elif self.writeMode == Mode.ReadOnly:
+            elif self.__writeMode == Mode.ReadOnly:
                 raise SkillException("Cannot flush a read only file. Note: close will turn a file into read only.")
         except SkillException as e:
             raise e
@@ -150,24 +151,24 @@ class SkillState:
         except Exception as e:
             raise SkillException("unexpected exception", e)
 
-    def makeInStream(self):
-        if self.input is None or not (self.path == self.input.path):
-            self.input = FileInputStream.open(self.path, False)
-        return self.input
+    def __makeInStream(self):
+        if self.__input is None or not (self.__path == self.__input.path):
+            self.__input = FileInputStream.open(self.__path, False)
+        return self.__input
 
     def close(self):
-        if self.writeMode != Mode.ReadOnly:
+        if self.__writeMode != Mode.ReadOnly:
             self.flush()
-            self.writeMode = Mode.ReadOnly
+            self.__writeMode = Mode.ReadOnly
 
-        if self.input is not None:
+        if self.__input is not None:
             try:
-                self.input.close()
+                self.__input.close()
             except IOError:
                 traceback.print_exc()
 
     def currentPath(self):
-        return self.path
+        return self.__path
 
     def allTypes(self):
-        return self.types
+        return self.__types

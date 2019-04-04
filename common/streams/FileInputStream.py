@@ -16,6 +16,7 @@ class FileInputStream(InStream):
         super(FileInputStream, self).__init__(file)
         self.path = path
         self.storedPosition = None
+        self.pos = 0
 
     @staticmethod
     def open(path, readOnly):

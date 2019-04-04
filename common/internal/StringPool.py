@@ -26,7 +26,7 @@ class StringPool(FieldType):
         self.knownStrings = set()
         self.stringIDs = {}
 
-    def readSingleField(self, fis: InStream): return self.get(fis.v32())
+    def readSingleField(self, fis: InStream): return self.get(fis.v64())
 
     def calculateOffset(self, xs):
         if len(self.stringIDs) < 128:
@@ -96,7 +96,7 @@ class StringPool(FieldType):
             off = 0
             end = []
             for i in range(1, count + 1):
-                off += len(self.idMap[i])
+                off += len(self.idMap[i].encode())  # the warning is wrong because idMap is filled with strings
                 end.append(off)
             for i in range(0, len(end)):
                 out.i32(end[i])

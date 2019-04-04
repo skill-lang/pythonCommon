@@ -42,6 +42,11 @@ class FileOutputStream(OutStream):
         pos = self.position()
         if self.file is not None:
             self.flush()
+            self.close()
         r = MappedOutputStream.open(fileno, pos, size)
         self.pos += size
         return r
+
+    def flush(self):
+        if self.file is not None:
+            self.file.flush()
