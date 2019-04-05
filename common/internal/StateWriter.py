@@ -60,7 +60,7 @@ class StateWriter(SerializationFunctions):
             if f._offset < 0:
                 raise SkillException("aborting write because offset calculation failed")
 
-            fos.v64(f.index)
+            fos.v64(f._index)
             fos.v64(stringIDs.get(f.name()))
             self.writeType(f.fieldType(), fos)
             self.restrictions(fos)

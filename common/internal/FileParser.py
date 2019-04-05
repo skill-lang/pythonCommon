@@ -60,8 +60,6 @@ class FileParser:
         while not inStream.eof():
             self.stringBlock()
             self.typeBlock()
-            # not end of runtime
-            # implementation does things here
 
     @staticmethod
     def newPool(name: str, superPool, types: [], knownTypes, knownSubTypes):

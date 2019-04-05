@@ -93,7 +93,7 @@ class StateAppender(SerializationFunctions):
         offset = 0
         for fie in fieldQueue:
             for f in fie:
-                fos.v64(f.index)
+                fos.v64(f._index)
                 if len(f._dataChunks) == 1:
                     fos.v64(stringIDs[f.name()])
                     self.writeType(f.type, fos)

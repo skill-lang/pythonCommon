@@ -6,7 +6,7 @@ class AutoField(FieldDeclaration, KnownField):
 
     def __init__(self, fType, name, owner, index):
         super(AutoField, self).__init__(fType, name, owner, True)
-        self.index = index
+        self._index = index
         self.owner._autoFields[-index] = self
 
     def _rsc(self, i, h, inStream):

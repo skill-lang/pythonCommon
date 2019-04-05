@@ -22,7 +22,7 @@ class FieldDeclaration(ABC):
         self.owner = owner
         if not isAuto:
             self.owner._dataFields.append(self)
-        self.index = len(self.owner._dataFields)
+        self._index = len(self.owner._dataFields)
         self._offset = 0
         self._dataChunks = []
 

@@ -18,7 +18,7 @@ class StoragePool(FieldType):
     noAutoFields = []
     lock = threading.Lock()
 
-    def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields):
+    def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields: []):
         super(StoragePool, self).__init__(32 + poolIndex)
         self._name = name
         self.superPool: StoragePool = superPool
