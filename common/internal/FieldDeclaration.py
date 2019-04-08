@@ -98,6 +98,10 @@ class FieldDeclaration(ABC):
             i = b.bpo
             self._wsc(i, i + b.count, outStream)
 
+    def get(self, ref):
+        assert hasattr(ref, self.name())
+        return getattr(ref, self.name())
+
     def _finish(self, barrier: threading.Semaphore, readErrors: [], inStream):
         block = 0
         for c in self._dataChunks:

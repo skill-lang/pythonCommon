@@ -259,3 +259,27 @@ class TypeOrderIterator:
         if result is None:
             raise StopIteration()
         return result
+
+
+class InterfaceIterator:
+
+    def __init__(self, listOfRealizations: []):
+        self.ps = listOfRealizations
+        self.i = 0
+        self.xs = None
+        while self.i < len(self.ps):
+            xs = self.ps[self.i].__iter__()
+            self.i += 1
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            r = self.xs.__next__()
+        except StopIteration:
+            while self.i < len(self.ps):
+                self.xs = self.ps[self.i].__iter__()
+                self.i += 1
+            r = self.xs.__next__()
+        return r

@@ -73,23 +73,23 @@ class SerializationFunctions:
     def writeType(t, outStream):
         if t.typeID() == 0:
             outStream.i8(0)
-            outStream.i8(t.value)
+            outStream.i8(t.value())
             return
         elif t.typeID() == 1:
             outStream.i8(1)
-            outStream.i16(t.value)
+            outStream.i16(t.value())
             return
         elif t.typeID() == 2:
             outStream.i8(0)
-            outStream.i32(t.value)
+            outStream.i32(t.value())
             return
         elif t.typeID() == 3:
             outStream.i8(0)
-            outStream.i64(t.value)
+            outStream.i64(t.value())
             return
         elif t.typeID() == 4:
             outStream.i8(0)
-            outStream.v64(t.value)
+            outStream.v64(t.value())
             return
         elif t.typeID() == 15:
             outStream.i8(15)

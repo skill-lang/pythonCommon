@@ -1,8 +1,10 @@
+from typing import Union
+
 from common.internal.FieldType import FieldType
 from common.internal.SkillObject import SkillObject
 from common.internal.SubType import SubType
 from common.internal.Iterator import TypeHierarchyIterator, StaticFieldIterator, StaticDataIterator, FieldIterator,\
-    DynamicDataIterator, TypeOrderIterator, DynamicNewInstancesIterator
+    DynamicDataIterator, TypeOrderIterator, DynamicNewInstancesIterator, InterfaceIterator
 from common.internal.Exceptions import SkillException
 from common.internal.LazyField import LazyField
 from common.internal.Blocks import BulkChunk, Block, SimpleChunk
@@ -149,7 +151,7 @@ class StoragePool(FieldType):
         else:
             out.v64(data.skillID)
 
-    def size(self):
+    def __len__(self):
         if self._fixed:
             return self._cachedSize
         size = 0
@@ -263,3 +265,105 @@ class StoragePool(FieldType):
 
         @abstractmethod
         def make(self): pass
+
+
+class InterfacePool(FieldType):
+
+    def __init__(self, name, superPool, *realizations):
+        super(InterfacePool, self).__init__(superPool.typeID())
+        self._name = name
+        self._superPool = superPool
+        self._realizations = realizations
+
+    def __len__(self):
+        var = 0
+        for p in self._realizations:
+            var += len(p)
+        return var
+
+    def owner(self):
+        return self._superPool.owner()
+
+    def name(self):
+        return self._name
+
+    def superName(self):
+        return self._superPool.name()
+
+    def readSingleField(self, inStream):
+        index = inStream.v64() - 1
+        data = self._superPool.data()
+        if index < 0 or len(data) <= index:
+            return None
+        return data[index]
+
+    def calculateOffset(self, xs: Union[list, dict, set]):
+        if len(self._superPool.data()) < 128:
+            return len(xs)
+        result = 0
+        for x in xs:
+            if x is None:
+                result += 1
+            else:
+                V64().singleV64Offset(x.skillID)
+        return result
+
+    def singleOffset(self, x):
+        if x is None:
+            return 1
+        else:
+            return V64().singleV64Offset(x.skillID)
+
+    def writeSingleField(self, data, out):
+        if data is None:
+            out.i8(0)
+        else:
+            out.v64(data.skillID)
+
+    def __str__(self):
+        return self._name
+
+    def __iter__(self):
+        return InterfaceIterator(self._realizations)
+
+
+class UnrootedInterfacePool(FieldType):
+
+    def __init__(self, name, superPool, *realizations):
+        super(UnrootedInterfacePool, self).__init__(superPool.typeID())
+        self._name = name
+        self._superType = superPool
+        self._realizations = realizations
+
+    def __len__(self):
+        var = 0
+        for p in self._realizations:
+            var += len(p)
+        return var
+
+    def __iter__(self):
+        return InterfaceIterator(self._realizations)
+
+    def __str__(self):
+        return self._name
+
+    def owner(self):
+        return self._superType.owner()
+
+    def name(self):
+        return self._name
+
+    def getType(self):
+        return self._superType
+
+    def readSingleField(self, inStream):
+        return self._superType.readSingleField(inStream)
+
+    def calculateOffset(self, xs: Union[list, dict, set]):
+        return self._superType.calculateOffset(xs)
+
+    def singleOffset(self, x):
+        return self._superType.singleOffset(x)
+
+    def writeSingleField(self, data, out):
+        return self._superType.writeSingleField(data, out)

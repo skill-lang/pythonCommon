@@ -6,7 +6,10 @@ class ConstantInteger(FieldType):
 
     def __init__(self, typeID, value):
         super(ConstantInteger, self).__init__(typeID)
-        self.value = value
+        self._value = value
+
+    def value(self):
+        return self._value
 
     def readSingleField(self, inStream):
         return self.value

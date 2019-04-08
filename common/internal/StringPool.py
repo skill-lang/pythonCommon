@@ -12,12 +12,12 @@ S = TypeVar('S', FileInputStream, type(None))
 
 class StringPool(FieldType):
 
-    typeID = 14
+    _typeID = 14
     lock = threading.Lock()
 
     def __init__(self, inStream: S):
         """DO NOT CALL IF YOU ARE NOT GENERATED OR INTERNAL CODE!"""
-        super(StringPool, self).__init__(self.typeID)
+        super(StringPool, self).__init__(self._typeID)
         self.inStream = inStream
         self.stringPositions = []
         self.stringPositions.append(StringPool.Position(-1, -1))
