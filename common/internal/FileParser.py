@@ -226,8 +226,8 @@ class FileParser:
         fileOffset = self.inStream.position()
         dataEnd = fileOffset
         for e in self.fieldDataQueue:
-            f = e.owner._dataFields[e.fieldID - 1]
-            end = f._addOffsetToLastChunk(fileOffset)
+            f: FieldDeclaration = e.owner._dataFields[e.fieldID - 1]
+            end: int = f._addOffsetToLastChunk(fileOffset)
             dataEnd = max(dataEnd, end)
         self.inStream.jump(dataEnd)
 
