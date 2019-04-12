@@ -30,7 +30,7 @@ class FileOutputStream(OutStream):
     def append(target):
         f: W = target.file
         if f.closed:
-            f = open(target.path, 'ab+')
+            f = open(target.path, 'rb+')
             return FileOutputStream(f)
         else:
             size = os.stat(target.path).st_size
@@ -49,4 +49,15 @@ class FileOutputStream(OutStream):
 
     def flush(self):
         if self.file is not None:
+            p = self.file.tell()
+            self.file.seek(0)
             self.file.flush()
+            self.pos += p
+
+    def close(self):
+        if not self.file.closed:
+            self.flush()
+            self.file.close()
+            if os.stat(self.file.__sizeof__()).st_size != self.pos:
+                self.file.truncate(self.pos)
+

@@ -113,8 +113,4 @@ class OutStream(abc.ABC):
     def put(self, data):
         self.refresh()
         self.file.write(data)
-
-    def close(self):
-        if not self.file.closed:
-            self.flush()
-            self.file.close()
+        self.pos += len(data)
