@@ -19,20 +19,12 @@ class FileInputStream(InStream):
         self.pos = 0
 
     @staticmethod
-    def open(path, readOnly):
-        if readOnly:
-            file: R = open(path, 'rb', 4096)
-        else:
-            file: R = open(path, 'rb+', 4096)
+    def open(path):
+        file: R = open(path, 'rb+', 4096)  # ignore warning. it's working
         return FileInputStream(file, path)
 
     def jump(self, position):
         self.file.seek(position)
-
-    def jumpAndMap(self, offset):
-        m = self.map(self.position())
-        self.jump(offset)
-        return m
 
     def push(self, position):
         self.storedPosition = self.file.tell()
@@ -43,12 +35,6 @@ class FileInputStream(InStream):
             self.file.seek(self.storedPosition)
         else:
             raise IOError("There is no FileInputStream.storedPosition")
-
-    def map(self, basePosition, begin=0):
-        with self.lock:
-            f = deepcopy(self.file)
-        f.seek(basePosition + begin)
-        return MappedInStream(f)
 
     def close(self):
         self.file.close()
