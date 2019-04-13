@@ -12,10 +12,9 @@ class OutStream(abc.ABC):
         self.pos = 0
 
     def position(self):
-        if self.file is None:
-            return self.pos
-        else:
-            return self.file.tell() + self.pos
+        if self.file is not None:
+            return self.file.tell()
+        return Exception("Stream is closed")
 
     def refresh(self):
         if self.file is None or self.has() == 0:
@@ -35,7 +34,6 @@ class OutStream(abc.ABC):
 
     def i8(self, data):
         self.refresh()
-        # self.file.write(data.to_bytes(1, "big"))
         self.file.write(struct.pack('>b', data))
 
     def i16(self, data):
@@ -113,4 +111,3 @@ class OutStream(abc.ABC):
     def put(self, data):
         self.refresh()
         self.file.write(data)
-        self.pos += len(data)

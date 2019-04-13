@@ -49,15 +49,9 @@ class FileOutputStream(OutStream):
 
     def flush(self):
         if self.file is not None:
-            p = self.file.tell()
-            self.file.seek(0)
             self.file.flush()
-            self.pos += p
 
     def close(self):
         if not self.file.closed:
-            self.flush()
+            self.file.truncate(self.file.tell())
             self.file.close()
-            if os.stat(self.file.__sizeof__()).st_size != self.pos:
-                self.file.truncate(self.pos)
-
