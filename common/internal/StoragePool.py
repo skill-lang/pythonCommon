@@ -20,7 +20,7 @@ class StoragePool(FieldType):
     noAutoFields = []
     lock = threading.Lock()
 
-    def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields: []):
+    def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields: [], cls, subCls):
         super(StoragePool, self).__init__(32 + poolIndex)
         self._name = name
         self.superPool: StoragePool = superPool
@@ -42,6 +42,9 @@ class StoragePool(FieldType):
         self._dataFields = []
         self._fixed = False
         self._deletedCount = 0
+        # classes
+        self._cls = cls
+        self._subCls = subCls
 
     def setNextPool(self, nx):
         self._nextPool = nx
@@ -210,8 +213,8 @@ class StoragePool(FieldType):
     def addKnownField(self, name, string, annotation):
         raise Exception("Arbitrary storage pools know no fields!")
 
-    def makeSubPool(self, index, name):
-        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields)  # TODO
+    def makeSubPool(self, index, name, cls, subCls):
+        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields, cls, subCls)  # TODO
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         if self.basePool is not None:

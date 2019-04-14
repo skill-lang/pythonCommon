@@ -23,6 +23,8 @@ from common.internal.Exceptions import SkillException, ParseException, InvalidPo
 from common.internal.Blocks import Block, SimpleChunk, BulkChunk
 from common.internal.FieldDeclaration import FieldDeclaration
 from common.streams.FileInputStream import FileInputStream
+from common.internal.NamedType import NamedType
+from common.internal.SkillObject import SkillObject
 
 
 class DataEntry:
@@ -118,7 +120,10 @@ class FileParser:
                     superDef = self.types[superID - 1]
 
                 try:
-                    definition = self.newPool(name, superDef, self.types, self.knownTypes, self.knownSubTypes)
+                    superType = (SkillObject,) if superDef is None else (superDef._cls,)
+                    typ = type(name, superType, dict())
+                    subTyp = type("SubType" + name, (typ, NamedType,), dict())
+                    definition = self.newPool(name, superDef, self.types, typ, subTyp)
                     if definition.superPool is not superDef:
                         if superDef is None:
                             raise ParseException(self.inStream, self.blockCounter, None,
@@ -131,13 +136,13 @@ class FileParser:
                     self.poolByName[name] = definition
                 except Exception as ex:
                     raise ParseException(self.inStream, self.blockCounter, ex,
-                                         "The super fType of {} stored in the file does not match the specification!",
+                                         "The super type of {} stored in the file does not match the specification!",
                                          name)
             if self.blockIDBarrier < definition.typeID():
                 self.blockIDBarrier = definition.typeID()
             else:
                 raise ParseException(self.inStream, self.blockCounter, None,
-                                     "Found unordered fType block. Type {} has id {}, barrier was {}.", name,
+                                     "Found unordered type block. Type {} has id {}, barrier was {}.", name,
                                      definition.typeID(), self.blockIDBarrier)
 
             bpo = definition.basePool._cachedSize
