@@ -4,7 +4,7 @@ from common.internal.FieldType import FieldType
 from common.internal.SkillObject import SkillObject
 from common.internal.SubType import SubType
 from common.internal.Iterator import TypeHierarchyIterator, StaticFieldIterator, StaticDataIterator, FieldIterator,\
-    DynamicDataIterator, TypeOrderIterator, DynamicNewInstancesIterator, InterfaceIterator
+    DynamicDataIterator, TypeOrderIterator, DynamicNewInstancesIterator
 from common.internal.Exceptions import SkillException
 from common.internal.LazyField import LazyField
 from common.internal.Blocks import BulkChunk, Block, SimpleChunk
@@ -188,9 +188,12 @@ class StoragePool(FieldType):
     def _allocateInstances(self, last: Block):
         i = last.bpo
         high = i + last.staticCount
-        while i < high:
-            self._data[i] = self._cls(i + 1)  # warning is not important. StoragePool._cls is set in generated internal
-            i += 1
+        if self._cls is not None:
+            for j in range(i, high):
+                self._data[j] = self._cls(j + 1)
+        else:
+            for j in range(i, high):
+                self._data[j] = SubType(self, j + 1)
 
     def _updateAfterCompress(self, lbpoMap: []):
         self._data = self.basePool.data()
@@ -208,7 +211,7 @@ class StoragePool(FieldType):
         raise Exception("Arbitrary storage pools know no fields!")
 
     def makeSubPool(self, index, name):
-        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields)
+        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields)  # TODO
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         if self.basePool is not None:

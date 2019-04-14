@@ -153,7 +153,7 @@ class SkillState:
 
     def __makeInStream(self):
         if self.__input is None or not (self.__path == self.__input.path):
-            self.__input = FileInputStream.open(self.__path, False)
+            self.__input = FileInputStream.open(self.__path)
         return self.__input
 
     def close(self):

@@ -114,7 +114,7 @@ class FieldDeclaration(ABC):
                 if isinstance(c, BulkChunk):
                     self._rbc(c, inStream)
                 else:
-                    i = c.bpo  # c is SimpleChunk => c has bpo
+                    i = c.bpo
                     self._rsc(i, i + c.count, inStream)
             except SkillException as s:
                 ex = s

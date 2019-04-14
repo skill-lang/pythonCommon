@@ -113,11 +113,11 @@ class FieldIterator:
 
     def __init__(self, storagePool):
         self.p = storagePool
-        self.i = -len(storagePool.autoFields)
+        self.i = -len(storagePool._autoFields)
         while self.p is not None and self.i == 0 and len(self.p._dataFields) == 0:
             self.p = self.p.superPool
             if self.p is not None:
-                self.i = -len(self.p.autoFields)
+                self.i = -len(self.p._autoFields)
 
     def __iter__(self):
         return self
@@ -126,18 +126,18 @@ class FieldIterator:
         if self.p is None:
             raise StopIteration()
         if self.i < 0:
-            f = self.p.autoFields[-1 - self.i]
+            f = self.p._autoFields[-1 - self.i]
         else:
             f = self.p._dataFields[self.i]
         self.i += 1
         if len(self.p._dataFields) == self.i:
             self.p = self.p.superPool
             if self.p is not None:
-                self.i = -len(self.p.autoFields)
+                self.i = -len(self.p._autoFields)
             while self.p is not None and self.i == 0 and len(self.p._dataFields) == 0:
                 self.p = self.p.superPool
                 if self.p is not None:
-                    self.i = -len(self.p.autoFields)
+                    self.i = -len(self.p._autoFields)
         return f
 
 
@@ -188,12 +188,12 @@ class StaticDataIterator:
 class StaticFieldIterator:
 
     def __init__(self, storagePool):
-        if len(storagePool.autoFields) == 0 and len(storagePool._dataFields) == 0:
+        if len(storagePool._autoFields) == 0 and len(storagePool._dataFields) == 0:
             self.p = None
             self.i = 0
         else:
             self.p = storagePool
-            self.i = -len(storagePool.autoFields)
+            self.i = -len(storagePool._autoFields)
 
     def __iter__(self):
         return self
@@ -202,7 +202,7 @@ class StaticFieldIterator:
         if self.p is None:
             raise StopIteration()
         if self.i < 0:
-            f = self.p.autoFields[-1 - self.i]
+            f = self.p._autoFields[-1 - self.i]
         else:
             f = self.p._dataFields[self.i]
         self.i += 1

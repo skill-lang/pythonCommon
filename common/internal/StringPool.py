@@ -81,7 +81,7 @@ class StringPool(FieldType):
             self.knownStrings.add(result)
         return result
 
-    def prepareAndWrite(self, out, ws: StateWriter):
+    def prepareAndWrite(self, outStream, ws: StateWriter):
         self.idMap.clear()
         self.idMap.append(None)
 
@@ -91,17 +91,17 @@ class StringPool(FieldType):
                 self.idMap.append(s)
 
         count = len(self.idMap) - 1
-        out.v64(count)
+        outStream.v64(count)
         if count != 0:
             off = 0
             end = []
             for i in range(1, count + 1):
-                off += len(self.idMap[i].encode())  # the warning is wrong because idMap is filled with strings
+                off += len(self.idMap[i].encode())
                 end.append(off)
             for i in range(0, len(end)):
-                out.i32(end[i])
+                outStream.i32(end[i])
             for i in range(1, count + 1):
-                out.put(self.idMap[i].encode())
+                outStream.put(self.idMap[i].encode())
 
     def prepareAndAppend(self, fos, sa):
         for i in range(1, len(self.idMap)):
