@@ -86,8 +86,7 @@ class FileParser:
 
     def typeDefinition(self):
         try:
-            n = self.strings.get(self.inStream.v64())
-            name: str = n
+            name = self.strings.get(self.inStream.v64())
         except InvalidPoolIndexException as e:
             raise ParseException(self.inStream, self.blockCounter, e, "corrupted type header")
 
@@ -119,10 +118,18 @@ class FileParser:
                     superDef = self.types[superID - 1]
 
                 try:
-                    superType = (SkillObject,) if superDef is None else (superDef._cls,)
-                    typ = type(name, superType, dict())
-                    subTyp = type("SubType" + name, (typ, NamedType,), dict())
-                    definition = self.newPool(name, superDef, self.types, typ, subTyp)
+                    # search in knowntypes for this class
+                    seen = False
+                    typ = None
+                    for i in self.knownTypes:
+                        if name == i.__name__.lower():
+                            typ = i
+                            seen = True
+                    if not seen:
+                        superType = (SkillObject,) if superDef is None else (superDef._cls,)
+                        typ = type(name, superType, dict())
+                        print(name)
+                    definition = self.newPool(name, superDef, self.types, typ)
                     if definition.superPool is not superDef:
                         if superDef is None:
                             raise ParseException(self.inStream, self.blockCounter, None,

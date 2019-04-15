@@ -4,10 +4,10 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 class ListType(SingleArgumentType):
 
-    typeID = 18
+    _typeID = 18
 
     def __init__(self, groundType: FieldType):
-        super(ListType, self).__init__(self.typeID, groundType)
+        super(ListType, self).__init__(self.typeID(), groundType)
 
     def readSingleField(self, inStream):
         rval = []
