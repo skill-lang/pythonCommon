@@ -7,8 +7,8 @@ from common.internal.StoragePool import StoragePool
 class BasePool(StoragePool):
     """The base of a type hierarchy. Contains optimized representations of data compared to sub pools."""
 
-    def __init__(self, poolIndex, name, knownFields: [], autoFields: [], cls, subCls):
-        super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields, cls, subCls)
+    def __init__(self, poolIndex, name, knownFields: [], autoFields: [], cls):
+        super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields, cls)
         self._owner = None
 
     def _performAllocations(self, barrier: Semaphore) -> int:

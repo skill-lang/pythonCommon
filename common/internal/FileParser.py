@@ -43,7 +43,7 @@ class LFEntry:
 
 class FileParser:
 
-    def __init__(self, inStream: FileInputStream, knownTypes, knownSubTypes):
+    def __init__(self, inStream: FileInputStream, knownTypes):
         self.blockCounter = 0
         self.seenTypes = set()
         self.blockIDBarrier = 0
@@ -57,14 +57,13 @@ class FileParser:
         self.annotation = Annotation(self.types)
 
         self.knownTypes = knownTypes
-        self.knownSubTypes = knownSubTypes
 
         while not inStream.eof():
             self.stringBlock()
             self.typeBlock()
 
     @staticmethod
-    def newPool(name: str, superPool, types: [], knownTypes, knownSubTypes):
+    def newPool(name: str, superPool, types: [], knownTypes):
         raise NotImplementedError()
 
     def stringBlock(self):
@@ -283,9 +282,9 @@ class FileParser:
         else:
             raise ParseException(self.inStream, self.blockCounter, None, "Invalid type ID: []", typeID)
 
-    def read(self, cls, writeMode, knownTypes, knownSubTypes):
+    def read(self, cls, writeMode, knownTypes):
         try:
-            r = cls(self.poolByName, self.strings, self.annotation, self.types, self.inStream, writeMode, knownTypes, knownSubTypes)
+            r = cls(self.poolByName, self.strings, self.annotation, self.types, self.inStream, writeMode, knownTypes)
             return r
         except Exception as e:
             raise ParseException(self.inStream, self.blockCounter, e, "State instantiation failed!")
