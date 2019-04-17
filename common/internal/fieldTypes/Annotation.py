@@ -36,7 +36,7 @@ class Annotation(FieldType):
                 if isinstance(ref, NamedType):
                     result += V64().singleV64Offset(ref.tPool.typeID() - 31)
                 else:
-                    result += V64().singleV64Offset(self.typeByName[ref.skillName()].typeID() - 31)
+                    result += V64().singleV64Offset(self.typeByName[ref.skillName].typeID() - 31)
                 result += V64().singleV64Offset(ref.getSkillID())
         return result
 
@@ -46,7 +46,7 @@ class Annotation(FieldType):
         if isinstance(x, NamedType):
             name = V64().singleV64Offset(x.tPool.typeID() - 31)
         else:
-            name = V64().singleV64Offset(self.typeByName[x.skillName()].typeID() - 31)
+            name = V64().singleV64Offset(self.typeByName[x.skillName].typeID() - 31)
         return name + V64().singleV64Offset(x.getSkillID())
 
     def writeSingleField(self, data, out):
@@ -57,7 +57,7 @@ class Annotation(FieldType):
         if isinstance(data, NamedType):
             out.v64(data.tPool.typeID() - 31)
         else:
-            out.v64(self.typeByName[data.skillName()].typeID() - 31)
+            out.v64(self.typeByName[data.skillName].typeID() - 31)
         out.v64(data.getSkillID())
 
     def __str__(self):

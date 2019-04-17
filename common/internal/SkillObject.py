@@ -14,7 +14,10 @@ class SkillObject:
     def get(self, field):
         return field.get(self)
 
-    def printFs(self, fieldIterator, string):
+    def getSkillID(self):
+        return self.skillID
+
+    def printFields(self, fieldIterator, string):
         while fieldIterator.hasNext():
             f = fieldIterator.__next__()
             string += ", " + f.name() + ": " + f.get(self)

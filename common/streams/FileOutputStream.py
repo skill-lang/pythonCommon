@@ -53,5 +53,6 @@ class FileOutputStream(OutStream):
 
     def close(self):
         if not self.file.closed:
+            self.flush()
             self.file.truncate(self.file.tell())
             self.file.close()
