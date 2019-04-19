@@ -1,15 +1,12 @@
 import os
 from common.streams.InStream import InStream
 from io import BufferedReader, BufferedRandom
-import threading
 from typing import TypeVar
 
 R = TypeVar('R', BufferedReader, BufferedRandom)
 
 
 class FileInputStream(InStream):
-
-    lock = threading.Lock()
 
     def __init__(self, file: R, path):
         super(FileInputStream, self).__init__(file)

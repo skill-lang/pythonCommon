@@ -1,8 +1,7 @@
 import sys
 import traceback
 
-from common.internal.SerializationFunctions import SerializationFunctions, Task
-import threading
+from common.internal.SerializationFunctions import SerializationFunctions, WriteProcess
 from common.internal.Exceptions import SkillException
 from common.internal.BasePool import BasePool
 
@@ -14,15 +13,11 @@ class StateWriter(SerializationFunctions):
         self.fixPools(state.allTypes())
         lbpoMap = [0 for i in range(0, len(state.allTypes()))]
 
-        self.barrier = threading.Semaphore(0)
         bases = 0
         for p in state.allTypes():
             if isinstance(p, BasePool):
                 bases += 1
                 p._compress(lbpoMap)
-                self.barrier.release()
-        for _ in range(bases):
-            self.barrier.acquire()
 
         # **************** Phase 3: Write ******************
         # write string block
@@ -32,9 +27,7 @@ class StateWriter(SerializationFunctions):
         for p in state.allTypes():
             for f in p._dataFields:
                 fieldCount += 1
-                StateWriter.OT(f, self.barrier).run()
-        for _ in range(fieldCount):
-            self.barrier.acquire()
+                self.calcOffset(f)
 
         # write types
         fieldQueue = []
@@ -71,26 +64,17 @@ class StateWriter(SerializationFunctions):
             c = f._lastChunk()
             c.begin = offset
             c.end = end
-            data.append(Task(f, offset, end))
+            data.append(WriteProcess(f))
             offset = end
-        self.writeFieldData(state, fos, data, offset, self.barrier)
+        self.writeFieldData(state, fos, data)
 
-    class OT(threading.Thread):
-
-        def __init__(self, f, barrier):
-            super(StateWriter.OT, self).__init__()
-            self.f = f
-            self.barrier = barrier
-
-        def run(self):
-            try:
-                self.f._offset = 0
-                c = self.f._lastChunk()
-                i = c.bpo
-                self.f._osc(i, i + c.count)
-            except:
-                traceback.print_exc()
-                print("Offset calculation failed, resulting file will be corrupted.")
-                self.f._offset = -sys.maxsize - 1
-            finally:
-                self.barrier.release()
+    def calcOffset(self, f):
+        try:
+            f._offset = 0
+            c = f._lastChunk()
+            i = c.bpo
+            f._osc(i, i + c.count)
+        except:
+            traceback.print_exc()
+            print("Offset calculation failed, resulting file will be corrupted.")
+            f._offset = -sys.maxsize - 1

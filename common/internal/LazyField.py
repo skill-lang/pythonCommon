@@ -1,10 +1,8 @@
 from common.internal.DistributedField import DistributedField
 from common.internal.Blocks import SimpleChunk, BulkChunk
-import threading
 
 
 class LazyField(DistributedField):
-    lock = threading.Lock()
     chunkMap = {}
     isLazy = True
 
@@ -26,12 +24,10 @@ class LazyField(DistributedField):
             self.__load()
 
     def _rsc(self, i, h, inStream):
-        with self.lock:
-            self.chunkMap[SimpleChunk(i, h, 1, 1)] = inStream
+        self.chunkMap[SimpleChunk(i, h, 1, 1)] = inStream
 
     def _rbc(self, c, inStream):
-        with self.lock:
-            self.chunkMap[c] = inStream
+        self.chunkMap[c] = inStream
 
     def get(self, ref):
         if ref.skillID == -1:

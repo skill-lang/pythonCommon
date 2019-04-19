@@ -1,5 +1,4 @@
 import copy
-from threading import Semaphore
 from common.internal.Iterator import *
 from common.internal.StoragePool import StoragePool
 
@@ -11,11 +10,10 @@ class BasePool(StoragePool):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields, cls)
         self._owner = None
 
-    def _performAllocations(self, barrier: Semaphore) -> int:
+    def _performAllocations(self) -> int:
         """
         Allocates data and all instances for this pool and all of its sub-pools.
         Note: invoked once upon state creation before deserialization of field data
-        :param barrier: used to synchronize parallel object allocation
         :return:
         """
         reads = 0
@@ -30,7 +28,6 @@ class BasePool(StoragePool):
             for b in s.blocks:
                 reads += 1
                 s._allocateInstances(b)
-                barrier.release()
         return reads
 
     def _compress(self, lbpoMap: []) -> None:

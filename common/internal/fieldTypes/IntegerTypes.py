@@ -2,7 +2,6 @@ from common.internal.FieldType import FieldType
 from common.streams.FileInputStream import FileInputStream
 from common.streams.FileOutputStream import FileOutputStream
 from typing import Union
-from logging import getLogger
 
 
 class Singleton(object):
@@ -11,7 +10,6 @@ class Singleton(object):
     def __new__(cls, *args, **kwargs):
         if cls not in cls._instance:
             cls._instance[cls] = super(Singleton, cls).__new__(cls)
-            getLogger().log(10, "new instance of" + cls.__class__.__name__)
         return cls._instance[cls]
 
 

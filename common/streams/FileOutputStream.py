@@ -1,5 +1,4 @@
 import os
-import threading
 from common.streams.OutStream import OutStream
 from typing import TypeVar
 from io import BufferedWriter, BufferedRandom
@@ -8,8 +7,6 @@ W = TypeVar('W', BufferedWriter, BufferedRandom)
 
 
 class FileOutputStream(OutStream):
-
-    lock = threading.Lock()
 
     def __init__(self, file: W, position=0):
         super(FileOutputStream, self).__init__(file)

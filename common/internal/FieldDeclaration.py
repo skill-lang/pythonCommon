@@ -1,6 +1,5 @@
 from common.internal.Exceptions import SkillException, PoolSizeMismatchError
 from common.internal.Blocks import BulkChunk, SimpleChunk
-import threading
 from abc import ABC, abstractmethod
 
 
@@ -102,7 +101,7 @@ class FieldDeclaration(ABC):
         assert hasattr(ref, self.name())
         return getattr(ref, self.name())
 
-    def _finish(self, barrier: threading.Semaphore, readErrors: [], inStream):
+    def _finish(self, readErrors: [], inStream):
         block = 0
         for c in self._dataChunks:
             blockCounter = block
@@ -123,7 +122,6 @@ class FieldDeclaration(ABC):
             except Exception as e:
                 ex = SkillException("internal error: unexpected foreign exception", e)
             finally:
-                barrier.release()
                 if ex is not None:
                     readErrors.append(ex)
         return block

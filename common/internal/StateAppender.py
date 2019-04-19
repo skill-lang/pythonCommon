@@ -1,6 +1,5 @@
-from common.internal.SerializationFunctions import SerializationFunctions, Task
+from common.internal.SerializationFunctions import SerializationFunctions, WriteProcess
 from common.internal.Blocks import SimpleChunk
-from threading import Semaphore
 
 
 class StateAppender(SerializationFunctions):
@@ -18,15 +17,11 @@ class StateAppender(SerializationFunctions):
 
         lbpoMap = []
         chunkMap = {}
-        barrier = Semaphore(0)
         bases = 0
         for p in state.allTypes():
             if p.owner is None:
                 bases += 1
                 p._prepareAppend(lbpoMap, chunkMap)
-                barrier.release()
-        for _ in range(bases):
-            barrier.acquire()
 
         # locate relevant pools
         rPools = []
@@ -53,9 +48,6 @@ class StateAppender(SerializationFunctions):
                 f._osc(i, i + c.count)
             else:
                 f._obc(c)
-            barrier.release()
-        for _ in range(fieldCount):
-            barrier.acquire()
         fos.v64(fieldCount)
 
         # write headers
@@ -100,6 +92,6 @@ class StateAppender(SerializationFunctions):
                     self.restrictions(fos)
                 end = offset + f._offset
                 fos.v64(end)
-                data.append(Task(f, offset, end))
+                data.append(WriteProcess(f))
                 offset = end
-        self.writeFieldData(state, fos, data, offset, barrier)
+        self.writeFieldData(state, fos, data)

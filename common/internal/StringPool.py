@@ -4,7 +4,6 @@ from common.streams.FileInputStream import FileInputStream
 from common.internal.fieldTypes.IntegerTypes import V64
 from common.streams.OutStream import OutStream
 from common.internal.FieldType import FieldType
-import threading
 from typing import TypeVar
 
 S = TypeVar('S', FileInputStream, type(None))
@@ -13,7 +12,6 @@ S = TypeVar('S', FileInputStream, type(None))
 class StringPool(FieldType):
 
     _typeID = 14
-    lock = threading.Lock()
 
     def __init__(self, inStream: S):
         """DO NOT CALL IF YOU ARE NOT GENERATED OR INTERNAL CODE!"""
@@ -70,15 +68,14 @@ class StringPool(FieldType):
         if result is not None:
             return result
 
-        with self.lock:
-            off: StringPool.Position = self.stringPositions[index]
-            self.inStream.push(off.absoluteOffset)
-            chars = self.inStream.bytes(off.length)
-            self.inStream.pop()
-            result = chars.decode('utf-8')
+        off: StringPool.Position = self.stringPositions[index]
+        self.inStream.push(off.absoluteOffset)
+        chars = self.inStream.bytes(off.length)
+        self.inStream.pop()
+        result = chars.decode('utf-8')
 
-            self.idMap[index] = result
-            self.knownStrings.add(result)
+        self.idMap[index] = result
+        self.knownStrings.add(result)
         return result
 
     def prepareAndWrite(self, outStream, ws: StateWriter):

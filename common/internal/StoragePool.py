@@ -1,5 +1,3 @@
-from typing import Union
-
 from common.internal.FieldType import FieldType
 from common.internal.SkillObject import SkillObject
 from common.internal.SubType import SubType
@@ -9,7 +7,6 @@ from common.internal.Exceptions import SkillException
 from common.internal.LazyField import LazyField
 from common.internal.Blocks import BulkChunk, Block, SimpleChunk
 from common.internal.fieldTypes.IntegerTypes import V64
-import threading
 import copy
 from abc import ABC, abstractmethod
 
@@ -18,7 +15,6 @@ class StoragePool(FieldType):
 
     noKnownFields = []
     noAutoFields = []
-    lock = threading.Lock()
 
     def __init__(self, poolIndex: int, name: str, superPool, knownFields: [], autoFields: [], cls):
         super(StoragePool, self).__init__(32 + poolIndex)
@@ -255,8 +251,7 @@ class StoragePool(FieldType):
                         continue
 
                     f.addChunk(c)
-                    with self.lock:
-                        chunkMap[f] = c
+                    chunkMap[f] = c
 
         self.newObjects.clear()
 

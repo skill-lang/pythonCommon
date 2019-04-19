@@ -7,7 +7,6 @@ from common.internal.StoragePool import StoragePool
 from common.internal.Exceptions import SkillException
 from common.internal.Mode import Mode
 import traceback
-from threading import Semaphore
 from common.streams.FileOutputStream import FileOutputStream
 from common.streams.FileInputStream import FileInputStream
 from common.internal.BasePool import BasePool
@@ -33,13 +32,12 @@ class SkillState:
         try:
             StoragePool._establishNextPool(self.__types)
 
-            barrier = Semaphore(0)
             reads = 0
             fieldNames = set()
             for p in self.allTypes():
                 if isinstance(p, BasePool):  # if p is BasePool
                     p._owner = self
-                    reads += p._performAllocations(barrier)
+                    reads += p._performAllocations()
                 # add missing field declarations
                 fieldNames.clear()
                 for f in p._dataFields:
@@ -48,19 +46,15 @@ class SkillState:
                 for n in p.knownFields:
                     if n not in fieldNames:
                         p.addKnownField(n, self._strings, self.__annotationType)
-            for _ in range(reads):
-                barrier.acquire()
 
             # read field data
             reads = 0
             readErrors = []
             for p in self.allTypes():
                 for f in p._dataFields:
-                    reads += f._finish(barrier, readErrors, fis)
+                    reads += f._finish(readErrors, fis)
 
             self.__annotationType.fixTypes(self._poolByName)
-            for _ in range(reads):
-                barrier.acquire()
             for e in readErrors:
                 raise e
             if not len(readErrors) == 0:
@@ -151,7 +145,7 @@ class SkillState:
             raise SkillException("unexpected exception", e)
 
     def __makeInStream(self):
-        if self.__input is None or not (self.__path == self.__input.path):
+        if self.__input is None or self.__input.file.closed or not (self.__path == self.__input.path):
             self.__input = FileInputStream.open(self.__path)
         return self.__input
 

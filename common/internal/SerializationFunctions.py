@@ -1,4 +1,3 @@
-import threading
 from common.internal.Blocks import SimpleChunk
 from common.internal.Exceptions import SkillException
 
@@ -79,15 +78,15 @@ class SerializationFunctions:
             outStream.i16(t.value())
             return
         elif t.typeID() == 2:
-            outStream.i8(0)
+            outStream.i8(2)
             outStream.i32(t.value())
             return
         elif t.typeID() == 3:
-            outStream.i8(0)
+            outStream.i8(3)
             outStream.i64(t.value())
             return
         elif t.typeID() == 4:
-            outStream.i8(0)
+            outStream.i8(4)
             outStream.v64(t.value())
             return
         elif t.typeID() == 15:
@@ -108,16 +107,12 @@ class SerializationFunctions:
             outStream.v64(t.typeID())
             return
 
-    def writeFieldData(self, state, fos, data: [], offset, barrier: threading.Semaphore):
+    def writeFieldData(self, state, fos, data: []):
         writeErrors = []
 
         for t in data:
-            t.outMap = fos
             t.writeErrors = writeErrors
-            t.barrier = barrier
-            t.run()
-        for _ in range(len(data)):
-            barrier.acquire()
+            t.write(fos)
         fos.close()
 
         for e in writeErrors:
@@ -150,26 +145,22 @@ class SerializationFunctions:
         outStream.i8(0)
 
 
-class Task(threading.Thread):
+class WriteProcess:
 
     writeErrors = []
-    barrier: threading.Semaphore
 
-    def __init__(self, f, begin, end):
-        super(Task, self).__init__()
+    def __init__(self, f):
+        super(WriteProcess, self).__init__()
         self.f = f
-        self.begin = begin
-        self.end = end
-        self.outMap = None
 
-    def run(self):
+    def write(self, fos):
         try:
             c = self.f._lastChunk()
             if isinstance(c, SimpleChunk):
                 i = c.bpo
-                self.f._wsc(i, i + c.count, self.outMap)
+                self.f._wsc(i, i + c.count, fos)
             else:
-                self.f._wbc(c, self.outMap)
+                self.f._wbc(c, fos)
         except SkillException as s:
             self.writeErrors.append(s)
         except IOError as i:
@@ -177,5 +168,3 @@ class Task(threading.Thread):
         except Exception as e:
             self.writeErrors.append(SkillException("unexpected failure while writing field {}".format(
                 self.f.__str__()), e))
-        finally:
-            self.barrier.release()

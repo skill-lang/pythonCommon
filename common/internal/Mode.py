@@ -1,7 +1,4 @@
 from enum import Enum
-import logging
-
-logger = logging.getLogger()
 
 
 class Mode(Enum):
@@ -22,17 +19,17 @@ class ActualMode:
                 if self.openMode is None:
                     self.openMode = m
                 elif self.openMode != m:
-                    raise IOError(logger.error("You can either create or read a file."))
+                    raise IOError("You can either create or read a file.")
             elif m == Mode.Write or m == Mode.Append:
                 if self.closeMode is None:
                     self.closeMode = m
                 elif self.closeMode != m:
-                    raise IOError(logger.error("You can either write or append to a file."))
+                    raise IOError("You can either write or append to a file.")
             elif m == Mode.ReadOnly:
                 if self.closeMode is None:
                     self.closeMode = m
                 elif self.closeMode != m:
-                    raise IOError(logger.error("You cannot combine ReadOnly with another write mode."))
+                    raise IOError("You cannot combine ReadOnly with another write mode.")
         if self.openMode is None:
             self.openMode = Mode.Read
         if self.closeMode is None:
