@@ -11,5 +11,5 @@ class SubType(SkillObject, NamedType):
     def skillName(self):
         return self.tpool.name()
 
-    def toString(self):
+    def __str__(self):
         return self.skillName() + "#" + self.skillID

@@ -45,7 +45,7 @@ class StoragePool(FieldType):
         # classes
         self._cls = cls
 
-    def setNextPool(self, nx):
+    def __setNextPool(self, nx):
         self._nextPool = nx
 
     def nextPool(self):
@@ -73,8 +73,8 @@ class StoragePool(FieldType):
             if p.nextPool() is None:
                 L[p.typeID() - 32] = L[ids]
             else:
-                L[ids].setNextPool(p.nextPool())
-            p.setNextPool(t)
+                L[ids].__setNextPool(p.nextPool())
+            p.__setNextPool(t)
 
     def fields(self):
         return StaticFieldIterator(self)
@@ -193,7 +193,7 @@ class StoragePool(FieldType):
         if self._cls is not None:
             for j in range(i, high):
                 self._data[j] = self._cls(j + 1)
-        else:
+        else:  # should not happen
             for j in range(i, high):
                 self._data[j] = SubType(self, j + 1)
 

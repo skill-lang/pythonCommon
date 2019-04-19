@@ -38,3 +38,6 @@ class ConstantLengthArray(SingleArgumentType):
         if isinstance(obj, ConstantLengthArray):
             return (self.length == obj.length) and self.groundType.equals(obj.groundType)
         return False
+
+    def __len__(self):
+        return self.length

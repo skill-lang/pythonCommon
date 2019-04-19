@@ -1,7 +1,6 @@
 import threading
 from common.internal.Blocks import SimpleChunk
 from common.internal.Exceptions import SkillException
-from common.streams.MappedOutputStream import MappedOutputStream
 
 
 class SerializationFunctions:

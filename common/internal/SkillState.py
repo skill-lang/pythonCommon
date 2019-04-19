@@ -116,7 +116,6 @@ class SkillState:
     def loadLazyData(self):
         for ID in range(0, len(self._strings.idMap)):
             self._strings.get(ID)
-            ID -= 1
         for p in self.__types:
             for f in p._dataFields:
                 if f.isLazy:

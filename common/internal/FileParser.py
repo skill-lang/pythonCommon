@@ -23,8 +23,8 @@ from common.internal.Exceptions import SkillException, ParseException, InvalidPo
 from common.internal.Blocks import Block, SimpleChunk, BulkChunk
 from common.internal.FieldDeclaration import FieldDeclaration
 from common.streams.FileInputStream import FileInputStream
-from common.internal.NamedType import NamedType
 from common.internal.SkillObject import SkillObject
+import binascii
 
 
 class DataEntry:
@@ -121,8 +121,9 @@ class FileParser:
                     # search in knowntypes for this class
                     seen = False
                     typ = None
+                    escapeName = "Z" + str(binascii.hexlify(name.encode("utf-16_be")))[2:-1]
                     for i in self.knownTypes:
-                        if name == i.__name__.lower():
+                        if name == i.__name__.lower() or i.__name__ == escapeName:
                             typ = i
                             seen = True
                     if not seen:
@@ -152,9 +153,7 @@ class FileParser:
                                      definition.typeID(), self.blockIDBarrier)
 
             bpo = definition.basePool._cachedSize
-            if definition.superPool is None:
-                bpo += 0
-            else:
+            if definition.superPool is not None:
                 if count != 0:
                     bpo += self.inStream.v64()
                 else:
@@ -168,7 +167,8 @@ class FileParser:
             definition.blocks.append(Block(bpo, count, count))
             definition.staticDataInstances += count
 
-            self.localFields.append(LFEntry(definition, self.inStream.v64()))
+            fieldCount = self.inStream.v64()
+            self.localFields.append(LFEntry(definition, fieldCount))
         except Exception as exc:
             raise ParseException(self.inStream, self.blockCounter, exc, "unexpected end of file")
 

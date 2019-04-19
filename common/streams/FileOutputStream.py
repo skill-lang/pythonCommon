@@ -1,10 +1,7 @@
 import os
 import threading
-from copy import deepcopy
 from common.streams.OutStream import OutStream
-import struct
 from typing import TypeVar
-from common.streams.MappedOutputStream import MappedOutputStream
 from io import BufferedWriter, BufferedRandom
 
 W = TypeVar('W', BufferedWriter, BufferedRandom)
@@ -36,16 +33,6 @@ class FileOutputStream(OutStream):
             size = os.stat(target.path).st_size
             f.seek(size)
             return FileOutputStream(f, size)
-
-    def mapBlock(self, size) -> MappedOutputStream:
-        fileno = self.file.fileno()
-        pos = self.position()
-        if self.file is not None:
-            self.flush()
-            self.close()
-        r = MappedOutputStream.open(fileno, pos, size)
-        self.pos += size
-        return r
 
     def flush(self):
         if self.file is not None:

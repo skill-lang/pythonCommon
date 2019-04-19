@@ -146,7 +146,9 @@ class StaticDataIterator:
     def __init__(self, storagePool):
         self.p = storagePool
         self.lastBlock = len(storagePool.blocks)
-        self.index = self.last = self.secondIndex = 0
+        self.index = 0
+        self.last = 0
+        self.secondIndex = 0
 
         while self.index == self.last and self.secondIndex < self.lastBlock:
             b = self.p.blocks[self.secondIndex]
@@ -224,7 +226,7 @@ class TypeHierarchyIterator:
         if self.p is None:
             raise StopIteration()
         r = self.p
-        n = self.p.nextPool()
+        n = self.p._nextPool
         if n is not None and self.end < n.typeHierarchyHeight:
             self.p = n
         else:
@@ -237,9 +239,11 @@ class TypeOrderIterator:
     def __init__(self, storagePool):
         self.sdi = None
         self.ts = TypeHierarchyIterator(storagePool)
+        self.lastTS = None
         for t in self.ts:
             if t.staticSize() != 0:
                 self.sdi = StaticDataIterator(t)
+                self.lastTS = t
                 break
 
     def __iter__(self):
@@ -255,6 +259,7 @@ class TypeOrderIterator:
             for t in self.ts:
                 if t.staticSize() != 0:
                     self.sdi = StaticDataIterator(t)
+                    result = self.sdi.__next__()
                     break
         if result is None:
             raise StopIteration()

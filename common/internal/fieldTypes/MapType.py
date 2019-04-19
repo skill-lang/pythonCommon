@@ -17,7 +17,8 @@ class MapType(FieldType):
         rval = {}
         while i != 0:
             i -= 1
-            rval[self.keyType.readSingleField(inStream)] = self.valueType.readSingleField(inStream)
+            a = self.keyType.readSingleField(inStream)
+            rval[a] = self.valueType.readSingleField(inStream)
         return rval
 
     def calculateOffset(self, xs: Union[list, dict, set]):

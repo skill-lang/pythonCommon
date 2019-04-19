@@ -1,6 +1,5 @@
-from copy import deepcopy
+import os
 from common.streams.InStream import InStream
-from common.streams.MappedInStream import MappedInStream
 from io import BufferedReader, BufferedRandom
 import threading
 from typing import TypeVar
@@ -20,6 +19,8 @@ class FileInputStream(InStream):
 
     @staticmethod
     def open(path):
+        if not os.path.exists(path):
+            open(path, "x").close()
         file: R = open(path, 'rb+', 4096)  # ignore warning. it's working
         return FileInputStream(file, path)
 

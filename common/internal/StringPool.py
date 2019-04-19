@@ -130,7 +130,7 @@ class StringPool(FieldType):
 
     def __iter__(self): return self.knownStrings.__iter__()
 
-    def toArray(self): return list(self.knownStrings)
+    def toList(self): return list(self.knownStrings)
 
     def add(self, e):
         self.knownStrings.add(e)
