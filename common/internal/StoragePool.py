@@ -209,8 +209,14 @@ class StoragePool(FieldType):
         raise Exception("Arbitrary storage pools know no fields!")
 
     def makeSubPool(self, index, name, cls):
-        clas = type(name, (cls,), dict())
-        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields, clas)
+        """
+        creates a new Subpool of this pool
+        :param index: index of the new pool
+        :param name: name of the new pool
+        :param cls: class of the new pool
+        :return: new StoragePool
+        """
+        return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields, cls)
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
         if self.basePool is not None:

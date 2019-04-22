@@ -2,7 +2,7 @@ from common.internal.Blocks import SimpleChunk
 from common.internal.Exceptions import SkillException
 
 
-class SerializationFunctions:
+class WritingFunctions:
 
     def __init__(self, state):
         self.state = state
@@ -65,7 +65,7 @@ class SerializationFunctions:
                     strings.add(s)
             if mapType.valueType.typeID() == 20:
                 for s in xs.values:
-                    SerializationFunctions.collectNestedStrings(strings, mapType.valueType, s)
+                    WritingFunctions.collectNestedStrings(strings, mapType.valueType, s)
 
     @staticmethod
     def writeType(t, outStream):
@@ -100,19 +100,23 @@ class SerializationFunctions:
             return
         elif t.typeID() == 20:
             outStream.i8(20)
-            SerializationFunctions.writeType(t.keyType, outStream)
-            SerializationFunctions.writeType(t.valueType, outStream)
+            WritingFunctions.writeType(t.keyType, outStream)
+            WritingFunctions.writeType(t.valueType, outStream)
             return
         else:
             outStream.v64(t.typeID())
             return
 
-    def writeFieldData(self, state, fos, data: []):
+    def writeFieldData(self, fos, data: []):
         writeErrors = []
 
-        for t in data:
-            t.writeErrors = writeErrors
-            t.write(fos)
+        for f in data:
+            c = f._lastChunk()
+            if isinstance(c, SimpleChunk):
+                i = c.bpo
+                f._wsc(i, i + c.count, fos)
+            else:
+                f._wbc(c, fos)
         fos.close()
 
         for e in writeErrors:
@@ -120,15 +124,11 @@ class SerializationFunctions:
         if len(writeErrors) != 0:
             raise writeErrors.pop(0)
 
-        # Phase 4
-        state._strings.resetIDs()
-        self.unfixPools(state.allTypes())
-
     @staticmethod
     def fixPools(pools: []):
         for p in pools:
             p._cachedSize = p.staticSize() - p._deletedCount
-            p.fixed = True
+            p._fixed = True
 
         for i in range(len(pools) - 1, -1, -1):
             p = pools[i]
@@ -138,33 +138,8 @@ class SerializationFunctions:
     @staticmethod
     def unfixPools(pools: []):
         for p in pools:
-            p.fixed = False
+            p._fixed = False
 
     @staticmethod
     def restrictions(outStream):
         outStream.i8(0)
-
-
-class WriteProcess:
-
-    writeErrors = []
-
-    def __init__(self, f):
-        super(WriteProcess, self).__init__()
-        self.f = f
-
-    def write(self, fos):
-        try:
-            c = self.f._lastChunk()
-            if isinstance(c, SimpleChunk):
-                i = c.bpo
-                self.f._wsc(i, i + c.count, fos)
-            else:
-                self.f._wbc(c, fos)
-        except SkillException as s:
-            self.writeErrors.append(s)
-        except IOError as i:
-            self.writeErrors.append(SkillException("failed to write field " + self.f.__str__(), i))
-        except Exception as e:
-            self.writeErrors.append(SkillException("unexpected failure while writing field {}".format(
-                self.f.__str__()), e))

@@ -1,8 +1,8 @@
-from common.internal.SerializationFunctions import SerializationFunctions, WriteProcess
+from common.internal.WritingFunctions import WritingFunctions
 from common.internal.Blocks import SimpleChunk
 
 
-class StateAppender(SerializationFunctions):
+class StateAppender(WritingFunctions):
 
     def __init__(self, state, fos):
         super(StateAppender, self).__init__(state)
@@ -92,6 +92,9 @@ class StateAppender(SerializationFunctions):
                     self.restrictions(fos)
                 end = offset + f._offset
                 fos.v64(end)
-                data.append(WriteProcess(f))
+                data.append(f)
                 offset = end
-        self.writeFieldData(state, fos, data)
+        self.writeFieldData(fos, data)
+        # Phase 4
+        state._strings.resetIDs()
+        self.unfixPools(state.allTypes())

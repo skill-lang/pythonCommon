@@ -1,12 +1,12 @@
 import sys
 import traceback
 
-from common.internal.SerializationFunctions import SerializationFunctions, WriteProcess
+from common.internal.WritingFunctions import WritingFunctions
 from common.internal.Exceptions import SkillException
 from common.internal.BasePool import BasePool
 
 
-class StateWriter(SerializationFunctions):
+class StateWriter(WritingFunctions):
 
     def __init__(self, state, fos):
         super(StateWriter, self).__init__(state)
@@ -64,9 +64,12 @@ class StateWriter(SerializationFunctions):
             c = f._lastChunk()
             c.begin = offset
             c.end = end
-            data.append(WriteProcess(f))
+            data.append(f)
             offset = end
-        self.writeFieldData(state, fos, data)
+        self.writeFieldData(fos, data)
+        # Phase 4
+        state._strings.resetIDs()
+        self.unfixPools(state.allTypes())
 
     def calcOffset(self, f):
         try:

@@ -129,7 +129,6 @@ class FileParser:
                     if not seen:
                         superType = (SkillObject,) if superDef is None else (superDef._cls,)
                         typ = type(name, superType, dict())
-                        print(name)
                     definition = self.newPool(name, superDef, self.types, typ)
                     if definition.superPool is not superDef:
                         if superDef is None:

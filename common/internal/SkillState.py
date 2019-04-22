@@ -121,7 +121,7 @@ class SkillState:
                 if self.isWindows:
                     target = self.__path
                     f = tempfile.TemporaryFile('w+b', -1, None, None, ".sf", "write")
-                    self.changePath(f.name())
+                    self.changePath(f.name)
                     StateWriter(self, FileOutputStream.write(self.__makeInStream()))
                     f._name = target
                     self.changePath(target)

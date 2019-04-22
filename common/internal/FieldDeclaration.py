@@ -106,7 +106,6 @@ class FieldDeclaration(ABC):
         for c in self._dataChunks:
             blockCounter = block
             block += 1
-            a = inStream.file.tell()
             ex = None
             try:
                 inStream.jump(c.begin)
