@@ -1,6 +1,5 @@
 from common.internal.FieldType import FieldType
 from common.internal.SkillObject import SkillObject
-from common.internal.SubType import SubType
 from common.internal.Iterator import TypeHierarchyIterator, StaticFieldIterator, StaticDataIterator, FieldIterator,\
     DynamicDataIterator, TypeOrderIterator, DynamicNewInstancesIterator
 from common.internal.Exceptions import SkillException
@@ -189,9 +188,6 @@ class StoragePool(FieldType):
         if self._cls is not None:
             for j in range(i, high):
                 self._data[j] = self._cls(j + 1)
-        else:  # should not happen
-            for j in range(i, high):
-                self._data[j] = SubType(self, j + 1)
 
     def _updateAfterCompress(self, lbpoMap: []):
         self._data = self.basePool.data()

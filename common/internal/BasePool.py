@@ -4,19 +4,16 @@ from common.internal.StoragePool import StoragePool
 
 
 class BasePool(StoragePool):
-    """The base of a type hierarchy. Contains optimized representations of data compared to sub pools."""
+    """The base of a type hierarchy"""
 
     def __init__(self, poolIndex, name, knownFields: [], autoFields: [], cls):
         super(BasePool, self).__init__(poolIndex, name, None, knownFields, autoFields, cls)
         self._owner = None
 
-    def _performAllocations(self) -> int:
+    def _performAllocations(self):
         """
         Allocates data and all instances for this pool and all of its sub-pools.
-        Note: invoked once upon state creation before deserialization of field data
-        :return:
         """
-        reads = 0
         # allocate data and link it to sub pools
         data = [None for _ in range(0, self._cachedSize)]
         subs = TypeHierarchyIterator(self)
@@ -26,9 +23,7 @@ class BasePool(StoragePool):
         subs = TypeHierarchyIterator(self)
         for s in subs:
             for b in s.blocks:
-                reads += 1
                 s._allocateInstances(b)
-        return reads
 
     def _compress(self, lbpoMap: []) -> None:
         """
@@ -48,6 +43,7 @@ class BasePool(StoragePool):
 
         # make d smaller than data
         d = []
+        p = 0
         toi: TypeOrderIterator = TypeOrderIterator(self)
         for i in toi:
             if i.skillID != 0:

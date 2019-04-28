@@ -19,7 +19,7 @@ class VariableLengthArray(SingleArgumentType):
     def __str__(self):
         return self.groundType.__str__() + "[]"
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, VariableLengthArray):
-            return self.groundType.equals(obj.groundType)
+            return self.groundType.__eq__(obj.groundType)
         return False

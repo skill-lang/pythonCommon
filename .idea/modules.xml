@@ -3,9 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../python/.idea/python.iml" filepath="$PROJECT_DIR$/../python/.idea/python.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../pythonGen/.idea/pythonGen.iml" filepath="$PROJECT_DIR$/../pythonGen/.idea/pythonGen.iml" />
       <module fileurl="file://$PROJECT_DIR$/../pythonTest/.idea/pythonTest.iml" filepath="$PROJECT_DIR$/../pythonTest/.idea/pythonTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/pythoncommon.iml" filepath="$PROJECT_DIR$/.idea/pythoncommon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../skill/testsuites/.idea/testsuites.iml" filepath="$PROJECT_DIR$/../skill/testsuites/.idea/testsuites.iml" />
     </modules>
   </component>
 </project>

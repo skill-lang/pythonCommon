@@ -58,7 +58,7 @@ class MapType(FieldType):
     def __str__(self):
         return "map<{}, {}>".format(self.keyType, self.valueType)
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, MapType):
-            return self.keyType.equals(obj.keyType) and self.valueType.equals(obj.valueType)
+            return self.keyType.__eq__(obj.keyType) and self.valueType.__eq__(obj.valueType)
         return False

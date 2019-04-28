@@ -10,7 +10,7 @@ class DynamicDataIterator:
         self.last = 0
 
         while self.index == self.last & self.secondIndex < self.lastBlock:
-            b = self.p.blocks.get(self.secondIndex)
+            b = self.p.blocks[self.secondIndex]
             self.index = b.bpo
             self.last = self.index + b.count
             self.secondIndex += 1
@@ -44,7 +44,7 @@ class DynamicDataIterator:
                 if self.index == self.last & self.secondIndex == self.lastBlock:
                     self.secondIndex += 1
                     while self.p is not None:
-                        if self.p.newObjects.size() != 0:
+                        if len(self.p.newObjects) != 0:
                             self.index = 0
                             self.last = self.p.newObjects.size()
                             break

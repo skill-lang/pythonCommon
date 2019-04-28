@@ -19,7 +19,7 @@ class SetType(SingleArgumentType):
     def __str__(self):
         return "set<" + self.groundType.__str__() + ">"
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, SetType):
-            return self.groundType.equals(obj.groundType)
+            return self.groundType.__eq__(obj.groundType)
         return False

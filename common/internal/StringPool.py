@@ -83,7 +83,11 @@ class StringPool(FieldType):
         self.idMap.append(None)
 
         for s in self.knownStrings:
-            if not(s in list(self.stringIDs)):
+            try:
+                a = self.stringIDs[s]
+            except:
+                a = None
+            if a is None:
                 self.stringIDs[s] = len(self.idMap)
                 self.idMap.append(s)
 
@@ -106,7 +110,11 @@ class StringPool(FieldType):
         todo = []
 
         for s in self.knownStrings:
-            if s not in self.stringIDs:
+            try:
+                a = self.stringIDs[s]
+            except:
+                a = None
+            if a is None:
                 self.stringIDs[s] = len(self.idMap)
                 self.idMap.append(s)
                 todo.append(bytearray(s.encode('utf-8')))

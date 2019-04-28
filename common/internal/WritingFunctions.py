@@ -58,13 +58,13 @@ class WritingFunctions:
     def collectNestedStrings(strings, mapType, xs: {}):
         if xs is not None:
             if mapType.keyType.typeID() == 14:
-                for s in set(xs.keys):
+                for s in set(xs.keys()):
                     strings.add(s)
             if mapType.valueType.typeID() == 14:
-                for s in set(xs.values):
+                for s in set(xs.values()):
                     strings.add(s)
             if mapType.valueType.typeID() == 20:
-                for s in xs.values:
+                for s in xs.values():
                     WritingFunctions.collectNestedStrings(strings, mapType.valueType, s)
 
     @staticmethod

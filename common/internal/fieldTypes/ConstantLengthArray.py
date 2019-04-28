@@ -34,9 +34,9 @@ class ConstantLengthArray(SingleArgumentType):
     def __str__(self):
         return self.groundType.__str__() + "[" + self.length + "]"
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantLengthArray):
-            return (self.length == obj.length) and self.groundType.equals(obj.groundType)
+            return (self.length == obj.length) and (self.groundType == obj.groundType)
         return False
 
     def __len__(self):

@@ -32,12 +32,11 @@ class SkillState:
         try:
             StoragePool._establishNextPool(self.__types)
 
-            reads = 0
             fieldNames = set()
             for p in self.allTypes():
                 if isinstance(p, BasePool):  # if p is BasePool
                     p._owner = self
-                    reads += p._performAllocations()
+                    p._performAllocations()
                 # add missing field declarations
                 fieldNames.clear()
                 for f in p._dataFields:
@@ -48,11 +47,10 @@ class SkillState:
                         p.addKnownField(n, self._strings, self.__annotationType)
 
             # read field data
-            reads = 0
             readErrors = []
             for p in self.allTypes():
                 for f in p._dataFields:
-                    reads += f._finish(readErrors, fis)
+                    f._finish(readErrors, fis)
 
             self.__annotationType.fixTypes(self._poolByName)
             for e in readErrors:

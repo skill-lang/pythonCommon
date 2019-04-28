@@ -18,7 +18,7 @@ class ListType(SingleArgumentType):
     def __str__(self):
         return "list<" + self.groundType.__str__() + ">"
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ListType):
-            return self.groundType.equals(obj.groundType)
+            return self.groundType.__eq__(obj.groundType)
         return False

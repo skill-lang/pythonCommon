@@ -9,7 +9,7 @@ class FieldType:
     def typeID(self):
         return self._typeID
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, FieldType):
             return obj.typeID() == self.typeID()
         return False

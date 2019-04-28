@@ -34,7 +34,7 @@ class ConstantI8(ConstantInteger):
     def __str__(self):
         return "const i8 = []".format(self.value())
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantI8):
             return obj.value() == self.value()
         return False
@@ -50,7 +50,7 @@ class ConstantI16(ConstantInteger):
     def __str__(self):
         return "const i16 = []".format(self.value())
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantI16):
             return obj.value() == self.value()
         return False
@@ -66,7 +66,7 @@ class ConstantI32(ConstantInteger):
     def __str__(self):
         return "const i32 = []".format(self.value())
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantI32):
             return obj.value() == self.value()
         return False
@@ -82,7 +82,7 @@ class ConstantI64(ConstantInteger):
     def __str__(self):
         return "const i64 = []".format(self.value())
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantI64):
             return obj.value() == self.value()
         return False
@@ -98,7 +98,7 @@ class ConstantV64(ConstantInteger):
     def __str__(self):
         return "const v64 = []".format(self.value())
 
-    def equals(self, obj):
+    def __eq__(self, obj):
         if isinstance(obj, ConstantV64):
             return obj.value() == self.value()
         return False
