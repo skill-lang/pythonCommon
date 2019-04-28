@@ -106,7 +106,8 @@ class StoragePool(FieldType):
             return None
 
     def getByID(self, index: int):
-        if len(self._data) < 1 or len(self._data) <= index:
+        index -= 1
+        if index < 0 or len(self._data) <= index:
             return None
         return self._data[index]
 

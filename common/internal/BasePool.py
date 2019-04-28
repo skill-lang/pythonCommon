@@ -43,12 +43,11 @@ class BasePool(StoragePool):
 
         # make d smaller than data
         d = []
-        p = 0
         toi: TypeOrderIterator = TypeOrderIterator(self)
         for i in toi:
             if i.skillID != 0:
                 d.append(i)
-                i.skillID = len(d) - 1
+                i.skillID = len(d)
 
         # update after compressing
         self._data = d
