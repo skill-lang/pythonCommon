@@ -1,4 +1,0 @@
-
-class NamedType:
-
-    tPool = None
