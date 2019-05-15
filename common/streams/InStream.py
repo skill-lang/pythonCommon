@@ -9,7 +9,7 @@ R = TypeVar('R', BufferedReader, BufferedRandom)
 
 class InStream(abc.ABC):
     """
-    Implementations of this class are used to turn a byte stream into a stream of integers and floats
+    Implementations of this class are used to turn a byte stream into a stream of integers and floats.
     """
 
     def __init__(self, reader: R):

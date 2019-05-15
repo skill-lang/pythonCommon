@@ -3,6 +3,9 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
 class SetType(SingleArgumentType):
+    """
+    Field type of all sets.
+    """
 
     _typeID = 19
 

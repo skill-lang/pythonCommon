@@ -9,6 +9,11 @@ from common.internal.BasePool import BasePool
 class StateWriter(WritingFunctions):
 
     def __init__(self, state, fos):
+        """
+        Writes to a file.
+        :param state: SkillState to be written
+        :param fos: FileOutputStream
+        """
         super(StateWriter, self).__init__(state)
         self.fixPools(state.allTypes())
         lbpoMap = [0 for i in range(0, len(state.allTypes()))]
@@ -19,7 +24,6 @@ class StateWriter(WritingFunctions):
                 bases += 1
                 p._compress(lbpoMap)
 
-        # **************** Phase 3: Write ******************
         # write string block
         state._strings.prepareAndWrite(fos, self)
         fos.v64(len(state.allTypes()))
@@ -67,11 +71,16 @@ class StateWriter(WritingFunctions):
             data.append(f)
             offset = end
         self.writeFieldData(fos, data)
-        # Phase 4
+        # Writing done. Clean up
         state._strings.resetIDs()
         self.unfixPools(state.allTypes())
 
     def calcOffset(self, f):
+        """
+        Calculates offset of FieldDeclaration
+        :param f: FieldDeclaration
+        :return:
+        """
         try:
             f._offset = 0
             c = f._lastChunk()

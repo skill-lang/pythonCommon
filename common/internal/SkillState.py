@@ -13,6 +13,9 @@ from common.internal.BasePool import BasePool
 
 
 class SkillState:
+    """
+    SkillFile representation in memory. Holds all information of a binary file.
+    """
 
     isWindows = (os.name == 'nt')
 
@@ -29,6 +32,11 @@ class SkillState:
         self.__dirty = False
 
     def _finalizePools(self, fis):
+        """
+        Finalize reading a binary file.
+        :param fis: FileInputStream
+        :return:
+        """
         try:
             StoragePool._establishNextPool(self.__types)
 
@@ -61,10 +69,18 @@ class SkillState:
             traceback.print_exc()
 
     def Strings(self):
+        """
+        :return: StringPool of this SkillState
+        """
         return self._strings
 
     def contains(self, target):
-        if target is None or target == 0:
+        """
+        Holds this SkillState target?
+        :param target: SkillObject
+        :return: True if SkillState holds this instance or target is None or deleted
+        """
+        if target is None or target.skillID == 0:
             return True
         try:
             if target.skillID > 0:
@@ -74,11 +90,21 @@ class SkillState:
             return False
 
     def delete(self, target):
+        """
+        Delete instance by setting skillID to 0
+        :param target: SkillObject
+        :return:
+        """
         if target is not None:
             self.__dirty = self.__dirty | (target.skillID > 0)
             self._poolByName[target.skillName()].delete(target)
 
     def changePath(self, path):
+        """
+        Change path of the binary file.
+        :param path: new path
+        :return:
+        """
         if self.__writeMode == Mode.Append:
             if self.__path == path:
                 return
@@ -92,6 +118,11 @@ class SkillState:
         self.__path = path
 
     def changeMode(self, writeMode):
+        """
+        Change write mode
+        :param writeMode: new write mode
+        :return:
+        """
         if self.__writeMode == writeMode:
             return
 
@@ -106,6 +137,10 @@ class SkillState:
             return
 
     def loadLazyData(self):
+        """
+        Load all lazy loaded data.
+        :return:
+        """
         for ID in range(0, len(self._strings.idMap)):
             self._strings.get(ID)
         for p in self.__types:
@@ -114,6 +149,10 @@ class SkillState:
                     f._ensureLoaded()
 
     def flush(self):
+        """
+        Flush to the binary file.
+        :return:
+        """
         try:
             if self.__writeMode == Mode.Write:
                 if self.isWindows:
@@ -143,11 +182,19 @@ class SkillState:
             raise SkillException("unexpected exception", e)
 
     def __makeInStream(self):
+        """
+        If FileInputStream is closed or None, a new FileInputStream will be opened.
+        :return: current FileInputStream
+        """
         if self.__input is None or self.__input.file.closed or not (self.__path == self.__input.path):
             self.__input = FileInputStream.open(self.__path)
         return self.__input
 
     def close(self):
+        """
+        Flush and close the binary file. The SKillState will not be deleted.
+        :return:
+        """
         if self.__writeMode != Mode.ReadOnly:
             self.flush()
             self.__writeMode = Mode.ReadOnly
@@ -159,7 +206,13 @@ class SkillState:
                 traceback.print_exc()
 
     def currentPath(self):
+        """
+        :return: current path of the binary file.
+        """
         return self.__path
 
     def allTypes(self):
+        """
+        :return: list of all StoragePools in the SkillState
+        """
         return self.__types

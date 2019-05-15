@@ -6,6 +6,9 @@ from common.streams.OutStream import OutStream
 
 
 class BoolType(FieldType, Singleton):
+    """
+    Field type of a boolean
+    """
 
     _typeID = 6
 

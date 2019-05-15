@@ -1,7 +1,13 @@
 
 class DynamicDataIterator:
+    """
+    Iterates over all instances of the StoragePools which are iterated in Pre-order.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: first StoragePools
+        """
         self.p = storagePool
         self.endHeight = storagePool.typeHierarchyHeight
         self.lastBlock = len(storagePool.blocks)
@@ -81,8 +87,14 @@ class DynamicDataIterator:
 
 
 class DynamicNewInstancesIterator:
+    """
+    Iterates over all new instances in a StoragePool.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: StoragePool which holds the instances.
+        """
         self.ts = TypeHierarchyIterator(storagePool)
         self.last = len(storagePool.newObjects)
         self.index = 0
@@ -110,6 +122,9 @@ class DynamicNewInstancesIterator:
 
 
 class FieldIterator:
+    """
+    Iterates over all FieldDeclaration of a StoragePool and its superpools.
+    """
 
     def __init__(self, storagePool):
         self.p = storagePool
@@ -142,8 +157,14 @@ class FieldIterator:
 
 
 class StaticDataIterator:
+    """
+    Iterates over all instances in a StoragePool.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: StoragePool which holds the FieldDeclarations
+        """
         self.p = storagePool
         self.lastBlock = len(storagePool.blocks)
         self.index = 0
@@ -188,8 +209,14 @@ class StaticDataIterator:
 
 
 class StaticFieldIterator:
+    """
+    Iterates over FieldDeclarations of a StoragePool without its superpools.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: StoragePool which holds the FieldDeclarations
+        """
         if len(storagePool._autoFields) == 0 and len(storagePool._dataFields) == 0:
             self.p = None
             self.i = 0
@@ -214,8 +241,14 @@ class StaticFieldIterator:
 
 
 class TypeHierarchyIterator:
+    """
+    Iterates over all StoragePools in Pre-order.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: first StoragePool
+        """
         self.p = storagePool
         self.end = storagePool.typeHierarchyHeight
 
@@ -235,8 +268,14 @@ class TypeHierarchyIterator:
 
 
 class TypeOrderIterator:
+    """
+    Iterates over instances in StoragePools which are iterated in type order.
+    """
 
     def __init__(self, storagePool):
+        """
+        :param storagePool: first StoragePool
+        """
         self.sdi = None
         self.ts = TypeHierarchyIterator(storagePool)
         self.lastTS = None

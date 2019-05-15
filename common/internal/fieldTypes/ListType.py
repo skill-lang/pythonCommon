@@ -3,6 +3,9 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
 class ListType(SingleArgumentType):
+    """
+    Field type of all lists.
+    """
 
     _typeID = 18
 

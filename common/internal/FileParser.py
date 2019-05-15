@@ -44,6 +44,11 @@ class LFEntry:
 class FileParser:
 
     def __init__(self, inStream: FileInputStream, knownTypes):
+        """
+        Parses a binary SKilL file
+        :param inStream: FileInputStream
+        :param knownTypes: classes from the specification
+        """
         self.blockCounter = 0
         self.seenTypes = set()
         self.blockIDBarrier = 0
@@ -67,6 +72,10 @@ class FileParser:
         raise NotImplementedError()
 
     def stringBlock(self):
+        """
+        Parses string block
+        :return:
+        """
         try:
             count = self.inStream.v64()
 
@@ -85,6 +94,10 @@ class FileParser:
             raise ParseException(self.inStream, self.blockCounter, e, "corrupted string block")
 
     def typeDefinition(self):
+        """
+        Parses type definitions in type block
+        :return:
+        """
         try:
             name = self.strings.get(self.inStream.v64())
         except InvalidPoolIndexException as e:
@@ -172,6 +185,10 @@ class FileParser:
             raise ParseException(self.inStream, self.blockCounter, exc, "unexpected end of file")
 
     def typeBlock(self):
+        """
+        Parses type block.
+        :return:
+        """
         self.seenTypes.clear()
         self.blockIDBarrier = 0
         self.localFields.clear()
@@ -233,6 +250,10 @@ class FileParser:
         self.processFieldData()
 
     def processFieldData(self):
+        """
+        Parses field data by setting position of Chunks.
+        :return:
+        """
         fileOffset = self.inStream.position()
         dataEnd = fileOffset
         for e in self.fieldDataQueue:
@@ -242,6 +263,10 @@ class FileParser:
         self.inStream.jump(dataEnd)
 
     def fieldType(self):
+        """
+        Reads typeID and returns corresponding FieldType.
+        :return: FieldType
+        """
         typeID = self.inStream.v64()
         if typeID == 0:
             return ConstantI8(self.inStream.i8())
@@ -289,6 +314,13 @@ class FileParser:
             raise ParseException(self.inStream, self.blockCounter, None, "Invalid type ID: []", typeID)
 
     def read(self, cls, writeMode, knownTypes):
+        """
+        Function to create a SkillState defined in the binding.
+        :param cls: class of generated SkillState
+        :param writeMode: current writeMode
+        :param knownTypes: classes generated in binding
+        :return:
+        """
         try:
             r = cls(self.poolByName, self.strings, self.annotation, self.types, self.inStream, writeMode, knownTypes)
             return r

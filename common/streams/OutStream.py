@@ -6,6 +6,9 @@ from io import BufferedWriter
 
 
 class OutStream(abc.ABC):
+    """
+    Implementations of this class are used to turn a stream of integers and floats into a byte stream.
+    """
 
     def __init__(self, file):
         self.file: BufferedWriter = file

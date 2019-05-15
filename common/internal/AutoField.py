@@ -3,6 +3,9 @@ from common.internal.KnownField import KnownField
 
 
 class AutoField(FieldDeclaration, KnownField):
+    """
+    Superclass of all fields marked as 'auto'.
+    """
 
     def __init__(self, fType, name, owner, index):
         super(AutoField, self).__init__(fType, name, owner, True)

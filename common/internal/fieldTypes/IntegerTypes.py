@@ -5,6 +5,9 @@ from typing import Union
 
 
 class Singleton(object):
+    """
+    Superclass of all classes which should be singletons.
+    """
     _instance = {}
 
     def __new__(cls, *args, **kwargs):
@@ -14,6 +17,9 @@ class Singleton(object):
 
 
 class Integer(FieldType, Singleton):
+    """
+    Superclass of all non-constant integer types.
+    """
 
     def __init__(self, typeID):
         super(Integer, self).__init__(typeID)
@@ -23,6 +29,9 @@ class Integer(FieldType, Singleton):
 
 
 class I8(Integer):
+    """
+    Field type of all 8-bit integers.
+    """
     
     def __init__(self):
         super(I8, self).__init__(7)
@@ -44,6 +53,9 @@ class I8(Integer):
 
 
 class I16(Integer):
+    """
+    Field type of all 16-bit integers.
+    """
 
     def __init__(self):
         super(I16, self).__init__(8)
@@ -68,6 +80,9 @@ class I16(Integer):
 
 
 class I32(Integer):
+    """
+    Field type of all 32-bit integers.
+    """
 
     def __init__(self):
         super(I32, self).__init__(9)
@@ -92,6 +107,9 @@ class I32(Integer):
 
 
 class I64(Integer):
+    """
+    Field type of all 64-bit integers.
+    """
 
     def __init__(self):
         super(I64, self).__init__(10)
@@ -116,6 +134,9 @@ class I64(Integer):
 
 
 class V64(Integer):
+    """
+    Field type of all integers with variable length.
+    """
 
     def __init__(self):
         super(V64, self).__init__(11)
@@ -181,6 +202,11 @@ class V64(Integer):
 
     @staticmethod
     def singleV64Offset(v):
+        """
+        Special function to calculate offset faster.
+        :param v:
+        :return:
+        """
         if (v & 0xFFFFFFFFFFFFFF80) == 0:
             return 1
         elif (v & 0xFFFFFFFFFFFFC000) == 0:

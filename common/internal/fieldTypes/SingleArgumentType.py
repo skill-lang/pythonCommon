@@ -5,6 +5,9 @@ from common.internal.fieldTypes.IntegerTypes import V64
 
 
 class SingleArgumentType(FieldType):
+    """
+    Superclass of field types list, set and arrays.
+    """
 
     def __init__(self, typeID, groundType: FieldType):
         super(SingleArgumentType, self).__init__(typeID)

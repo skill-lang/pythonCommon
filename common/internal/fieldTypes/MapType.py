@@ -5,6 +5,9 @@ from common.internal.fieldTypes.IntegerTypes import V64
 
 
 class MapType(FieldType):
+    """
+    Field type of all maps.
+    """
     _typeID = 20
 
     def __init__(self, keyType, valueType):

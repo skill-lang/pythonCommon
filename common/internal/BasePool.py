@@ -12,7 +12,7 @@ class BasePool(StoragePool):
 
     def _performAllocations(self):
         """
-        Allocates data and all instances for this pool and all of its sub-pools.
+        Allocates data and all instances for this pool and its sub-pools.
         """
         # allocate data and link it to sub pools
         data = [None for _ in range(0, self._cachedSize)]
@@ -28,7 +28,7 @@ class BasePool(StoragePool):
     def _compress(self, lbpoMap: []) -> None:
         """
         compress new instances into the data array and update skillIDs
-        :param lbpoMap
+        :param lbpoMap: list of lbpos
         :return:
         """
         # create our part of the lbpo map
@@ -56,6 +56,12 @@ class BasePool(StoragePool):
             s._updateAfterCompress(lbpoMap)
 
     def _prepareAppend(self, lbpoMap: [], chunkMap: {}):
+        """
+        Update StoragePools, FieldDeclarations and SkillIDs before appending to a file.
+        :param lbpoMap: list of the lbpos
+        :param chunkMap: Dict of FieldDeclaration and chunks
+        :return:
+        """
         # update lbpoMap
         theNext = len(self._data)
         for p in TypeHierarchyIterator(self):
@@ -89,4 +95,7 @@ class BasePool(StoragePool):
             t.updateAfterPrepareAppend(lbpoMap, chunkMap)
 
     def owner(self):
+        """
+        :return: returns SkillState which owns this BasePool
+        """
         return self._owner

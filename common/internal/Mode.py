@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class Mode(Enum):
+    """
+    Read and write modes
+    """
     Create = 0
     Read = 1
     Write = 2
@@ -12,6 +15,10 @@ class Mode(Enum):
 class ActualMode:
 
     def __init__(self, modes):
+        """
+        Calculate read and write mode
+        :param modes: list of modes
+        """
         self.openMode = None
         self.closeMode = None
         for m in modes:

@@ -3,22 +3,26 @@ from common.internal.Exceptions import SkillException
 
 
 class WritingFunctions:
+    """
+    Functions for writing to the file.
+    """
 
     def __init__(self, state):
         self.state = state
 
+        # collect strings
         strings = self.state.Strings()
         for p in self.state.allTypes():
-            strings.add(p.name())
+            strings.add(p.name())  # collect type names
             for f in p._dataFields:
-                strings.add(f.name())
+                strings.add(f.name())  # collect field names
 
-                if f.fieldType().typeID() == 14:
+                if f.fieldType().typeID() == 14:  # collect strings from string types
                     for i in p:
                         if not i.isDeleted():
                             strings.add(i.get(f))
 
-                if f.fieldType().typeID() in [15, 17, 18, 19]:
+                if f.fieldType().typeID() in [15, 17, 18, 19]:  # collect string from arrays, lists and sets
                     if f.fieldType().groundType.typeID() == 14:
                         for i in p:
                             if not i.isDeleted():
@@ -26,7 +30,7 @@ class WritingFunctions:
                                 for s in xs:
                                     strings.add(s)
 
-                if f.fieldType().typeID() == 20:
+                if f.fieldType().typeID() == 20:  # collect strings from maps
                     typ = f.fieldType()
                     k = typ.keyType.typeID() == 14
                     v = typ.valueType.typeID() == 14
@@ -56,6 +60,13 @@ class WritingFunctions:
 
     @staticmethod
     def collectNestedStrings(strings, mapType, xs: {}):
+        """
+        Collects strings in nested maps
+        :param strings: StringPool
+        :param mapType: Field Type
+        :param xs: map/dict
+        :return:
+        """
         if xs is not None:
             if mapType.keyType.typeID() == 14:
                 for s in set(xs.keys()):
@@ -69,6 +80,12 @@ class WritingFunctions:
 
     @staticmethod
     def writeType(t, outStream):
+        """
+        Write type id to the file.
+        :param t: Field type
+        :param outStream: FileOutputStream
+        :return:
+        """
         if t.typeID() == 0:
             outStream.i8(0)
             outStream.i8(t.value())
@@ -108,7 +125,12 @@ class WritingFunctions:
             return
 
     def writeFieldData(self, fos, data: []):
-        writeErrors = []
+        """
+        Writes field data to the file.
+        :param fos: FileOutputStream
+        :param data: list of FieldDeclaration to write in order
+        :return:
+        """
 
         for f in data:
             c = f._lastChunk()
@@ -119,13 +141,13 @@ class WritingFunctions:
                 f._wbc(c, fos)
         fos.close()
 
-        for e in writeErrors:
-            raise e
-        if len(writeErrors) != 0:
-            raise writeErrors.pop(0)
-
     @staticmethod
     def fixPools(pools: []):
+        """
+        Fix StoragePools by updating size
+        :param pools: list of StroagePools
+        :return:
+        """
         for p in pools:
             p._cachedSize = p.staticSize() - p._deletedCount
             p._fixed = True
@@ -137,9 +159,19 @@ class WritingFunctions:
 
     @staticmethod
     def unfixPools(pools: []):
+        """
+        Unfix StoragePools by setting fixed to False.
+        :param pools: list of StoragePools
+        :return:
+        """
         for p in pools:
             p._fixed = False
 
     @staticmethod
     def restrictions(outStream):
+        """
+        Write restrictions. not supported!
+        :param outStream: FileOutputStream
+        :return:
+        """
         outStream.i8(0)

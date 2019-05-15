@@ -6,6 +6,9 @@ from common.streams.FileOutputStream import FileOutputStream
 
 
 class Float(FieldType, Singleton):
+    """
+    Superclass of all floating point field types.
+    """
     
     def __init__(self, typeID):
         super(Float, self).__init__(typeID)
@@ -15,6 +18,9 @@ class Float(FieldType, Singleton):
 
 
 class F32(Float):
+    """
+    Field type of all 32-bit floats.
+    """
 
     def __init__(self):
         super(F32, self).__init__(12)
@@ -39,6 +45,9 @@ class F32(Float):
 
 
 class F64(Float):
+    """
+    Field type of all 64-bit floats.
+    """
 
     def __init__(self):
         super(F64, self).__init__(13)

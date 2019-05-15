@@ -3,6 +3,9 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
 class ConstantLengthArray(SingleArgumentType):
+    """
+    Field type of a array with constant length.
+    """
 
     _typeID = 15
 
@@ -40,4 +43,7 @@ class ConstantLengthArray(SingleArgumentType):
         return False
 
     def __len__(self):
+        """
+        :return: Length of this array.
+        """
         return self.length

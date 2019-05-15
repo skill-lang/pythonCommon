@@ -3,8 +3,16 @@ from common.internal.Blocks import SimpleChunk
 
 
 class StateAppender(WritingFunctions):
+    """
+    Class for appending to a binary file.
+    """
 
     def __init__(self, state, fos):
+        """
+        Append to a binary file. Used iff write mode is 'Append'.
+        :param state: SkillState to be appended
+        :param fos: FileOutputStream
+        """
         super(StateAppender, self).__init__(state)
 
         i = 0

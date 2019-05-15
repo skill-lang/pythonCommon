@@ -3,6 +3,9 @@ from common.internal.Blocks import SimpleChunk, BulkChunk
 
 
 class LazyField(DistributedField):
+    """
+    Superclass of lazy loaded fields.
+    """
     chunkMap = {}
     isLazy = True
 
@@ -10,6 +13,10 @@ class LazyField(DistributedField):
         super(LazyField, self).__init__(fType, name, owner)
 
     def __load(self):
+        """
+        Loads field data.
+        :return:
+        """
         for p in self.chunkMap:
             if p.count > 0:
                 if isinstance(p, BulkChunk):
@@ -20,6 +27,10 @@ class LazyField(DistributedField):
         self.chunkMap = None
 
     def _ensureLoaded(self):
+        """
+        Ensures that field data is loaded.
+        :return:
+        """
         if self.chunkMap is not None:
             self.__load()
 

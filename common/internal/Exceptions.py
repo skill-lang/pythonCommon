@@ -22,7 +22,7 @@ class PoolSizeMismatchError(Exception):
 
 
 class TypeMismatchError(Exception):
-    """Thrown in case of a type miss-match on a field type."""
+    """Thrown in case of a type mismatch of a field type."""
 
     def __init__(self, fType, expected: str, field: str, pool: str):
         super(TypeMismatchError, self).__init__(

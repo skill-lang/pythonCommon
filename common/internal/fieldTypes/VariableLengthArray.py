@@ -3,6 +3,9 @@ from common.internal.fieldTypes.SingleArgumentType import SingleArgumentType
 
 
 class VariableLengthArray(SingleArgumentType):
+    """
+    Field type of arrays with variable length.
+    """
 
     _typeID = 17
 

@@ -6,6 +6,9 @@ from common.internal.NamedType import NamedType
 
 
 class Annotation(FieldType):
+    """
+    Field type class of Annotations. Annotations are saved in variable annotationTypes of the SkillState.
+    """
 
     _typeID = 5
 

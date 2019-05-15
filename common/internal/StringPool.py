@@ -10,6 +10,9 @@ S = TypeVar('S', FileInputStream, type(None))
 
 
 class StringPool(FieldType):
+    """
+    Container for all Strings.
+    """
 
     _typeID = 14
 
@@ -24,9 +27,20 @@ class StringPool(FieldType):
         self.knownStrings = set()
         self.stringIDs = {}
 
-    def readSingleField(self, fis: InStream): return self.get(fis.v64())
+    def readSingleField(self, fis: InStream):
+        """
+        Return a string hold by this StringPool by reading the index from the file.
+        :param fis: FileInputStream
+        :return: String hold by this StringPool
+        """
+        return self.get(fis.v64())
 
     def calculateOffset(self, xs):
+        """
+        Calculates offset of all strings in collection xs.
+        :param xs: Collection of strings
+        :return: offset
+        """
         if len(self.stringIDs) < 128:
             return len(xs)
         result = 0
@@ -38,12 +52,23 @@ class StringPool(FieldType):
         return result
 
     def singleOffset(self, name):
+        """
+        Calculates offset of the id of the string with the specified name
+        :param name: name of the string
+        :return: offset of the id
+        """
         if name is None:
             return 1
         else:
             return V64().singleV64Offset(self.stringIDs.get(name))
 
     def writeSingleField(self, v, out: OutStream):
+        """
+        Writes the id of the string to the file.
+        :param v: string
+        :param out: FileOutputStream
+        :return:
+        """
         if v is None:
             out.i8(0)
         else:
@@ -58,6 +83,11 @@ class StringPool(FieldType):
     def __len__(self): return len(self.knownStrings)
 
     def get(self, index):
+        """
+        Get a string by its id.
+        :param index: id of the string
+        :return: string
+        """
         if index is 0:
             return None
         result = None
@@ -79,6 +109,12 @@ class StringPool(FieldType):
         return result
 
     def prepareAndWrite(self, outStream, ws: StateWriter):
+        """
+        Update dict and list of strings and writes offsets and string to the file.
+        :param outStream: FileOutputStream
+        :param ws: StateWriter
+        :return:
+        """
         self.idMap.clear()
         self.idMap.append(None)
 
@@ -105,6 +141,12 @@ class StringPool(FieldType):
                 outStream.put(self.idMap[i].encode())
 
     def prepareAndAppend(self, fos, sa):
+        """
+        Update dict and list of strings and appends offsets and string in a new string block to the file.
+        :param fos: FileOutputStream
+        :param sa: StateAppender
+        :return:
+        """
         for i in range(1, len(self.idMap)):
             self.stringIDs[self.idMap[i]] = i
         todo = []
@@ -131,41 +173,97 @@ class StringPool(FieldType):
         for s in todo:
             fos.putString(s)
 
-    def contains(self, obj): return obj in self.knownStrings
+    def contains(self, obj):
+        """
+        :param obj: string
+        :return: True iff string in this StringPool, else False
+        """
+        return obj in self.knownStrings
 
-    def __iter__(self): return self.knownStrings.__iter__()
+    def __iter__(self):
+        """
+        Iterator over all known strings
+        :return:
+        """
+        return self.knownStrings.__iter__()
 
-    def toList(self): return list(self.knownStrings)
+    def toList(self):
+        """
+        :return: list of all known strings without duplicates.
+        """
+        return list(self.knownStrings)
 
     def add(self, e):
+        """
+        Adds string to StringPool
+        :param e: string to add
+        :return:
+        """
         self.knownStrings.add(e)
 
-    def remove(self, obj): self.knownStrings.remove(obj)
+    def remove(self, obj):
+        """
+        Removes string from StringPool
+        :param obj: string to remove
+        :return:
+        """
+        self.knownStrings.remove(obj)
 
     def containsAll(self, c):
+        """
+        :param c: collection
+        :return: True iff all strings in c are in this StringPool, else False
+        """
         for x in c:
             if x not in self.knownStrings:
                 return False
         return True
 
-    def addAll(self, c): self.knownStrings.update(c)
+    def addAll(self, c):
+        """
+        Adds all strings in c to the StringPool
+        :param c: collection
+        :return:
+        """
+        self.knownStrings.update(c)
 
     def removeAll(self, c):
+        """
+        Removes all strings stored in c from this StringPool.
+        :param c: collection of strings
+        :return:
+        """
         for x in c:
             if x in self.knownStrings:
                 self.knownStrings.remove(x)
 
     def retainAll(self, c):
+        """
+        Removes all strings from this StringPool except the ones in c.
+        :param c: collection of strings
+        :return:
+        """
         for x in self.knownStrings:
             if x not in c:
                 self.knownStrings.remove(x)
 
-    def clear(self): self.knownStrings.clear()
+    def clear(self):
+        """
+        Clears knownStrings of this StringPool
+        :return:
+        """
+        self.knownStrings.clear()
 
-    def hasInStream(self): return self.inStream is not None
+    def hasInStream(self):
+        """
+        :return: True if StringPool has a FileInputStream
+        """
+        return self.inStream is not None
 
     class Position:
-
+        """
+        Position of a string in the file. This stores the offset and the length of a string.
+        """
         def __init__(self, l, i):
             self.absoluteOffset = l
             self.length = i

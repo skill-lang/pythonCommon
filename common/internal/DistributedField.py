@@ -33,7 +33,6 @@ class DistributedField(FieldDeclaration):
     def _compress(self):
         """
         compress this field
-        Note: for now, deleted elements can survive in data
         """
         self._data.update(self._newData)
         self._newData.clear()

@@ -11,6 +11,10 @@ from abc import ABC, abstractmethod
 
 
 class StoragePool(FieldType):
+    """
+    A StoragePool exists for each class specified in the specification. It holds each instance of this class and
+    manages all information and fields of it.
+    """
 
     noKnownFields = []
     noAutoFields = []
@@ -41,19 +45,38 @@ class StoragePool(FieldType):
         self._cls = cls
 
     def __setNextPool(self, nx):
+        """
+        Sets the _nextPool of this StoragePool.
+        :param nx: new next pool
+        :return:
+        """
         self._nextPool = nx
 
     def nextPool(self):
+        """
+        :return: _nextPool of this StoragePool
+        """
         return self._nextPool
 
     def name(self):
+        """
+        :return: name of this StoragePool
+        """
         return self._name
 
     def data(self):
+        """
+        :return: data array of this StoragePool
+        """
         return self._data
 
     @staticmethod
     def _establishNextPool(types: []):
+        """
+        Sets _nextPool for all StoragePools in types. The StoragePools will be traversed in Pre-order.
+        :param types: list of all StoragePools
+        :return:
+        """
         L = [None for i in range(0, len(types))]
         for i in range(len(types) - 1, -1, -1):
             t: StoragePool = types[i]
@@ -72,21 +95,40 @@ class StoragePool(FieldType):
             p.__setNextPool(t)
 
     def fields(self):
+        """
+        :return: StaticFieldIterator over all FieldDeclarations of this StoragePool.
+        """
         return StaticFieldIterator(self)
 
     def allFields(self):
+        """
+        :return: FieldIterator over all FieldDeclarations of this StoragePool and its superpools.
+        """
         return FieldIterator(self)
 
     def lastBlock(self) -> Block:
+        """
+        :return: last block stored in this StoragePool
+        """
         return self.blocks[len(self.blocks) - 1]
 
     def newObject(self, index):
+        """
+        :param index: index of the instance in the array which stores all newly created instances
+        :return: instance stored at index in this array
+        """
         return self.newObjects[index]
 
     def _newDynamicInstances(self):
+        """
+        :return: DynamicDataIterator over all instances of the StoragePools which are iterated in Pre-order.
+        """
         return DynamicNewInstancesIterator(self)
 
     def _newDynamicInstancesSize(self):
+        """
+        :return: number of all newly created instances
+        """
         rval = 0
         ts = TypeHierarchyIterator(self)
         for t in ts:
@@ -94,30 +136,53 @@ class StoragePool(FieldType):
         return rval
 
     def staticSize(self):
+        """
+        :return: number of all instances stored in this StoragePool. 'Deleted' instances are counted as well.
+        """
         return self.staticDataInstances + len(self.newObjects)
 
     def staticInstances(self):
+        """
+        :return: StaticDataIterator over all instances in this StoragePool.
+        """
         return StaticDataIterator(self)
 
     def superName(self):
+        """
+        :return: name of the superpool.
+        """
         if self.superPool is not None:
             return self.superPool.name()
         else:
             return None
 
     def getByID(self, index: int):
+        """
+        :param index: index of the instance
+        :return: instance stored in the specified index by the data array
+        """
         index -= 1
         if index < 0 or len(self._data) <= index:
             return None
         return self._data[index]
 
     def readSingleField(self, instream):
+        """
+        Reads index of instance hold by this StoragePool
+        :param instream: FileInputStream
+        :return: instance
+        """
         index = instream.v64() - 1
         if (index < 0) or (len(self._data) <= index):
             return None
         return self._data[index]
 
     def calculateOffset(self, xs: []):
+        """
+        Calculates offset of list filled with instances
+        :param xs: list
+        :return: calculated offset
+        """
         if len(self._data) < 128:
             return len(xs)
         result = 0
@@ -129,6 +194,11 @@ class StoragePool(FieldType):
         return result
 
     def singleOffset(self, x: SkillObject):
+        """
+        Calculates offset of a single instance.
+        :param x: instance
+        :return: calculated offset
+        """
         if x is None:
             return 1
         v = x.skillID
@@ -144,12 +214,21 @@ class StoragePool(FieldType):
             return 5
 
     def writeSingleField(self, data, out):
+        """
+        Writes the SkillID of instance to the file.
+        :param data: instance
+        :param out: FileOutputStream
+        :return:
+        """
         if data is None:
             out.i8(0)
         else:
             out.v64(data.skillID)
 
     def __len__(self):
+        """
+        :return: size of this StoragePool or number of instances hold by this StoragePool.
+        """
         if self._fixed:
             return self._cachedSize
         size = 0
@@ -158,6 +237,11 @@ class StoragePool(FieldType):
             size += t.staticSize()
 
     def toList(self, a: []):
+        """
+        Fill a copy of a list with instances
+        :param a: list
+        :return: filled list
+        """
         rval: [] = copy.deepcopy(a)
         ddi = self.__iter__()
         for i in range(0, len(rval)):
@@ -165,25 +249,49 @@ class StoragePool(FieldType):
         return rval
 
     def add(self, e: SkillObject):
+        """
+        Adds instance to this StoragePool
+        :param e: instance to add
+        :return:
+        """
         if self._fixed:
             raise Exception("can not fix a pool that contains new objects")
         self.newObjects.append(e)
 
     def delete(self, target: SkillObject):
+        """
+        Delete instance from this StoragePool by setting the SkillID to 0.
+        :param target: instance to delete
+        :return:
+        """
         if not target.isDeleted():
             target.skillID = 0
             self._deletedCount += 1
 
     def owner(self):
+        """
+        :return: SkillState which holds this StoragePool
+        """
         return self.basePool.owner()
 
     def __iter__(self) -> DynamicDataIterator:
+        """
+        :return: DynamicDataIterator over all instances
+        """
         return DynamicDataIterator(self)
 
     def typeOrderIterator(self):
+        """
+        :return: TypeOrderIterator over all instances in StoragePools in type order
+        """
         return TypeOrderIterator(self)
 
     def _allocateInstances(self, last: Block):
+        """
+        Creates instances from the binary file.
+        :param last: Block which stores the number of instances
+        :return:
+        """
         i = last.bpo
         high = i + last.staticCount
         if self._cls is not None:
@@ -191,6 +299,10 @@ class StoragePool(FieldType):
                 self._data[j] = self._cls(j + 1)
 
     def _updateAfterCompress(self, lbpoMap: []):
+        """
+        :param lbpoMap:
+        :return:
+        """
         self._data = self.basePool.data()
 
         self.staticDataInstances += len(self.newObjects) - self._deletedCount
@@ -200,9 +312,22 @@ class StoragePool(FieldType):
         self.blocks.append(Block(lbpoMap[self.typeID() - 32], self._cachedSize, self.staticDataInstances))
 
     def addField(self, fType: FieldType, name: str):
+        """
+        Adds new FieldDeclaration to this StoragePool
+        :param fType: Field type of the new field
+        :param name: name of the new field
+        :return: new LazyField
+        """
         return LazyField(fType, name, self)
 
     def addKnownField(self, name, string, annotation):
+        """
+        Used by binding only!
+        :param name:
+        :param string:
+        :param annotation:
+        :return:
+        """
         raise Exception("Arbitrary storage pools know no fields!")
 
     def makeSubPool(self, index, name, cls):
@@ -216,6 +341,12 @@ class StoragePool(FieldType):
         return StoragePool(index, name, self, self.noKnownFields, self.noAutoFields, cls)
 
     def updateAfterPrepareAppend(self, lbpoMap: [], chunkMap: {}):
+        """
+        Updates lbpo, blocks and chunks. Invoked by BasePool after 'prepare append'.
+        :param lbpoMap: list of lbpos
+        :param chunkMap: dict of FieldDeclarations and chunks
+        :return:
+        """
         if self.basePool is not None:
             self._data = self.basePool.data
         else:
@@ -259,6 +390,9 @@ class StoragePool(FieldType):
         self.newObjects.clear()
 
     def __str__(self):
+        """
+        :return: string representation of this StoragePool
+        """
         return self._name
 
     class Builder(ABC):

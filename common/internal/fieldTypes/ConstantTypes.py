@@ -3,6 +3,9 @@ from common.internal.FieldType import FieldType
 
 
 class ConstantInteger(FieldType):
+    """
+    Superclass of all constant integer field types.
+    """
 
     def __init__(self, typeID, value):
         super(ConstantInteger, self).__init__(typeID)
@@ -15,16 +18,19 @@ class ConstantInteger(FieldType):
         return self.value
 
     def calculateOffset(self, xs: Union[list, dict, set]):
-        return 0  # nothing to do
+        return 0
 
     def singleOffset(self, x):
-        return 0  # nothing to do
+        return 0
 
     def writeSingleField(self, data, out):
-        pass  # nothing to do
+        pass
 
 
 class ConstantI8(ConstantInteger):
+    """
+    Field type of all constant 8-bit integers.
+    """
 
     _typeID = 0
 
@@ -41,6 +47,9 @@ class ConstantI8(ConstantInteger):
 
 
 class ConstantI16(ConstantInteger):
+    """
+    Field type of all constant 16-bit integers.
+    """
 
     _typeID = 1
 
@@ -57,6 +66,9 @@ class ConstantI16(ConstantInteger):
 
 
 class ConstantI32(ConstantInteger):
+    """
+    Field type of all constant 32-bit integers.
+    """
 
     _typeID = 2
 
@@ -73,6 +85,9 @@ class ConstantI32(ConstantInteger):
 
 
 class ConstantI64(ConstantInteger):
+    """
+    Field type of all constant 64-bit integers.
+    """
 
     _typeID = 3
 
@@ -89,6 +104,9 @@ class ConstantI64(ConstantInteger):
 
 
 class ConstantV64(ConstantInteger):
+    """
+    Field type of all constant integers with variable length.
+    """
 
     _typeID = 4
 
