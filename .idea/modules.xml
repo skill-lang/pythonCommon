@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/../python/.idea/python.iml" filepath="$PROJECT_DIR$/../python/.idea/python.iml" />
       <module fileurl="file://$PROJECT_DIR$/../pythonTest/.idea/pythonTest.iml" filepath="$PROJECT_DIR$/../pythonTest/.idea/pythonTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/pythoncommon.iml" filepath="$PROJECT_DIR$/.idea/pythoncommon.iml" />
-      <module fileurl="file://$USER_HOME$/Dropbox/Abgabe/testsuites/.idea/testsuites.iml" filepath="$USER_HOME$/Dropbox/Abgabe/testsuites/.idea/testsuites.iml" />
       <module fileurl="file://$PROJECT_DIR$/../skill/testsuites/.idea/testsuites.iml" filepath="$PROJECT_DIR$/../skill/testsuites/.idea/testsuites.iml" />
     </modules>
   </component>

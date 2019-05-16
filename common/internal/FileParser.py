@@ -117,7 +117,7 @@ class FileParser:
             if name in self.poolByName:
                 definition: StoragePool = self.poolByName.get(name)
             else:
-                restriction = self.inStream.v64()  # typeRestrictions
+                self.typeRestriction()
                 superID = self.inStream.v64()
                 # superDef: StoragePool = None
                 if superID == 0:
@@ -230,7 +230,7 @@ class FileParser:
                         raise ParseException(self.inStream, self.blockCounter, None,
                                              "corrupted file: nullptr in field name")
                     t = self.fieldType()
-                    rest = self.inStream.v64()  # fieldRestrictions
+                    self.fieldRestrictions(t)
                     end = self.inStream.v64()
                     try:
                         f: FieldDeclaration = p.addField(t, fieldName)
@@ -326,3 +326,37 @@ class FileParser:
             return r
         except Exception as e:
             raise ParseException(self.inStream, self.blockCounter, e, "State instantiation failed!")
+
+    def typeRestriction(self):
+        """
+        Reads type restrictions. Does not generate restriction objects. Binary files with restrictions can be read.
+        :return:
+        """
+        i = self.inStream.v64()
+        for _ in range(i, 0, -1):
+            self.inStream.v64()
+
+    def fieldRestrictions(self, fType):
+        """
+        Reads field restrictions. Does not generate restriction objects. Binary files with restrictions can be read.
+        :param fType: Field type of the field.
+        :return:
+        """
+        count = self.inStream.v64()
+        i = fType.typeID()
+        for _ in range(count, 0, -1):
+            index = self.inStream.v64()
+            if index == 1:
+                if i in [5, 14] or i >= 32:
+                    self.inStream.v64()
+                else:
+                    fType.readSingleField(self.inStream)
+            elif index == 3:
+                fType.readSingleField(self.inStream)
+                fType.readSingleField(self.inStream)
+            elif index == 5:
+                self.inStream.v64()
+            elif index == 9:
+                c = self.inStream.v64()
+                for k in range(c, 0, -1):
+                    self.inStream.v64()
