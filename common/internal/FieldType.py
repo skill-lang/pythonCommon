@@ -22,7 +22,7 @@ class FieldType:
             return obj.typeID() == self.typeID()
         return False
 
-    def hashCode(self): return self.typeID()
+    def __hash__(self): return self.typeID()
 
     def readSingleField(self, inStream):
         """

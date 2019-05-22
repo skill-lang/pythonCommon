@@ -82,6 +82,9 @@ class BasePool(StoragePool):
         if newInstances:
             # if we have to resize
             d: [] = copy.deepcopy(self._data)
+            newLength = len(self) - len(self._data)
+            extension = [None for _ in range(0, newLength)]
+            d.extend(extension)
             i = len(self._data)
             dnii: DynamicNewInstancesIterator = self._newDynamicInstances()
             for instance in dnii:

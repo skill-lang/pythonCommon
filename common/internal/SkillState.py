@@ -97,7 +97,7 @@ class SkillState:
         """
         if target is not None:
             self.__dirty = self.__dirty | (target.skillID > 0)
-            self._poolByName[target.skillName()].delete(target)
+            self._poolByName[target.skillName].delete(target)
 
     def changePath(self, path):
         """
@@ -105,7 +105,10 @@ class SkillState:
         :param path: new path
         :return:
         """
-        if self.__writeMode == Mode.Append:
+        if self.__writeMode == Mode.Write:
+            self.__path = path
+            return
+        elif self.__writeMode == Mode.Append:
             if self.__path == path:
                 return
             if os.path.exists(path):

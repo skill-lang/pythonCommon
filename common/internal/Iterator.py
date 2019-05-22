@@ -15,13 +15,13 @@ class DynamicDataIterator:
         self.index = 0
         self.last = 0
 
-        while self.index == self.last & self.secondIndex < self.lastBlock:
+        while self.index == self.last and self.secondIndex < self.lastBlock:
             b = self.p.blocks[self.secondIndex]
             self.index = b.bpo
             self.last = self.index + b.count
             self.secondIndex += 1
 
-        if self.index == self.last & self.secondIndex == self.lastBlock:
+        if self.index == self.last and self.secondIndex == self.lastBlock:
             self.secondIndex += 1
             while self.p is not None:
                 if len(self.p.newObjects) != 0:
@@ -40,14 +40,14 @@ class DynamicDataIterator:
             r = self.p.data()[self.index]
             self.index += 1
             if self.index == self.last:
-                while self.index == self.last & self.secondIndex < self.lastBlock:
-                    b = self.p.blocks.get(self.secondIndex)
+                while self.index == self.last and self.secondIndex < self.lastBlock:
+                    b = self.p.blocks[self.secondIndex]
                     self.index = b.bpo
                     self.last = self.index + b.count
                     self.secondIndex += 1
 
                 # mode switch, if there is no other block
-                if self.index == self.last & self.secondIndex == self.lastBlock:
+                if self.index == self.last and self.secondIndex == self.lastBlock:
                     self.secondIndex += 1
                     while self.p is not None:
                         if len(self.p.newObjects) != 0:
@@ -99,15 +99,19 @@ class DynamicNewInstancesIterator:
         self.last = len(storagePool.newObjects)
         self.index = 0
 
-        for t in self.ts:
-            if self.last != 0:
-                break
-            self.last = len(self.ts.p.newObjects)
+        while self.last == 0 and self.ts.hasNext():
+            self.ts.__next__()
+            if self.ts.hasNext():
+                self.last = len(self.ts.p.newObjects)
+            else:
+                return
 
     def __iter__(self):
         return self
 
     def __next__(self):
+        if self.index == self.last:
+            raise StopIteration()
         rval = self.ts.p.newObject(self.index)
         self.index += 1
         if self.index == self.last:
@@ -119,6 +123,9 @@ class DynamicNewInstancesIterator:
             for t in self.ts:
                 self.rval = t
         return rval
+
+    def hasNext(self):
+        return self.index != self.last
 
 
 class FieldIterator:
@@ -265,6 +272,9 @@ class TypeHierarchyIterator:
         else:
             self.p = None
         return r
+
+    def hasNext(self):
+        return self.p is not None
 
 
 class TypeOrderIterator:

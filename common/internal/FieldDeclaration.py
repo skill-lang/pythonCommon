@@ -43,6 +43,17 @@ class FieldDeclaration(ABC):
         """
         return str(self._fType) + " " + self._name
 
+    def __hash__(self):
+        a = hash(self.fieldType())
+
+        # calculate hash code for name like java (python hash is too big)
+        b = 0
+        for c in self._name:
+            h = (31 * b + ord(c)) & 0xFFFFFFFF
+        b = ((b + 0x80000000) & 0xFFFFFFFF) - 0x80000000
+        c = pow(a, b)
+        return c
+
     def __eq__(self, obj):
         """
         Is executed if two objects are compared with '=='

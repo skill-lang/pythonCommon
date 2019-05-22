@@ -235,6 +235,7 @@ class StoragePool(FieldType):
         ts = TypeHierarchyIterator(self)
         for t in ts:
             size += t.staticSize()
+        return size
 
     def toList(self, a: []):
         """
@@ -347,10 +348,7 @@ class StoragePool(FieldType):
         :param chunkMap: dict of FieldDeclarations and chunks
         :return:
         """
-        if self.basePool is not None:
-            self._data = self.basePool.data
-        else:
-            self._data = None
+        self._data = self.basePool.data()
 
         it = self._newDynamicInstances()
         newInstances = it.index != it.last
@@ -358,7 +356,7 @@ class StoragePool(FieldType):
 
         exists = False
         for f in self._dataFields:
-            if len(f.dataChunks) == 0:
+            if len(f._dataChunks) == 0:
                 exists = True
                 break
         newField = exists
@@ -375,9 +373,9 @@ class StoragePool(FieldType):
 
             if newInstances or not newPool:
                 for f in self._dataFields:
-                    if f.index == 0:
+                    if f._index == 0:
                         continue
-                    if len(f.dataChunks) == 0 and blockCount != 1:
+                    if len(f._dataChunks) == 0 and blockCount != 1:
                         c = BulkChunk(-1, -1, self._cachedSize, blockCount)
                     elif newInstances:
                         c = SimpleChunk(-1, -1, lbpo, lcount)

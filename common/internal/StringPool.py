@@ -159,13 +159,13 @@ class StringPool(FieldType):
             if a is None:
                 self.stringIDs[s] = len(self.idMap)
                 self.idMap.append(s)
-                todo.append(bytearray(s.encode('utf-8')))
+                todo.append(bytes(s.encode('utf-8')))
 
         count = len(todo)
         fos.v64(count)
 
         off = 0
-        end = []
+        end = bytearray()
         for s in todo:
             off += len(s)
             end.append(off)

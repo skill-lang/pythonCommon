@@ -1,3 +1,4 @@
+from common.internal.BasePool import BasePool
 from common.internal.WritingFunctions import WritingFunctions
 from common.internal.Blocks import SimpleChunk
 
@@ -20,14 +21,14 @@ class StateAppender(WritingFunctions):
             if len(t.blocks) == 0:
                 break
             i += 1
-        newPoolIndex = 0
+        newPoolIndex = i
         self.fixPools(state.allTypes())
 
-        lbpoMap = []
+        lbpoMap = [0 for i in range(0, len(state.allTypes()))]
         chunkMap = {}
         bases = 0
         for p in state.allTypes():
-            if p.owner is None:
+            if isinstance(p, BasePool):
                 bases += 1
                 p._prepareAppend(lbpoMap, chunkMap)
 
@@ -69,11 +70,11 @@ class StateAppender(WritingFunctions):
                     fields.append(f)
 
             if newPool or (len(fields) != 0 and len(p) > 0):
-                self.restrictions(fos)
                 fos.v64(stringIDs[p.name()])
                 count = p.lastBlock().count
                 fos.v64(count)
                 if newPool:
+                    self.restrictions(fos)
                     if p.superName() is None:
                         fos.i8(0)
                     else:
